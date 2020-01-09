@@ -16,6 +16,8 @@ list(APPEND GLOBAL_FILES_HPP
 
 if(NOT APPLE)
 	list(APPEND GLOBAL_FILES_SRC "Main.cpp")
+else()
+	list(APPEND GLOBAL_FILES_SRC "Main.mm")
 endif()
 
 target_sources(Etterna PUBLIC ${GLOBAL_FILES_SRC} ${GLOBAL_FILES_HPP})

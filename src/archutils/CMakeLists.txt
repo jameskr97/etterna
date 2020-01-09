@@ -7,7 +7,7 @@ if(APPLE)
 		"Darwin/KeyboardDevice.cpp"
 		"Darwin/MouseDevice.cpp"
 		"Darwin/PumpDevice.cpp"
-		"Darwin/SMMain.mm"
+#		"Darwin/SMMain.mm"
 		"Darwin/SpecialDirs.cpp"
 		"Darwin/VectorHelper.cpp")
 
