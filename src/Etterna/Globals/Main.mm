@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
-#include <iostream>
 
+// TODO: Maybe there is a better location for these to be implemented?
 CGFloat scrolled;
 float MACMouseScroll()
 {
@@ -34,15 +34,42 @@ float MACWindowWidth()
     return frame.size.width;
 }
 
-@interface EtternaApplication:NSApplication {}
-
+// Etterna AppDelegate. Here is where the window is created and then the game initialized
+@interface AppDelegate:NSObject <NSApplicationDelegate>
+@property(strong) NSWindow *window; // The core window
+- (id)init;
 @end
 
-@implementation EtternaApplication
+@implementation AppDelegate
+- (id)init {
 
+    // If self initilized...
+    if(self = [super init]) {
+        NSRect contentSize = NSMakeRect(10.0, 10.0, 1024.0, 576.0); // Default Window Size
+        NSWindowStyleMask mask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+        self.window = [[NSWindow alloc] initWithContentRect:contentSize styleMask:mask backing:NSBackingStoreBuffered defer:false];
+        self.window.backgroundColor = [NSColor blackColor];
+        self.window.title = @"Etterna";
+        [self.window center];
+    }
+    return self;
+}
+
+// - Delegate Methods
+- (void)applicationDidFinishLaunching:(NSNotification *)notification {
+    [self.window makeKeyAndOrderFront:self]; // Make game window primary window
+}
 @end
 
+
+/** @brief macOS Main. This is where it all starts! */
 int main(int argc, const char * argv[]) {
-    
+    @autoreleasepool {
+        NSApplication *application = [NSApplication sharedApplication];
+
+        AppDelegate *appDelegate = [[[AppDelegate alloc] init] autorelease];
+        [application setDelegate:appDelegate];
+        [application run];
+    }
     return NSApplicationMain(argc, argv);
 }
