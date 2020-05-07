@@ -2,7 +2,7 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "ScreenSelectLanguage.h"
-#include "arch/ArchHooks/ArchHooks.h"
+#include "Core/Services/Locator.hpp"
 
 REGISTER_SCREEN_CLASS(ScreenSelectLanguage);
 
@@ -37,7 +37,7 @@ ScreenSelectLanguage::Init()
 RString
 ScreenSelectLanguage::GetDefaultChoice()
 {
-	return HOOKS->GetPreferredLanguage();
+	return Locator::getArchHooks()->GetPreferredLanguage();
 }
 
 void

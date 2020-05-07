@@ -9,7 +9,7 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Singletons/NetworkSyncManager.h"
 #include "Etterna/Models/Misc/PlayerState.h"
-#include "arch/ArchHooks/ArchHooks.h"
+#include "Core/Services/Locator.hpp"
 #include "ScreenNetSelectBase.h"
 
 #define CHAT_TEXT_OUTPUT_WIDTH THEME->GetMetricF(m_sName, "ChatTextOutputWidth")
@@ -186,7 +186,7 @@ ScreenNetSelectBase::UpdateTextInput()
 void
 ScreenNetSelectBase::PasteClipboard()
 {
-	m_sTextInput.append(HOOKS->GetClipboard());
+	m_sTextInput.append(Locator::getArchHooks()->GetClipboard());
 	UpdateTextInput();
 }
 

@@ -5,7 +5,6 @@
 #include "RageUtil/File/RageFileManager.h"
 #include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
-#include "arch/ArchHooks/ArchHooks.h"
 #include "arch/Dialog/Dialog.h"
 #if !defined(SMPACKAGE)
 #include "Etterna/Actor/Base/ActorUtil.h"
@@ -23,6 +22,8 @@
 #include "Etterna/FileTypes/XmlFileUtil.h"
 #include <deque>
 #include "PrefsManager.h"
+#include "Core/Services/Locator.hpp"
+
 ThemeManager* THEME =
   NULL; // global object accessible from anywhere in the program
 
@@ -395,8 +396,7 @@ ThemeManager::LoadThemeMetrics(const RString& sThemeName_,
 RString
 ThemeManager::GetDefaultLanguage()
 {
-	RString sLangCode = HOOKS->GetPreferredLanguage();
-	return sLangCode;
+	return Locator::getArchHooks()->GetPreferredLanguage();
 }
 
 void

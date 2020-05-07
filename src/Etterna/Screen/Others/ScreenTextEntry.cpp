@@ -14,7 +14,8 @@
 #include "ScreenTextEntry.h"
 #include "Etterna/Singletons/ThemeManager.h"
 #include "Etterna/Singletons/InputFilter.h"
-#include "arch/ArchHooks/ArchHooks.h" // HOOKS->GetClipboard()
+#include "Core/Services/Locator.hpp"
+
 
 static const char* g_szKeys[NUM_KeyboardRow][KEYS_PER_ROW] = {
 	{ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M" },
@@ -456,7 +457,7 @@ ScreenTextEntry::Input(const InputEventPlus& input)
 		auto vPressed =
 		  input.DeviceI.button == KEY_CV || input.DeviceI.button == KEY_Cv;
 		if (vPressed && ctrlPressed) {
-			TryAppendToAnswer(HOOKS->GetClipboard());
+			TryAppendToAnswer(Locator::getArchHooks()->GetClipboard());
 
 			TextEnteredDirectly(); // XXX: This doesn't seem appropriate but
 								   // there's no TextPasted()

@@ -5,7 +5,7 @@
 #include "RageUtil/Sound/RageSoundManager.h"
 #include "RageUtil/Graphics/RageTextureManager.h"
 
-#include "arch/ArchHooks/ArchHooks.h"
+#include "Core/Services/Locator.hpp"
 
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "Etterna/Singletons/ThemeManager.h"
@@ -107,17 +107,18 @@ ChangeAppPri()
 static void
 CheckFocus()
 {
-	if (!HOOKS->AppFocusChanged())
+    ArchHooks* hooks = Locator::getArchHooks();
+	if (!hooks->AppFocusChanged())
 		return;
 
 	// If we lose focus, we may lose input events, especially key releases.
 	INPUTFILTER->Reset();
 
 	if (ChangeAppPri()) {
-		if (HOOKS->AppHasFocus())
-			HOOKS->BoostPriority();
+		if (hooks->AppHasFocus())
+            hooks->BoostPriority();
 		else
-			HOOKS->UnBoostPriority();
+            hooks->UnBoostPriority();
 	}
 }
 
@@ -258,7 +259,7 @@ GameLoop::RunGameLoop()
 	/* People may want to do something else while songs are loading, so do
 	 * this after loading songs. */
 	if (ChangeAppPri())
-		HOOKS->BoostPriority();
+        Locator::getArchHooks()->BoostPriority();
 
 	while (!ArchHooks::UserQuit()) {
 		if (!g_NewGame.empty()) {
@@ -323,7 +324,7 @@ GameLoop::RunGameLoop()
 	}
 
 	if (ChangeAppPri())
-		HOOKS->UnBoostPriority();
+        Locator::getArchHooks()->UnBoostPriority();
 }
 
 class ConcurrentRenderer
@@ -413,7 +414,7 @@ ConcurrentRenderer::RenderThread()
 			/* We're starting to render. Set up, and then kick the event to wake
 			 * up the calling thread. */
 			DISPLAY->BeginConcurrentRendering();
-			HOOKS->SetupConcurrentRenderingThread();
+            Locator::getArchHooks()->SetupConcurrentRenderingThread();
 
 			LOG->Trace("ConcurrentRenderer::RenderThread start");
 
