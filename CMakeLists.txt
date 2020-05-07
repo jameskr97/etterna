@@ -107,6 +107,7 @@ add_subdirectory(src/Etterna)
 add_subdirectory(src/arch)
 add_subdirectory(src/archutils)
 add_subdirectory(src/RageUtil)
+add_subdirectory(src/Core)
 
 # Static Analysis
 include(CMake/Helpers/StaticAnalysis.cmake)
