@@ -40,6 +40,7 @@ set(SQLITECPP_RUN_CPPLINT OFF CACHE BOOL "" FORCE)  # Disable SQLiteCpp linting
 set(CLANG_FORMAT_CMD OFF CACHE BOOL "" FORCE)       # Disable discord clang-format
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)         # Disable discord examples
 set(USE_STATIC_CRT ON CACHE BOOL "" FORCE)          # Have discord-rpc link statically
+set(PLOG_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)     # Disable plog logging library samples
 
 ## CMake related variables
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMake/Modules)  # Tell CMake where to access FindXXX.cmake files
@@ -91,6 +92,7 @@ target_link_libraries(Etterna vorbis)
 target_link_libraries(Etterna pcre)
 target_link_libraries(Etterna libmad)
 target_link_libraries(Etterna stb)
+target_link_libraries(Etterna plog::plog)
 
 # OS Specific Initialization
 if(WIN32)
