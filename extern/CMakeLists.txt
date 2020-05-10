@@ -29,6 +29,7 @@ add_subdirectory(mad-0.15.1b)
 add_subdirectory(newogg)
 add_subdirectory(newvorbis)
 add_subdirectory(plog)
+add_subdirectory(fmt)
 
 if(MSVC) # Only required on Windows
     add_subdirectory(ffmpeg)

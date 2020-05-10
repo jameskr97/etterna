@@ -93,6 +93,7 @@ target_link_libraries(Etterna pcre)
 target_link_libraries(Etterna libmad)
 target_link_libraries(Etterna stb)
 target_link_libraries(Etterna plog::plog)
+target_link_libraries(Etterna fmt::fmt)
 
 # OS Specific Initialization
 if(WIN32)
