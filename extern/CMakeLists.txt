@@ -43,6 +43,6 @@ list(APPEND ET_EXT_TARGETS
     tomcrypt libtommath
     fftw3f glfw pcre
     zlib libmad
-    ogg vorbis)
+    ogg vorbis fmt)
 
 set_property(TARGET ${ET_EXT_TARGETS} PROPERTY FOLDER "External Libraries") # Sort all extern libraries to a IDE folder/filter
