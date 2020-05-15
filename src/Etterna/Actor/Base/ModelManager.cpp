@@ -1,7 +1,7 @@
 ﻿#include "Etterna/Globals/global.h"
 #include "ModelManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 
 ModelManager* MODELMAN =
@@ -17,9 +17,8 @@ ModelManager::~ModelManager()
 		 ++i) {
 		RageModelGeometry* pGeom = i->second;
 		if (pGeom->m_iRefCount)
-			LOG->Trace("MODELMAN LEAK: '%s', RefCount = %d.",
-					   i->first.c_str(),
-					   pGeom->m_iRefCount);
+			Locator::getLogger()->trace("MODELMAN LEAK: '{}', RefCount = {}.",
+					   i->first.c_str(), pGeom->m_iRefCount);
 		SAFE_DELETE(pGeom);
 	}
 }

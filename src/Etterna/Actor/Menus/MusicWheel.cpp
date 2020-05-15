@@ -12,7 +12,7 @@
 #include "Etterna/Singletons/NetworkSyncManager.h"
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Misc/RageString.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/ScreenManager.h"
@@ -291,7 +291,7 @@ MusicWheel::SelectSongOrCourse()
 			return SelectSong(wiWheelItems[i]->m_pSong);
 	}
 
-	LOG->Trace("MusicWheel::MusicWheel() - No selectable songs or courses "
+	Locator::getLogger()->trace("MusicWheel::MusicWheel() - No selectable songs or courses "
 			   "found in WheelData");
 	return false;
 }
@@ -1138,7 +1138,7 @@ MusicWheel::readyWheelItemsData(SortOrder so, bool searching, RString findme)
 		m_WheelItemDatasStatus[so] = VALID;
 
 		if (PREFSMAN->m_verbose_log > 0)
-			LOG->Trace("MusicWheel sorting took: %f",
+			Locator::getLogger()->trace("MusicWheel sorting took: {}",
 					   timer.GetTimeSinceStart());
 	}
 }
@@ -1314,8 +1314,8 @@ MusicWheel::UpdateSwitch()
 				m_fTimeLeftInState = SwitchTimes[m_iSwitchesLeftInSpinDown];
 				m_Moving = 0;
 
-				LOG->Trace(
-				  "m_iSwitchesLeftInSpinDown id %d, m_fTimeLeftInState is %f",
+				Locator::getLogger()->trace(
+				  "m_iSwitchesLeftInSpinDown id {}, m_fTimeLeftInState is {}",
 				  m_iSwitchesLeftInSpinDown,
 				  m_fTimeLeftInState);
 
@@ -1431,7 +1431,7 @@ MusicWheel::NextSort() // return true if change successful
 bool
 MusicWheel::Select() // return true if this selection ends the screen
 {
-	LOG->Trace("MusicWheel::Select()");
+	Locator::getLogger()->trace("MusicWheel::Select()");
 
 	switch (m_WheelState) {
 		case STATE_FLYING_OFF_BEFORE_NEXT_SORT:
@@ -1622,12 +1622,11 @@ MusicWheel::JumpToPrevGroup()
 		}
 		// in case it wasn't found above:
 		for (unsigned int i = m_CurWheelItemData.size() - 1; i > 0; --i) {
-			LOG->Trace("JumpToPrevGroup iteration 2 | i = %u", i);
+			Locator::getLogger()->trace("JumpToPrevGroup iteration 2 | i = {}", i);
 			if (m_CurWheelItemData[i]->m_Type == WheelItemDataType_Section) {
 				m_iSelection = i;
-				LOG->Trace("finding it in #2 | i = %u | text = %s",
-						   i,
-						   m_CurWheelItemData[i]->m_sText.c_str());
+				Locator::getLogger()->trace("finding it in #2 | i = {} | text = {}",
+						   i, m_CurWheelItemData[i]->m_sText.c_str());
 				return m_CurWheelItemData[i]->m_sText;
 			}
 		}

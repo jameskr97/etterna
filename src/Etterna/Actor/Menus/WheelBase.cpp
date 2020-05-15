@@ -5,7 +5,7 @@
 #include "Etterna/Singletons/GameManager.h"
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Misc/RageMath.h"
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "RageUtil/Utils/RageUtil.h"
@@ -41,7 +41,7 @@ void
 WheelBase::Load(const string& sType)
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("WheelBase::Load('%s')", sType.c_str());
+		Locator::getLogger()->trace("WheelBase::Load('{}')", sType.c_str());
 	ASSERT(this->GetNumChildren() == 0); // only load once
 
 	m_bEmpty = false;
@@ -242,7 +242,7 @@ WheelBase::UpdateSwitch()
 bool
 WheelBase::Select() // return true if this selection can end the screen
 {
-	LOG->Trace("WheelBase::Select()");
+	Locator::getLogger()->trace("WheelBase::Select()");
 
 	m_Moving = 0;
 

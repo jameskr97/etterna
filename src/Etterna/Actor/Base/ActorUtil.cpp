@@ -7,7 +7,7 @@
 #include "Etterna/Singletons/LuaManager.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Singletons/ThemeManager.h"
@@ -338,9 +338,8 @@ ActorUtil::MakeActor(const RString& sPath_, Actor* pParentActor)
 				return ActorUtil::LoadFromNode(&xml, pParentActor);
 			}
 			default: {
-				LOG->Warn("File \"%s\" has unknown type, \"%s\".",
-						  sPath.c_str(),
-						  FileTypeToString(ft).c_str());
+				Locator::getLogger()->warn("File \"{}\" has unknown type, \"{}\".",
+						  sPath.c_str(), FileTypeToString(ft).c_str());
 
 				XNode xml;
 				xml.AppendAttr("Class", "Actor");
@@ -386,8 +385,7 @@ ActorUtil::GetAttrPath(const XNode* pNode,
 		RString sDir;
 		if (!pNode->GetAttrValue("_Dir", sDir)) {
 			if (!optional) {
-				LOG->Warn("Relative path \"%s\", but path is unknown",
-						  sOut.c_str());
+				Locator::getLogger()->warn("Relative path \"{}\", but path is unknown", sOut.c_str());
 			}
 			return false;
 		}
