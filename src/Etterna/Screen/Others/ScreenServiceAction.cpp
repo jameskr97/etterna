@@ -5,7 +5,7 @@
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/ProfileManager.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenServiceAction.h"
 #include "Etterna/Models/Songs/Song.h"
@@ -120,7 +120,7 @@ SyncFiles(const RString& sFromDir,
 
 	for (unsigned i = 0; i < vsToDelete.size(); ++i) {
 		RString sFile = sToDir + vsToDelete[i];
-		LOG->Trace("Delete \"%s\"", sFile.c_str());
+		Locator::getLogger()->trace("Delete \"{}\"", sFile.c_str());
 
 		if (FILEMAN->Remove(sFile))
 			++iNumDeleted;
@@ -131,7 +131,7 @@ SyncFiles(const RString& sFromDir,
 	for (unsigned i = 0; i < vsFilesSource.size(); ++i) {
 		RString sFileFrom = sFromDir + vsFilesSource[i];
 		RString sFileTo = sToDir + vsFilesSource[i];
-		LOG->Trace("Copy \"%s\"", sFileFrom.c_str());
+		Locator::getLogger()->trace("Copy \"{}\"", sFileFrom.c_str());
 		bool bOverwrite = DoesFileExist(sFileTo);
 		bool bSuccess = FileCopy(sFileFrom, sFileTo);
 		if (bSuccess) {

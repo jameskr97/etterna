@@ -15,7 +15,7 @@
 #include "Etterna/Singletons/ProfileManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
 #include "RageUtil/Misc/RageInput.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Sound/RageSoundManager.h"
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "ScreenDebugOverlay.h"
@@ -425,7 +425,7 @@ ScreenDebugOverlay::UpdateText()
 		 * figuring out why, so warn. */
 		if (g_HaltTimer.Ago() >= 5.0f) {
 			g_HaltTimer.Touch();
-			LOG->Warn("Game halted");
+			Locator::getLogger()->warn("Game halted");
 		}
 	}
 }
@@ -513,7 +513,7 @@ ScreenDebugOverlay::Input(const InputEventPlus& input)
 			RString sMessage;
 			(*p)->DoAndLog(sMessage);
 			if (!sMessage.empty())
-				LOG->Trace("DEBUG: %s", sMessage.c_str());
+				Locator::getLogger()->trace("DEBUG: {}", sMessage.c_str());
 			if ((*p)->ForceOffAfterUse())
 				m_bForcedHidden = true;
 
@@ -1279,7 +1279,6 @@ class DebugLineFlushLog : public IDebugLine
 	bool IsEnabled() override { return true; }
 	void DoAndLog(RString& sMessageOut) override
 	{
-		LOG->Flush();
 		IDebugLine::DoAndLog(sMessageOut);
 	}
 };

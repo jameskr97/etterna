@@ -8,7 +8,7 @@
 #include "Etterna/Models/Lua/LuaBinding.h"
 #include "Etterna/Models/Misc/OptionRowHandler.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Misc/ScreenDimensions.h"
 #include "Etterna/Singletons/ScreenManager.h"
@@ -205,7 +205,7 @@ ScreenOptions::Init()
 void
 ScreenOptions::InitMenu(const vector<OptionRowHandler*>& vHands)
 {
-	LOG->Trace("ScreenOptions::InitMenu()");
+	Locator::getLogger()->trace("ScreenOptions::InitMenu()");
 
 	for (unsigned i = 0; i < m_pRows.size(); i++) {
 		m_frameContainer.RemoveChild(m_pRows[i]);
@@ -340,7 +340,7 @@ ScreenOptions::TweenOffScreen()
 
 ScreenOptions::~ScreenOptions()
 {
-	LOG->Trace("ScreenOptions::~ScreenOptions()");
+	Locator::getLogger()->trace("ScreenOptions::~ScreenOptions()");
 	for (unsigned i = 0; i < m_pRows.size(); i++)
 		SAFE_DELETE(m_pRows[i]);
 	MESSAGEMAN->Broadcast("OptionsScreenClosed");
@@ -454,7 +454,7 @@ ScreenOptions::TweenCursor(PlayerNumber pn)
 	const int iChoiceWithFocus = row.GetChoiceInRowWithFocus();
 
 	if (iChoiceWithFocus == -1) {
-		LOG->Warn("Tried to tween cursor on row with no choices.");
+		Locator::getLogger()->warn("Tried to tween cursor on row with no choices.");
 		return;
 	}
 
@@ -885,8 +885,7 @@ ScreenOptions::ProcessMenuStart(const InputEventPlus& input)
 	if (row.GetRowDef().m_selectType == SELECT_MULTIPLE) {
 		int iChoiceInRow = row.GetChoiceInRowWithFocus();
 		if (iChoiceInRow == -1) {
-			LOG->Warn(
-			  "MenuStart used on SelectMultiple OptionRow with no choices.");
+			Locator::getLogger()->warn("MenuStart used on SelectMultiple OptionRow with no choices.");
 			return;
 		}
 		bool bSelected = !row.GetSelected(iChoiceInRow);
@@ -935,9 +934,7 @@ ScreenOptions::ProcessMenuStart(const InputEventPlus& input)
 			case NAV_TOGGLE_FIVE_KEY: {
 				int iChoiceInRow = row.GetChoiceInRowWithFocus();
 				if (iChoiceInRow == -1) {
-					LOG->Warn(
-					  "MenuStart used on other SelectType OptionRow with "
-					  "no choices.");
+					Locator::getLogger()->warn("MenuStart used on other SelectType OptionRow with no choices.");
 					return;
 				}
 				if (row.GetRowDef().m_bOneChoiceForAllPlayers)
@@ -983,10 +980,10 @@ ScreenOptions::StoreFocus(PlayerNumber pn)
 	int iWidth, iY;
 	int iChoiceOnRow = row.GetChoiceInRowWithFocus();
 	if (iChoiceOnRow == -1) {
-		LOG->Warn("No choices found when setting focus.");
+		Locator::getLogger()->warn("No choices found when setting focus.");
 	} else {
 		GetWidthXY(pn, m_iCurrentRow, iChoiceOnRow, iWidth, m_iFocusX, iY);
-		LOG->Trace("cur selection %ix%i @ %i",
+		Locator::getLogger()->trace("cur selection {}x{} @ {}",
 				   m_iCurrentRow,
 				   row.GetChoiceInRowWithFocus(),
 				   m_iFocusX);

@@ -3,7 +3,7 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Singletons/InputMapper.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "Screen.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "RageUtil/Misc/RageInput.h"
@@ -66,8 +66,7 @@ Screen::Init()
 	vector<RString> asList;
 	split(PREPARE_SCREENS, ",", asList);
 	for (unsigned i = 0; i < asList.size(); ++i) {
-		LOG->Trace(
-		  "Screen \"%s\" preparing \"%s\"", m_sName.c_str(), asList[i].c_str());
+		Locator::getLogger()->trace("Screen \"{}\" preparing \"{}\"", m_sName.c_str(), asList[i].c_str());
 		SCREENMAN->PrepareScreen(asList[i]);
 	}
 

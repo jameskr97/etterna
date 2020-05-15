@@ -24,6 +24,7 @@
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "RageUtil/Misc/RageInput.h"
 #include "Etterna/Singletons/SongManager.h"
+#include "Core/Services/Locator.hpp"
 
 #include "Etterna/Models/Lua/LuaBinding.h"
 #include "Etterna/Singletons/LuaManager.h"
@@ -54,7 +55,7 @@ ScreenGameplayPractice::Init()
 ScreenGameplayPractice::~ScreenGameplayPractice()
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("ScreenGameplayReplay::~ScreenGameplayReplay()");
+		Locator::getLogger()->trace("ScreenGameplayReplay::~ScreenGameplayReplay()");
 }
 
 bool
@@ -93,7 +94,7 @@ ScreenGameplayPractice::Input(const InputEventPlus& input)
 			SONGMAN->ReconcileChartKeysForReloadedSong(cursong, oldKeys);
 
 			if (!success || GAMESTATE->m_pCurSteps->GetNoteData().IsEmpty()) {
-				LOG->Trace("The Player attempted something resulting in an "
+				Locator::getLogger()->trace("The Player attempted something resulting in an "
 						   "unrecoverable error while in Gameplay Practice and "
 						   "has been ejected.");
 				BeginBackingOutFromGameplay();
@@ -241,7 +242,7 @@ ScreenGameplayPractice::Update(float fDeltaTime)
 			if (bGiveUpTimerFired) {
 				m_vPlayerInfo.GetPlayerStageStats()->gaveuplikeadumbass = true;
 				m_vPlayerInfo.GetPlayerStageStats()->m_bDisqualified = true;
-				LOG->Trace("Exited Practice Mode to Evaluation");
+				Locator::getLogger()->trace("Exited Practice Mode to Evaluation");
 				this->PostScreenMessage(SM_LeaveGameplay, 0);
 				return;
 			}

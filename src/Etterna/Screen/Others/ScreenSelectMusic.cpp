@@ -15,7 +15,7 @@
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "Etterna/Singletons/ProfileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenSelectMusic.h"
@@ -217,7 +217,7 @@ ScreenSelectMusic::BeginScreen()
 	}
 
 	if (GAMESTATE->GetCurrentStyle(PLAYER_INVALID) == nullptr) {
-		LOG->Trace("The Style has not been set.  A theme must set the Style "
+		Locator::getLogger()->trace("The Style has not been set.  A theme must set the Style "
 				   "before loading ScreenSelectMusic.");
 		// Instead of crashing, set the first compatible style.
 		vector<StepsType> vst;
@@ -225,7 +225,7 @@ ScreenSelectMusic::BeginScreen()
 		const Style* pStyle = GAMEMAN->GetFirstCompatibleStyle(
 		  GAMESTATE->m_pCurGame, GAMESTATE->GetNumSidesJoined(), vst[0]);
 		if (pStyle == nullptr) {
-			LOG->Warn(ssprintf("No compatible styles for %s with %d player%s.",
+			Locator::getLogger()->warn(ssprintf("No compatible styles for %s with %d player%s.",
 							   GAMESTATE->m_pCurGame->m_szName,
 							   GAMESTATE->GetNumSidesJoined(),
 							   GAMESTATE->GetNumSidesJoined() == 1 ? "" : "s") +
@@ -238,7 +238,7 @@ ScreenSelectMusic::BeginScreen()
 	if (GAMESTATE->m_PlayMode == PlayMode_Invalid) {
 		// Instead of crashing here, let's just set the PlayMode to regular
 		GAMESTATE->m_PlayMode.Set(PLAY_MODE_REGULAR);
-		LOG->Trace("PlayMode not set, setting as regular.");
+		Locator::getLogger()->trace("PlayMode not set, setting as regular.");
 	}
 
 	OPTIONS_MENU_AVAILABLE.Load(m_sName, "OptionsMenuAvailable");
@@ -279,7 +279,7 @@ ScreenSelectMusic::BeginScreen()
 ScreenSelectMusic::~ScreenSelectMusic()
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("ScreenSelectMusic::~ScreenSelectMusic()");
+		Locator::getLogger()->trace("ScreenSelectMusic::~ScreenSelectMusic()");
 	IMAGECACHE->Undemand("Banner");
 }
 
@@ -880,7 +880,7 @@ ScreenSelectMusic::UpdateSelectButton(PlayerNumber pn, bool bSelectIsDown)
 void
 ScreenSelectMusic::ChangeSteps(PlayerNumber pn, int dir)
 {
-	LOG->Trace("ScreenSelectMusic::ChangeSteps( %d, %d )", pn, dir);
+	Locator::getLogger()->trace("ScreenSelectMusic::ChangeSteps( {}, {} )", pn, dir);
 
 	ASSERT(GAMESTATE->IsHumanPlayer(pn));
 
@@ -1083,7 +1083,7 @@ ScreenSelectMusic::SelectCurrent(PlayerNumber pn, GameplayMode mode)
 
 	switch (m_SelectionState) {
 		case SelectionState_Finalized: {
-			LOG->Warn("song selection made while selectionstate_finalized");
+			Locator::getLogger()->warn("song selection made while selectionstate_finalized");
 			return false;
 		}
 		case SelectionState_SelectingSong:
@@ -1749,7 +1749,7 @@ class LunaScreenSelectMusic : public Luna<ScreenSelectMusic>
 		PlayerAI::oldFailType = ft;
 
 		// lock the game into replay mode and GO
-		LOG->Trace("Viewing replay for score key %s",
+		Locator::getLogger()->trace("Viewing replay for score key {}",
 				   hs->GetScoreKey().c_str());
 		GamePreferences::m_AutoPlay.Set(PC_REPLAY);
 		GAMESTATE->m_pPlayerState->m_PlayerController = PC_REPLAY;
@@ -1839,7 +1839,7 @@ class LunaScreenSelectMusic : public Luna<ScreenSelectMusic>
 		MESSAGEMAN->Broadcast("RateChanged");
 
 		// go
-		LOG->Trace("Viewing evaluation screen for score key %s",
+		Locator::getLogger()->trace("Viewing evaluation screen for score key {}",
 				   score->GetScoreKey().c_str());
 		SCREENMAN->SetNewScreen("ScreenEvaluationNormal");
 

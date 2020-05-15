@@ -2,7 +2,7 @@
 #include "Etterna/Actor/Base/ActorUtil.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "Etterna/Models/Misc/ScreenDimensions.h"
 #include "ScreenStatsOverlay.h"
 
@@ -155,7 +155,7 @@ ScreenStatsOverlay::UpdateSkips()
 			AddTimestampLine(ssprintf("Lag: %.3fms", skipTime), colors[skip]);
 
 			if (PREFSMAN->m_bLogSkips)
-				LOG->Trace("Lag: %.3fms", skipTime);
+				Locator::getLogger()->trace("Lag: {:.3f}ms", skipTime);
 		}
 	}
 }

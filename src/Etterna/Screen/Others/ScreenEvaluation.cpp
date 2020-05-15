@@ -15,7 +15,7 @@
 #include "Etterna/Singletons/ScoreManager.h"
 #include "Etterna/Singletons/ProfileManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/ScoreKeepers/ScoreKeeperNormal.h"
 #include "ScreenEvaluation.h"
@@ -53,7 +53,7 @@ ScreenEvaluation::~ScreenEvaluation() {}
 void
 ScreenEvaluation::Init()
 {
-	LOG->Trace("ScreenEvaluation::Init()");
+	Locator::getLogger()->trace("ScreenEvaluation::Init()");
 
 	// debugging
 	// Only fill StageStats with fake info if we're the InitialScreen
