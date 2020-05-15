@@ -1,7 +1,7 @@
 #include "Etterna/Globals/global.h"
 #include "MovieTexture.h"
 #include "RageUtil/Utils/RageUtil.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "MovieTexture_Null.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/File/RageFile.h"
@@ -36,7 +36,7 @@ RageMovieTexture::GetFourCC(const RString& fn, RString& handler, RString& type)
 	// iostream
 #define HANDLE_ERROR(x)                                                        \
 	{                                                                          \
-		LOG->Warn("Error reading %s: %s", fn.c_str(), x);                      \
+		Locator::getLogger()->warn("Error reading {}: {}", fn.c_str(), x);                      \
 		handler = type = "";                                                   \
 		return false;                                                          \
 	}
@@ -72,7 +72,7 @@ DumpAVIDebugInfo(const RString& fn)
 	if (!RageMovieTexture::GetFourCC(fn, handler, type))
 		return;
 
-	LOG->Trace("Movie %s has handler '%s', type '%s'",
+	Locator::getLogger()->trace("Movie {} has handler '{}', type '{}'",
 			   fn.c_str(),
 			   handler.c_str(),
 			   type.c_str());
@@ -104,12 +104,12 @@ RageMovieTexture::Create(const RageTextureID& ID)
 
 	FOREACH_CONST(RString, DriversToTry, Driver)
 	{
-		LOG->Trace("Initializing driver: %s", Driver->c_str());
+		Locator::getLogger()->trace("Initializing driver: {}", Driver->c_str());
 		RageDriver* pDriverBase =
 		  RageMovieTextureDriver::m_pDriverList.Create(*Driver);
 
 		if (pDriverBase == NULL) {
-			LOG->Trace("Unknown movie driver name: %s", Driver->c_str());
+			Locator::getLogger()->trace("Unknown movie driver name: {}", Driver->c_str());
 			continue;
 		}
 
@@ -122,12 +122,11 @@ RageMovieTexture::Create(const RageTextureID& ID)
 		delete pDriver;
 
 		if (ret == NULL) {
-			LOG->Trace(
-			  "Couldn't load driver %s: %s", Driver->c_str(), sError.c_str());
+			Locator::getLogger()->trace("Couldn't load driver {}: {}", Driver->c_str(), sError.c_str());
 			SAFE_DELETE(ret);
 			continue;
 		}
-		LOG->Trace("Created movie texture \"%s\" with driver \"%s\"",
+		Locator::getLogger()->trace("Created movie texture \"{}\" with driver \"{}\"",
 				   ID.filename.c_str(),
 				   Driver->c_str());
 		break;

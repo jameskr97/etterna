@@ -2,7 +2,7 @@
 #include "InputHandler_DirectInputHelper.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/Utils/RageUtil.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "archutils/Win32/DirectXHelpers.h"
 #include "archutils/Win32/ErrorStrings.h"
 #include "archutils/Win32/GraphicsWindow.h"
@@ -37,7 +37,7 @@ DIDevice::Open()
 	m_sName = ConvertACPToUTF8(JoystickInst.tszProductName);
 
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("Opening device '%s'", m_sName.c_str());
+		Locator::getLogger()->trace("Opening device '{}'", m_sName.c_str());
 	buffered = true;
 
 	LPDIRECTINPUTDEVICE8 tmpdevice;
@@ -46,13 +46,13 @@ DIDevice::Open()
 	HRESULT hr =
 	  g_dinput->CreateDevice(JoystickInst.guidInstance, &tmpdevice, NULL);
 	if (hr != DI_OK) {
-		LOG->Info(hr_ssprintf(hr, "OpenDevice: IDirectInput_CreateDevice"));
+		Locator::getLogger()->info(hr_ssprintf(hr, "OpenDevice: IDirectInput_CreateDevice"));
 		return false;
 	}
 	hr = tmpdevice->QueryInterface(IID_IDirectInputDevice8, (LPVOID*)&Device);
 	tmpdevice->Release();
 	if (hr != DI_OK) {
-		LOG->Info(
+		Locator::getLogger()->info(
 		  hr_ssprintf(hr,
 					  "OpenDevice(%s): IDirectInputDevice::QueryInterface",
 					  m_sName.c_str()));
@@ -65,7 +65,7 @@ DIDevice::Open()
 
 	hr = Device->SetCooperativeLevel(GraphicsWindow::GetHwnd(), coop);
 	if (hr != DI_OK) {
-		LOG->Info(hr_ssprintf(
+		Locator::getLogger()->info(hr_ssprintf(
 		  hr,
 		  "OpenDevice(%s): IDirectInputDevice2::SetCooperativeLevel",
 		  m_sName.c_str()));
@@ -84,7 +84,7 @@ DIDevice::Open()
 			break;
 	}
 	if (hr != DI_OK) {
-		LOG->Info(
+		Locator::getLogger()->info(
 		  hr_ssprintf(hr,
 					  "OpenDevice(%s): IDirectInputDevice2::SetDataFormat",
 					  m_sName.c_str()));
@@ -130,7 +130,7 @@ DIDevice::Open()
 			 * to use less reliable polling. */
 			buffered = false;
 		} else if (hr != DI_OK) {
-			LOG->Info(
+			Locator::getLogger()->info(
 			  hr_ssprintf(hr,
 						  "OpenDevice(%s): IDirectInputDevice2::SetProperty",
 						  m_sName.c_str()));

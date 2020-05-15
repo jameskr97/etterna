@@ -1,7 +1,7 @@
 #include "Etterna/Globals/global.h"
 #include "DialogDriver.h"
 #include "Etterna/Models/Misc/Foreach.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 
 map<istring, CreateDialogDriverFn>* RegisterDialogDriver::g_pRegistrees;
 RegisterDialogDriver::RegisterDialogDriver(const istring& sName,
@@ -39,9 +39,7 @@ DialogDriver::Create()
 
 		if (sError.empty())
 			return pRet;
-		if (LOG)
-			LOG->Info(
-			  "Couldn't load driver %s: %s", Driver->c_str(), sError.c_str());
+        Locator::getLogger()->info("Couldn't load driver {}: {}", Driver->c_str(), sError.c_str());
 		SAFE_DELETE(pRet);
 	}
 	return NULL;
