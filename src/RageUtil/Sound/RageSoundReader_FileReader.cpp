@@ -1,7 +1,7 @@
 ﻿#include "Etterna/Globals/global.h"
 #include "Etterna/Actor/Base/ActorUtil.h"
 #include "RageUtil/File/RageFile.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageSoundReader_FileReader.h"
 #include "RageUtil/Utils/RageUtil.h"
 
@@ -46,7 +46,7 @@ RageSoundReader_FileReader::TryOpenFile(RageFileBasic* pFile,
 	RString err = Sample->GetError();
 	delete Sample;
 
-	LOG->Trace("Format %s failed: %s", format.c_str(), err.c_str());
+	Locator::getLogger()->trace("Format {} failed: {}", format.c_str(), err.c_str());
 
 	/*
 	 * The file failed to open, or failed to read.  This indicates a problem
@@ -152,10 +152,8 @@ RageSoundReader_FileReader::OpenFile(const RString& filename,
 		RageSoundReader_FileReader* NewSample =
 		  TryOpenFile(pFile->Copy(), error, *it, bKeepTrying);
 		if (NewSample) {
-			LOG->UserLog("Sound file",
-						 pFile->GetDisplayPath(),
-						 "is really %s.",
-						 it->c_str());
+            Locator::getLogger()->info("Sound file {} is really {}.",
+						 pFile->GetDisplayPath(), it->c_str());
 			return NewSample;
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿#include "Etterna/Globals/global.h"
 
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil.h"
 #include "RageUtil_FileDB.h"
 
@@ -296,8 +296,8 @@ FilenameDB::GetFileSet(const RString& sDir_, bool bCreate)
 
 	/* Creating can take a long time; don't hold the lock if we might do that.
 	 */
-	if (bCreate && m_Mutex.IsLockedByThisThread() && LOG)
-		LOG->Warn("FilenameDB::GetFileSet: m_Mutex was locked");
+	if (bCreate && m_Mutex.IsLockedByThisThread())
+		Locator::getLogger()->warn("FilenameDB::GetFileSet: m_Mutex was locked");
 
 	/* Normalize the path. */
 	sDir.Replace("\\", "/"); /* foo\bar -> foo/bar */
@@ -554,7 +554,7 @@ FilenameDB::FlushDirCache(const RString& /* sDir */)
 		}
 		else
 		{
-			LOG->Warn( "Trying to flush an unknown directory %s.", sDir.c_str() );
+			Locator::getLogger()->warn( "Trying to flush an unknown directory {}.", sDir.c_str() );
 		}
 #endif
 	m_Mutex.Unlock();
@@ -563,8 +563,8 @@ FilenameDB::FlushDirCache(const RString& /* sDir */)
 const File*
 FilenameDB::GetFile(const RString& sPath)
 {
-	if (m_Mutex.IsLockedByThisThread() && LOG)
-		LOG->Warn("FilenameDB::GetFile: m_Mutex was locked");
+	if (m_Mutex.IsLockedByThisThread())
+		Locator::getLogger()->warn("FilenameDB::GetFile: m_Mutex was locked");
 
 	RString Dir, Name;
 	SplitPath(sPath, Dir, Name);
@@ -643,6 +643,6 @@ FilenameDB::GetFileSetCopy(const RString& sDir, FileSet& out)
 void
 FilenameDB::CacheFile(const RString& sPath)
 {
-	LOG->Warn("Slow cache due to: %s", sPath.c_str());
+	Locator::getLogger()->warn("Slow cache due to: {}", sPath.c_str());
 	FlushDirCache(Dirname(sPath));
 }

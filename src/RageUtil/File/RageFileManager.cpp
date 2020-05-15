@@ -4,7 +4,7 @@
 #include "RageFile.h"
 #include "RageFileDriver.h"
 #include "RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Misc/RageThreads.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/Utils/RageUtil_FileDB.h"
@@ -306,7 +306,7 @@ ChangeToDirOfExecutable(const RString& argv0)
 	if (chdir(RageFileManagerUtil::sDirOfExecutable))
 #endif
 	{
-		LOG->Warn("Can't set current working directory to %s",
+		Locator::getLogger()->warn("Can't set current working directory to {}",
 				  RageFileManagerUtil::sDirOfExecutable.c_str());
 		return;
 	}
@@ -565,7 +565,7 @@ RageFileManager::CreateDir(const RString& sDir)
 	RString sTempFile = sDir + "newdir.temp.newdir";
 	RageFile f;
 	if (!f.Open(sTempFile, RageFile::WRITE))
-		LOG->Trace("Creating temporary file '%s' failed: %s",
+		Locator::getLogger()->trace("Creating temporary file '{}' failed: {}",
 				   sTempFile.c_str(),
 				   f.GetError().c_str());
 	f.Close();
@@ -634,15 +634,10 @@ RageFileManager::Mount(const RString& sType,
 				   sType.c_str(),
 				   sRoot.c_str()));
 
-		if (LOG)
-			LOG->Warn("Can't mount unknown VFS type \"%s\", root \"%s\"",
+		Locator::getLogger()->warn("Can't mount unknown VFS type \"{}\", root \"{}\"",
 					  sType.c_str(),
 					  sRoot.c_str());
-		else
-			fprintf(stderr,
-					"Can't mount unknown VFS type \"%s\", root \"%s\"\n",
-					sType.c_str(),
-					sRoot.c_str());
+
 		return false;
 	}
 
@@ -736,15 +731,14 @@ RageFileManager::Remount(const RString& sMountpoint, const RString& sPath)
 {
 	RageFileDriver* pDriver = GetFileDriver(sMountpoint);
 	if (pDriver == NULL) {
-		if (LOG)
-			LOG->Warn("Remount(%s,%s): mountpoint not found",
+		Locator::getLogger()->warn("Remount({},{}): mountpoint not found",
 					  sMountpoint.c_str(),
 					  sPath.c_str());
 		return;
 	}
 
 	if (!pDriver->Remount(sPath))
-		LOG->Warn("Remount(%s,%s): remount failed (does the driver support "
+		Locator::getLogger()->warn("Remount({},{}): remount failed (does the driver support "
 				  "remounting?)",
 				  sMountpoint.c_str(),
 				  sPath.c_str());

@@ -45,7 +45,7 @@
 #include "Etterna/Globals/global.h"
 #include "RageFile.h"
 #include "RageFileDriverTimeout.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/Utils/RageUtil_FileDB.h"
 #include "RageUtil/Utils/RageUtil_WorkerThread.h"
@@ -324,7 +324,7 @@ ThreadedFileWorker::Open(const RString& sPath, int iMode, int& iErr)
 	m_iRequestMode = iMode;
 
 	if (!DoRequest(REQ_OPEN)) {
-		LOG->Trace("Open(%s) timed out", sPath.c_str());
+		Locator::getLogger()->trace("Open({}) timed out", sPath.c_str());
 		iErr = EFAULT; /* Win32 has no ETIMEDOUT */
 		return NULL;
 	}
@@ -610,7 +610,7 @@ ThreadedFileWorker::PopulateFileSet(FileSet& fs, const RString& sPath)
 
 	/* Kick off the worker thread, and wait for it to finish. */
 	if (!DoRequest(REQ_POPULATE_FILE_SET)) {
-		LOG->Trace("PopulateFileSet(%s) timed out", sPath.c_str());
+		Locator::getLogger()->trace("PopulateFileSet({}) timed out", sPath.c_str());
 		return false;
 	}
 
@@ -680,7 +680,7 @@ ThreadedFileWorker::FlushDirCache(const RString& sPath)
 		if (!bTimeoutEnabled)
 			SetTimeout(-1);
 
-		LOG->Trace("FlushDirCache(%s) timed out", sPath.c_str());
+		Locator::getLogger()->trace("FlushDirCache({}) timed out", sPath.c_str());
 		return false;
 	}
 

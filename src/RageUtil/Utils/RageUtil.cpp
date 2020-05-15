@@ -4,7 +4,7 @@
 #include "Etterna/Models/Lua/LuaBinding.h"
 #include "Etterna/Singletons/LuaManager.h"
 #include "RageUtil/File/RageFile.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Sound/RageSoundReader_FileReader.h"
 #include "RageUtil.h"
 #include "RageUtil/Misc/RageString.h"
@@ -1448,8 +1448,7 @@ GetFileContents(const RString& sPath, RString& sOut, bool bOneLine)
 
 	RageFile file;
 	if (!file.Open(sPath)) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sPath.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sPath.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -1462,8 +1461,7 @@ GetFileContents(const RString& sPath, RString& sOut, bool bOneLine)
 		iGot = file.Read(sData, file.GetFileSize());
 
 	if (iGot == -1) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sPath.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sPath.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -1484,8 +1482,7 @@ GetFileContents(const std::string& sPath, std::string& sOut, bool bOneLine)
 
 	RageFile file;
 	if (!file.Open(sPath)) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sPath.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sPath.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -1498,8 +1495,7 @@ GetFileContents(const std::string& sPath, std::string& sOut, bool bOneLine)
 		iGot = file.Read(sData, file.GetFileSize());
 
 	if (iGot == -1) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sPath.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sPath.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -1515,8 +1511,7 @@ GetFileContents(const RString& sFile, vector<RString>& asOut)
 {
 	RageFile file;
 	if (!file.Open(sFile)) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sFile.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sFile.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -1531,8 +1526,7 @@ GetFileContents(const std::string& sFile, vector<std::string>& asOut)
 {
 	RageFile file;
 	if (!file.Open(sFile)) {
-		LOG->Warn(
-		  "GetFileContents(%s): %s", sFile.c_str(), file.GetError().c_str());
+		Locator::getLogger()->warn("GetFileContents({}): {}", sFile.c_str(), file.GetError().c_str());
 		return false;
 	}
 
@@ -2547,7 +2541,7 @@ bool
 FileCopy(const RString& sSrcFile, const RString& sDstFile)
 {
 	if (!sSrcFile.CompareNoCase(sDstFile)) {
-		LOG->Warn("Tried to copy \"%s\" over itself", sSrcFile.c_str());
+		Locator::getLogger()->warn("Tried to copy \"{}\" over itself", sSrcFile.c_str());
 		return false;
 	}
 
@@ -2561,10 +2555,7 @@ FileCopy(const RString& sSrcFile, const RString& sDstFile)
 
 	RString sError;
 	if (!FileCopy(in, out, sError)) {
-		LOG->Warn("FileCopy(%s,%s): %s",
-				  sSrcFile.c_str(),
-				  sDstFile.c_str(),
-				  sError.c_str());
+		Locator::getLogger()->warn("FileCopy({},{}): {}", sSrcFile.c_str(), sDstFile.c_str(), sError.c_str());
 		return false;
 	}
 

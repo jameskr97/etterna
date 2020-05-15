@@ -2,7 +2,7 @@
 
 #include "Etterna/Globals/global.h"
 #include "RageSoundReader_MP3.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 
 #include <cstdio>
