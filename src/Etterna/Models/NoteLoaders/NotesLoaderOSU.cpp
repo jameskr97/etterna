@@ -6,6 +6,7 @@
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Singletons/PrefsManager.h"
+#include "RageUtil/Misc/RageLog.h"
 
 vector<string>
 split(string str, string token)

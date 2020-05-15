@@ -5,6 +5,7 @@
 #include "Etterna/Singletons/PrefsManager.h"
 #include "TimingSegments.h"
 #include <cfloat> // max float
+#include "Core/Services/Locator.hpp"
 struct lua_State;
 
 /** @brief Compare a TimingData segment's properties with one another. */
@@ -704,7 +705,7 @@ class TimingData
 		for (size_t i = 0, l = bpms.size(); i < l; ++i) {
 			BPMSegment* bpm = ToBPM(bpms[i]);
 			if (0 > bpm->GetBPM()) {
-				LOG->Warn("Sequential Assumption Invalidated.");
+				Locator::getLogger()->warn("Sequential Assumption Invalidated.");
 				ValidSequentialAssumption = false;
 				return;
 			}
@@ -713,7 +714,7 @@ class TimingData
 		for (size_t i = 0, l = stops.size(); i < l; ++i) {
 			StopSegment* s = ToStop(stops[i]);
 			if (0 > s->GetPause()) {
-				LOG->Warn("Sequential Assumption Invalidated.");
+				Locator::getLogger()->warn("Sequential Assumption Invalidated.");
 				ValidSequentialAssumption = false;
 				return;
 			}

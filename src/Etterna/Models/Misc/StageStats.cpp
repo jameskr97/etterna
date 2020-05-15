@@ -19,6 +19,7 @@
 #include "Etterna/Singletons/DownloadManager.h"
 #include "Etterna/Globals/MinaCalc.h"
 #include "Etterna/Models/Songs/Song.h"
+#include "Core/Services/Locator.hpp"
 #include "GamePreferences.h"
 
 #ifndef _WIN32
@@ -617,7 +618,7 @@ StageStats::FinalizeScores(bool bSummary)
 	if (!GAMESTATE->m_SongOptions.GetCurrent().m_bSaveScore)
 		return;
 
-	LOG->Trace("saving stats and high scores");
+	Locator::getLogger()->trace("saving stats and high scores");
 
 	// generate a HighScore for each player
 
@@ -691,7 +692,7 @@ StageStats::FinalizeScores(bool bSummary)
 	mostrecentscorekey = hs.GetScoreKey();
 	zzz->m_lastSong.FromSong(GAMESTATE->m_pCurSong);
 
-	LOG->Trace("done saving stats and high scores");
+	Locator::getLogger()->trace("done saving stats and high scores");
 }
 
 // all scores are saved so all scores are highscores, remove this later -mina

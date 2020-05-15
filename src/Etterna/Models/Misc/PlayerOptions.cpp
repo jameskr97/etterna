@@ -8,6 +8,7 @@
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Models/StepsAndStyles/Style.h"
+#include "Core/Services/Locator.hpp"
 #include <cfloat>
 
 static const char* LifeTypeNames[] = {
@@ -430,9 +431,8 @@ PlayerOptions::FromString(const RString& sMultipleMods)
 	FOREACH(RString, vs, s)
 	{
 		if (!FromOneModString(*s, sThrowAway)) {
-			LOG->Trace("Attempted to load a non-existing mod \'%s\' for the "
-					   "Player. Ignoring.",
-					   (*s).c_str());
+			Locator::getLogger()->trace("Attempted to load a non-existing mod \'{}\' for the Player. Ignoring.",
+					   s->c_str());
 		}
 	}
 }

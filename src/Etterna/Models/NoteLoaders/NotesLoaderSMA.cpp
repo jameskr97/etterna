@@ -6,6 +6,7 @@
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Singletons/SongManager.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
+#include "RageUtil/Misc/RageLog.h"
 
 void
 SMALoader::ProcessMultipliers(TimingData& out,

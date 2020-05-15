@@ -2,7 +2,7 @@
 #include "EnumHelper.h"
 #include "Grade.h"
 #include "Etterna/Singletons/LuaManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/ThemeManager.h"
 
@@ -84,6 +84,6 @@ StringToGrade(const RString& sGrade)
 	else if (s == "NODATA")
 		return Grade_NoData;
 
-	LOG->Warn("Invalid grade: %s", sGrade.c_str());
+	Locator::getLogger()->warn("Invalid grade: {}", sGrade.c_str());
 	return Grade_NoData;
 };

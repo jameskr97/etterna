@@ -3,7 +3,7 @@
 #include "Etterna/Singletons/LuaManager.h"
 #include "Etterna/Singletons/MessageManager.h"
 #include "Preference.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "SubscriptionManager.h"
 #include "Etterna/FileTypes/XmlFile.h"
 
@@ -67,10 +67,7 @@ IPreference::ReadAllDefaultsFromNode(const XNode* pNode)
 void
 IPreference::PushValue(lua_State* L) const
 {
-	if (LOG)
-		LOG->Trace(
-		  "The preference value \"%s\" is of a type not supported by Lua",
-		  m_sName.c_str());
+	Locator::getLogger()->trace("The preference value \"{}\" is of a type not supported by Lua", m_sName.c_str());
 
 	lua_pushnil(L);
 }
@@ -78,9 +75,7 @@ IPreference::PushValue(lua_State* L) const
 void
 IPreference::SetFromStack(lua_State* L)
 {
-	if (LOG)
-		LOG->Trace(
-		  "The preference value \"%s\" is of a type not supported by Lua",
+    Locator::getLogger()->trace("The preference value \"{}\" is of a type not supported by Lua",
 		  m_sName.c_str());
 
 	lua_pop(L, 1);

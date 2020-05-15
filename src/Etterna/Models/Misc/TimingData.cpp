@@ -3,7 +3,7 @@
 #include "Etterna/Singletons/GameState.h"
 #include "NoteTypes.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/ThemeManager.h"
 #include "TimingData.h"
@@ -156,11 +156,11 @@ TimingData::DumpOneTable(const beat_start_lookup_t& lookup, const RString& name)
 	const vector<TimingSegment*>& warps = segs[SEGMENT_WARP];
 	const vector<TimingSegment*>& stops = segs[SEGMENT_STOP];
 	const vector<TimingSegment*>& delays = segs[SEGMENT_DELAY];
-	LOG->Trace("%s lookup table:", name.c_str());
+	Locator::getLogger()->trace("{} lookup table:", name.c_str());
 	for (size_t lit = 0; lit < lookup.size(); ++lit) {
 		const lookup_item_t& item = lookup[lit];
 		const GetBeatStarts& starts = item.second;
-		LOG->Trace("%zu: %f", lit, item.first);
+		Locator::getLogger()->trace("{}: {}", lit, item.first);
 		RString str =
 		  ssprintf("  %s, %s, %s, %s,\n"
 				   "  last_row: %d, last_time: %.3f,\n"
@@ -173,17 +173,17 @@ TimingData::DumpOneTable(const beat_start_lookup_t& lookup, const RString& name)
 				   starts.last_time,
 				   starts.warp_destination,
 				   starts.is_warping);
-		LOG->Trace("%s", str.c_str());
+		Locator::getLogger()->trace(str.c_str());
 	}
 }
 
 void
 TimingData::DumpLookupTables()
 {
-	LOG->Trace("Dumping timing data lookup tables for %s:", m_sFile.c_str());
+	Locator::getLogger()->trace("Dumping timing data lookup tables for {}:", m_sFile.c_str());
 	DumpOneTable(m_beat_start_lookup, "m_beat_start_lookup");
 	DumpOneTable(m_time_start_lookup, "m_time_start_lookup");
-	LOG->Trace("Finished dumping lookup tables for %s:", m_sFile.c_str());
+	Locator::getLogger()->trace("Finished dumping lookup tables for {}:", m_sFile.c_str());
 }
 
 TimingData::beat_start_lookup_t::const_iterator
@@ -582,7 +582,7 @@ static void
 EraseSegment(vector<TimingSegment*>& vSegs, int index, TimingSegment* cur)
 {
 #ifdef WITH_LOGGING_TIMING_DATA
-	LOG->Trace("EraseSegment(%d, %p)", index, cur);
+	Locator::getLogger()->trace("EraseSegment({}, {})", index, cur);
 	cur->DebugPrint();
 #endif
 
@@ -596,7 +596,7 @@ void
 TimingData::AddSegment(const TimingSegment* seg)
 {
 #ifdef WITH_LOGGING_TIMING_DATA
-	LOG->Trace("AddSegment( %s )",
+	Locator::getLogger()->trace("AddSegment({})",
 			   TimingSegmentTypeToString(seg->GetType()).c_str());
 	seg->DebugPrint();
 #endif
@@ -696,7 +696,7 @@ TimingData::AddSegment(const TimingSegment* seg)
 	// the segment at or before this row is equal to the new one; ignore it
 	if (bOnSameRow && (*cur) == (*seg)) {
 #ifdef WITH_LOGGING_TIMING_DATA
-		LOG->Trace("equals previous segment, ignoring");
+		Locator::getLogger()->trace("equals previous segment, ignoring");
 #endif
 		return;
 	}
@@ -1100,7 +1100,7 @@ TimingData::DeleteRows(int iStartRow, int iRowsToDelete)
 			iStartRow <= tsEnd->GetRow() &&
 			tsEnd->GetRow() < iStartRow + iRowsToDelete) {
 			// The iRowsToDelete will eventually be subtracted out
-			LOG->Trace("Segment at row %d shifted to %d",
+			Locator::getLogger()->trace("Segment at row {} shifted to {}",
 					   tsEnd->GetRow(),
 					   iStartRow + iRowsToDelete);
 			tsEnd->SetRow(iStartRow + iRowsToDelete);
@@ -1143,7 +1143,7 @@ TimingData::GetDisplayedSpeedPercent(float fSongBeat, float fMusicSeconds) const
 	const vector<TimingSegment*>& speeds = GetTimingSegments(SEGMENT_SPEED);
 	if (speeds.size() == 0) {
 #ifdef DEBUG
-		LOG->Trace("No speed segments found: using default value.");
+		Locator::getLogger()->trace("No speed segments found: using default value.");
 #endif
 		return 1.0f;
 	}
@@ -1152,7 +1152,7 @@ TimingData::GetDisplayedSpeedPercent(float fSongBeat, float fMusicSeconds) const
 
 	if (index < 0) {
 #ifdef DEBUG
-		LOG->Trace("Speed segment negative index: using default value");
+		Locator::getLogger()->trace("Speed segment negative index: using default value");
 #endif
 		return 1.0f;
 	}
@@ -1202,8 +1202,7 @@ TimingData::TidyUpData(bool allowEmpty)
 	// If there are no BPM segments, provide a default.
 	vector<TimingSegment*>* segs = m_avpTimingSegments;
 	if (segs[SEGMENT_BPM].empty()) {
-		LOG->UserLog(
-		  "Song file", m_sFile, "has no BPM segments, default provided.");
+        Locator::getLogger()->info("Song file {} has no BPM segments, default provided.", m_sFile);
 		AddSegment(BPMSegment(0, 60));
 	}
 

@@ -8,7 +8,7 @@
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "PlayerStageStats.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "Etterna/Models/ScoreKeepers/ScoreKeeperNormal.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Singletons/ThemeManager.h"
@@ -1047,7 +1047,7 @@ LuaFunction(GetGradeFromPercent, GetGradeFromPercent(FArg(1)))
 		if (lua_gettop(L) >= 2 && !lua_isnil(L, 2)) {
 			samples = IArg(2);
 			if (samples <= 0) {
-				LOG->Trace("PlayerStageStats:GetLifeRecord requires an integer "
+				Locator::getLogger()->trace("PlayerStageStats:GetLifeRecord requires an integer "
 						   "greater than 0.  Defaulting to 100.");
 				samples = 100;
 			}
@@ -1071,7 +1071,7 @@ LuaFunction(GetGradeFromPercent, GetGradeFromPercent(FArg(1)))
 		if (lua_gettop(L) >= 2 && !lua_isnil(L, 2)) {
 			samples = IArg(2);
 			if (samples <= 0) {
-				LOG->Trace("PlayerStageStats:GetLifeRecord requires an integer "
+				Locator::getLogger()->trace("PlayerStageStats:GetLifeRecord requires an integer "
 						   "greater than 0.  Defaulting to 100.");
 				samples = 100;
 			}

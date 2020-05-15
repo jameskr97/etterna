@@ -5,7 +5,7 @@
 #include "Etterna/Models/Misc/Foreach.h"
 #include "Etterna/FileTypes/IniFile.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Songs/Song.h"
 #include <set>
@@ -347,7 +347,7 @@ GetGlobalRandomMoviePaths(const Song* pSong,
 		GetDirListing(SONG_MOVIES_DIR + sMatch, vsPathsOut, false, true);
 		GetDirListing(RANDOMMOVIES_DIR + sMatch, vsPathsOut, false, true);
 		if (vsPathsOut.empty() && sMatch != NO_SONG_BG_FILE) {
-			LOG->Warn("Background missing: %s", sMatch.c_str());
+			Locator::getLogger()->warn("Background missing: {}", sMatch.c_str());
 		}
 		return;
 	}

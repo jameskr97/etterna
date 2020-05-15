@@ -1,7 +1,7 @@
 #include "Etterna/Globals/global.h"
 
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/File/RageFileManager.h"
 #include "RageUtil/Misc/RageThreads.h"
@@ -256,9 +256,7 @@ SongCacheIndex::InsertStepsTimingData(const TimingData& timing)
 	try {
 		insertTimingData.exec();
 	} catch (exception e) {
-		LOG->Warn(
-		  "Failed to execute statement to insert TimingData from Cache: %s",
-		  e.what());
+		Locator::getLogger()->warn("Failed to execute statement to insert TimingData from Cache: {}", e.what());
 	}
 	return sqlite3_last_insert_rowid(db->getHandle());
 }
@@ -331,8 +329,7 @@ SongCacheIndex::InsertSteps(const Steps* pSteps, int64_t songID)
 	try {
 		insertSteps.exec();
 	} catch (exception e) {
-		LOG->Warn("Failed to execute statement to insert Steps from Cache: %s",
-				  e.what());
+		Locator::getLogger()->warn("Failed to execute statement to insert Steps from Cache: {}", e.what());
 	}
 	return sqlite3_last_insert_rowid(db->getHandle());
 }
@@ -546,16 +543,14 @@ SongCacheIndex::CacheSong(Song& song, string dir)
 			if (pSteps->GetChartKey() == "") { // Avoid writing cache tags for
 											   // invalid chartkey files(empty
 											   // steps) -Mina
-				LOG->Info("Not caching empty difficulty in file %s",
-						  dir.c_str());
+				Locator::getLogger()->info("Not caching empty difficulty in file {}", dir.c_str());
 				continue;
 			}
 			int64_t stepsID = InsertSteps(pSteps, songID);
 		}
 		return true;
 	} catch (std::exception& e) {
-		LOG->Trace(
-		  "Error saving song %s to cache db: %s", dir.c_str(), e.what());
+		Locator::getLogger()->trace("Error saving song {} to cache db: {}", dir.c_str(), e.what());
 		return false;
 	}
 }
@@ -573,7 +568,7 @@ SongCacheIndex::DeleteDB()
 								  SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE |
 									SQLITE_OPEN_FULLMUTEX);
 	} catch (std::exception& e) {
-		LOG->Trace("Error reading cache db: %s", e.what());
+		Locator::getLogger()->trace("Error reading cache db: {}", e.what());
 		if (curTransaction != nullptr) {
 			delete curTransaction;
 			curTransaction = nullptr;
@@ -643,7 +638,7 @@ SongCacheIndex::CreateDBTables()
 		db->exec("INSERT INTO dbinfo VALUES (NULL, " +
 				 to_string(CACHE_DB_VERSION) + ")");
 	} catch (SQLite::Exception& e) {
-		LOG->Warn("Failed to create Cache DB Tables: %s", e.what());
+		Locator::getLogger()->warn("Failed to create Cache DB Tables: {}", e.what());
 	}
 }
 /*	Returns weather or not the db had valid data*/
@@ -679,7 +674,7 @@ SongCacheIndex::OpenDB()
 			return true;
 		}
 	} catch (std::exception& e) {
-		LOG->Trace("Error reading cache db: %s", e.what());
+		Locator::getLogger()->trace("Error reading cache db: {}", e.what());
 		if (curTransaction != nullptr) {
 			delete curTransaction;
 			curTransaction = nullptr;
@@ -740,7 +735,7 @@ SongCacheIndex::LoadHyperCache(LoadingWindow* ld,
 		}
 
 	} catch (std::exception& e) {
-		LOG->Trace("Error reading cache. last dir: %s . Error: %s",
+		Locator::getLogger()->trace("Error reading cache. last dir: {} . Error: {}",
 				   lastDir.c_str(),
 				   e.what());
 		ResetDB();
@@ -785,8 +780,7 @@ SongCacheIndex::LoadCache(
 			ld->SetTotalWork(count);
 		}
 	} catch (exception e) {
-		LOG->Warn("Failed to count all from songs table in Cache DB: %s",
-				  e.what());
+		Locator::getLogger()->warn("Failed to count all from songs table in Cache DB: {}", e.what());
 	}
 	cache.reserve(count);
 	int fivePercent = std::max(count / 100 * 5, 1);
@@ -823,7 +817,7 @@ SongCacheIndex::LoadCache(
 			  }
 
 		  } catch (std::exception& e) {
-			  LOG->Trace("Error reading cache. Error: %s", e.what());
+			  Locator::getLogger()->trace("Error reading cache. Error: {}", e.what());
 			  if (abort)
 				  return;
 			  abort = true;
@@ -874,10 +868,8 @@ SongCacheIndex::DeleteSongFromDBByCondition(string& condition)
 			.c_str());
 		db->exec(("DELETE FROM songs WHERE " + condition).c_str());
 	} catch (exception e) {
-		LOG->Warn("Failed to execute Song Deletion from DB with condition "
-				  "'%s'\nException: %s",
-				  condition.c_str(),
-				  e.what());
+		Locator::getLogger()->warn("Failed to execute Song Deletion from DB with condition "
+				  "'{}'\nException: {}", condition.c_str(), e.what());
 	}
 }
 void
@@ -930,7 +922,7 @@ SongCacheIndex::StartTransaction()
 	try {
 		curTransaction = new SQLite::Transaction(*db);
 	} catch (exception e) {
-		LOG->Warn("Failed to start transaction due to exception: %s", e.what());
+		Locator::getLogger()->warn("Failed to start transaction due to exception: {}", e.what());
 	}
 	return;
 }
@@ -1288,18 +1280,16 @@ SongCacheIndex::SongFromStatement(Song* song, SQLite::Statement& query)
 		song->m_sPreviewVidPath =
 		  static_cast<const char*>(query.getColumn(index++));
 	} catch (exception e) {
-		LOG->Warn("Exception occurred while loading file from cache: %s",
-				  e.what());
+		Locator::getLogger()->warn("Exception occurred while loading file from cache: {}", e.what());
 	}
 
 	SMLoader::TidyUpData(*song, true);
 
 	if (song->m_sMainTitle == "" ||
 		(song->m_sMusicFile == "" && song->m_vsKeysoundFile.empty())) {
-		LOG->Warn("Main title or music file for '%s' came up blank, forced to "
+		Locator::getLogger()->warn("Main title or music file for '{}' came up blank, forced to "
 				  "fall back on TidyUpData to fix title and paths.  Do not use "
-				  "# or ; in a song title.",
-				  dir.c_str());
+				  "# or ; in a song title.", dir.c_str());
 		// Tell TidyUpData that it's not loaded from the cache because it needs
 		// to hit the song folder to find the files that weren't found. -Kyz
 		song->TidyUpData(false, false);
@@ -1323,8 +1313,7 @@ SongCacheIndex::LoadSongFromCache(Song* song, string dir)
 
 		SongFromStatement(song, query);
 	} catch (std::exception& e) {
-		LOG->Trace(
-		  "Error reading song %s from cache: %s", dir.c_str(), e.what());
+		Locator::getLogger()->trace("Error reading song {} from cache: {}", dir.c_str(), e.what());
 		ResetDB();
 		return false;
 	}

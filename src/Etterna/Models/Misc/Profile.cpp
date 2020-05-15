@@ -16,7 +16,7 @@
 #include "RageUtil/File/RageFile.h"
 #include "RageUtil/File/RageFileDriverDeflate.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/ScoreManager.h"
 #include "Etterna/Singletons/ScreenManager.h"
@@ -828,7 +828,7 @@ Profile::LoadAllFromDir(const RString& sDir,
 						LoadingWindow* ld)
 {
 	if (PREFSMAN->m_verbose_log > 0)
-		LOG->Trace("Profile::LoadAllFromDir( %s )", sDir.c_str());
+		Locator::getLogger()->trace("Profile::LoadAllFromDir({})", sDir.c_str());
 	ASSERT(sDir.Right(1) == "/");
 
 	InitAll();
@@ -909,7 +909,7 @@ void
 Profile::CalculateStatsFromScores(LoadingWindow* ld)
 {
 	if (PREFSMAN->m_verbose_log > 0)
-		LOG->Trace("Calculating stats from scores");
+		Locator::getLogger()->trace("Calculating stats from scores");
 	const vector<HighScore*>& all = SCOREMAN->GetAllProfileScores(m_sProfileID);
 	float TotalGameplaySeconds = 0.f;
 	m_iTotalTapsAndHolds = 0;
