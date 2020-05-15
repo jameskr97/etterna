@@ -4,6 +4,7 @@
 #include "RageUtil/Misc/RageThreads.h"
 #include "Etterna/Globals/ProductInfo.h"
 #include "Etterna/Singletons/InputFilter.h"
+#include "Core/Services/Locator.hpp"
 #include <CoreFoundation/CoreFoundation.h>
 
 REGISTER_DIALOG_DRIVER_CLASS(MacOSX);
@@ -20,10 +21,7 @@ ShowAlert(CFOptionFlags flags,
 	  CFStringCreateWithCString(NULL, sMessage, kCFStringEncodingUTF8);
 
 	if (text == NULL) {
-		RString error =
-		  ssprintf("CFString for dialog string \"%s\" could not be created.",
-				   sMessage.c_str());
-		WARN(error);
+		Locator::getLogger()->warn("CFString for dialog string \"{}\" could not be created.", sMessage.c_str());
 		DEBUG_ASSERT_M(false, error);
 		return kCFUserNotificationDefaultResponse; // Is this better than
 												   // displaying an "unknown

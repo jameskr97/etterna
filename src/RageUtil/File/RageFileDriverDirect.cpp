@@ -4,6 +4,7 @@
 #include "RageFileDriverDirectHelpers.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/Utils/RageUtil_FileDB.h"
+#include "Core/Services/Locator.hpp"
 
 #if defined(HAVE_FCNTL_H)
 #include <fcntl.h>
@@ -140,14 +141,13 @@ RageFileDriverDirect::Move(const RString& sOldPath_, const RString& sNewPath_)
 	}
 	int size = FDB->GetFileSize(sOldPath);
 	int hash = FDB->GetFileHash(sOldPath);
-	TRACE(ssprintf("rename \"%s\" -> \"%s\"",
-				   (m_sRoot + sOldPath).c_str(),
-				   (m_sRoot + sNewPath).c_str()));
+    Locator::getLogger()->trace("rename \"{}\" -> \"{}\"",
+				   (m_sRoot + sOldPath).c_str(),(m_sRoot + sNewPath).c_str());
 	if (DoRename(m_sRoot + sOldPath, m_sRoot + sNewPath) == -1) {
-		WARN(ssprintf("rename(%s,%s) failed: %s",
+		Locator::getLogger()->warn("rename({},{}) failed: {}",
 					  (m_sRoot + sOldPath).c_str(),
 					  (m_sRoot + sNewPath).c_str(),
-					  strerror(errno)));
+					  strerror(errno));
 		return false;
 	}
 
@@ -164,22 +164,20 @@ RageFileDriverDirect::Remove(const RString& sPath_)
 	RageFileManager::FileType type = this->GetFileType(sPath);
 	switch (type) {
 		case RageFileManager::TYPE_FILE:
-			TRACE(ssprintf("remove '%s'", (m_sRoot + sPath).c_str()));
+            Locator::getLogger()->trace("remove '{}'", (m_sRoot + sPath).c_str());
 			if (DoRemove(m_sRoot + sPath) == -1) {
-				WARN(ssprintf("remove(%s) failed: %s",
-							  (m_sRoot + sPath).c_str(),
-							  strerror(errno)));
+				Locator::getLogger()->warn("remove({}) failed: {}",
+							  (m_sRoot + sPath).c_str(), strerror(errno));
 				return false;
 			}
 			FDB->DelFile(sPath);
 			return true;
 
 		case RageFileManager::TYPE_DIR:
-			TRACE(ssprintf("rmdir '%s'", (m_sRoot + sPath).c_str()));
+            Locator::getLogger()->trace("rmdir '{}'", (m_sRoot + sPath).c_str());
 			if (rmdir(m_sRoot + sPath) == -1) {
-				WARN(ssprintf("rmdir(%s) failed: %s",
-							  (m_sRoot + sPath).c_str(),
-							  strerror(errno)));
+				Locator::getLogger()->warn("rmdir({}) failed: {}",
+							  (m_sRoot + sPath).c_str(), strerror(errno));
 				return false;
 			}
 			FDB->DelFile(sPath);
@@ -306,18 +304,15 @@ RageFileObjDirect::FinalFlush()
 
 	/* Force a kernel buffer flush. */
 	if (fsync(m_iFD) == -1) {
-		WARN(ssprintf("Error synchronizing %s: %s",
-					  this->m_sPath.c_str(),
-					  strerror(errno)));
+		Locator::getLogger()->warn("Error synchronizing {}: {}",this->m_sPath.c_str(), strerror(errno));
 		SetError(strerror(errno));
 		return false;
 	}
 
 	RString sError;
 	if (!FlushDir(Dirname(m_sPath), sError)) {
-		WARN(ssprintf("Error synchronizing fsync(%s dir): %s",
-					  this->m_sPath.c_str(),
-					  sError.c_str()));
+		Locator::getLogger()->warn("Error synchronizing fsync({} dir): {}",
+					  this->m_sPath.c_str(), sError.c_str());
 		SetError(sError);
 		return false;
 	}
@@ -331,8 +326,7 @@ RageFileObjDirect::~RageFileObjDirect()
 
 	if (m_iFD != -1) {
 		if (close(m_iFD) == -1) {
-			WARN(ssprintf(
-			  "Error closing %s: %s", this->m_sPath.c_str(), strerror(errno)));
+			Locator::getLogger()->warn("Error closing {}: {}", this->m_sPath.c_str(), strerror(errno));
 			SetError(strerror(errno));
 			bFailed = true;
 		}
@@ -368,15 +362,15 @@ RageFileObjDirect::~RageFileObjDirect()
 											"Error renaming \"%s\" to \"%s\"",
 											sOldPath.c_str(),
 											sNewPath.c_str());
-		WARN(ssprintf("%s", error.c_str()));
+		Locator::getLogger()->warn((ssprintf("%s", error.c_str()));
 		SetError(error);
 		break;
 #else
 		if (rename(sOldPath, sNewPath) == -1) {
-			WARN(ssprintf("Error renaming \"%s\" to \"%s\": %s",
+			Locator::getLogger()->warn("Error renaming \"{}\" to \"{}\": {}",
 						  sOldPath.c_str(),
 						  sNewPath.c_str(),
-						  strerror(errno)));
+						  strerror(errno));
 			SetError(strerror(errno));
 			break;
 		}
@@ -384,9 +378,9 @@ RageFileObjDirect::~RageFileObjDirect()
 		if ((m_iMode & RageFile::SLOW_FLUSH) != 0) {
 			RString sError;
 			if (!FlushDir(Dirname(m_sPath), sError)) {
-				WARN(ssprintf("Error synchronizing fsync(%s dir): %s",
+				Locator::getLogger()->warn("Error synchronizing fsync({} dir): {}",
 							  this->m_sPath.c_str(),
-							  sError.c_str()));
+							  sError.c_str());
 				SetError(sError);
 			}
 		}
@@ -399,10 +393,7 @@ RageFileObjDirect::~RageFileObjDirect()
 	// The write or the rename failed. Delete the incomplete temporary file.
 	int err = DoRemove(MakeTempFilename(m_sPath));
 	if (err != 0)
-		WARN(ssprintf(
-		  "On writing or renaming file, deleting temporary file failed with "
-		  "error %d",
-		  err));
+		Locator::getLogger()->warn("On writing or renaming file, deleting temporary file failed with error {}",err);
 }
 
 int
@@ -478,7 +469,7 @@ RageFileObjDirect::GetFileSize() const
 	//		 ssprintf("\"%s\": %s", m_sPath.c_str(), strerror(errno)));
 	const int iRet2 = lseek(m_iFD, iOldPos, SEEK_SET);
 	if (iRet2 == -1)
-		WARN("Undoing seek for filesize getter may have failed.");
+        Locator::getLogger()->warn("Undoing seek for filesize getter may have failed.");
 
 	return iRet;
 }
