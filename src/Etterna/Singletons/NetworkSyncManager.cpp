@@ -24,7 +24,7 @@
 #include "Etterna/Screen/Others/ScreenMessage.h"
 #include "Etterna/Actor/Menus/RoomInfoDisplay.h"
 #include "Etterna/Globals/ProductInfo.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "arch/LoadingWindow/LoadingWindow.h"
 #include <iostream>
 #include <cerrno>
@@ -451,7 +451,7 @@ NetworkSyncManager::PostStartUp(const RString& ServerIP)
 		auto sub = ServerIP.substr(cLoc + 1);
 		iPort = (unsigned short)strtol(sub.c_str(), &cEnd, 10);
 		if (*cEnd != 0 || errno != 0) {
-			LOG->Warn("Invalid port");
+			Locator::getLogger()->warn("Invalid port");
 			return;
 		}
 	} else {
@@ -461,8 +461,7 @@ NetworkSyncManager::PostStartUp(const RString& ServerIP)
 
 	chat.rawMap.clear();
 	if (PREFSMAN->m_verbose_log > 0)
-		LOG->Info(
-		  "Attempting to connect to: %s, Port: %i", sAddress.c_str(), iPort);
+		Locator::getLogger()->info("Attempting to connect to: {}, Port: {}", sAddress.c_str(), iPort);
 	curProtocol = nullptr;
 	CloseConnection();
 
@@ -484,9 +483,9 @@ NetworkSyncManager::PostStartUp(const RString& ServerIP)
 	m_sArtist = "";
 	difficulty = Difficulty_Invalid;
 	meter = -1;
-	LOG->Info("Server Version: %d %s",
-			  curProtocol->serverVersion,
-			  curProtocol->serverName.c_str());
+	Locator::getLogger()->info("Server Version: {} {}",
+	        curProtocol->serverVersion,
+	        curProtocol->serverName.c_str());
 	MESSAGEMAN->Broadcast("MultiplayerConnection");
 }
 
@@ -515,7 +514,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 							 ws_message_ptr message) {
 		std::unique_ptr<Document> d(new Document);
 		if (d->Parse(message->get_payload().c_str()).HasParseError())
-			LOG->Trace("Error while processing ettprotocol json (message: %s )",
+			Locator::getLogger()->trace("Error while processing ettprotocol json (message: {} )",
 					   message->get_payload().c_str());
 		else {
 			std::lock_guard<std::mutex> l(this->messageBufferMutex);
@@ -527,7 +526,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 		finished_connecting = true;
 		this->hdl = std::make_shared<websocketpp::connection_hdl>(hdl);
 		n->isSMOnline = true;
-		LOG->Trace("Connected to ett server: %s", address.c_str());
+		Locator::getLogger()->trace("Connected to ett server: {}", address.c_str());
 	};
 	auto failHandler = [n, this, address, &finished_connecting](
 						 websocketpp::connection_hdl hdl) {
@@ -546,9 +545,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 			client->set_open_handler(openHandler);
 			client->set_close_handler(closeHandler);
 		} catch (exception& e) {
-			LOG->Warn(
-			  "Failed to initialize ettp connection due to exception: %s",
-			  e.what());
+			Locator::getLogger()->warn("Failed to initialize ettp connection due to exception: {}", e.what());
 		}
 		finished_connecting = false;
 		websocketpp::lib::error_code ec;
@@ -557,7 +554,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 			.c_str(),
 		  ec);
 		if (ec) {
-			LOG->Trace("Could not create ettp connection because: %s",
+			Locator::getLogger()->trace("Could not create ettp connection because: {}",
 					   ec.message().c_str());
 		} else {
 			try {
@@ -567,8 +564,8 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 				if (n->isSMOnline)
 					this->secure_client = std::move(client);
 			} catch (websocketpp::http::exception& e) {
-				LOG->Warn("Failed to create ettp connection due to exception: "
-						  "%d --- %s",
+				Locator::getLogger()->warn("Failed to create ettp connection due to exception: "
+						  "{} --- {}",
 						  e.m_error_code,
 						  e.what());
 			}
@@ -584,8 +581,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 			client->set_fail_handler(failHandler);
 			client->set_close_handler(closeHandler);
 		} catch (exception& e) {
-			LOG->Warn(
-			  "Failed to initialize ettp connection due to exception: %s",
+			Locator::getLogger()->warn("Failed to initialize ettp connection due to exception: {}",
 			  e.what());
 		}
 
@@ -596,7 +592,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 			.c_str(),
 		  ec);
 		if (ec) {
-			LOG->Trace("Could not create ettp connection because: %s",
+			Locator::getLogger()->trace("Could not create ettp connection because: {}",
 					   ec.message().c_str());
 		} else {
 			try {
@@ -607,8 +603,8 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 				if (n->isSMOnline)
 					this->client = std::move(client);
 			} catch (websocketpp::http::exception& e) {
-				LOG->Warn("Failed to create ettp connection due to exception: "
-						  "%d --- %s",
+				Locator::getLogger()->warn("Failed to create ettp connection due to exception: "
+						  "{} --- {}",
 						  e.m_error_code,
 						  e.what());
 			}
@@ -619,7 +615,7 @@ ETTProtocol::Connect(NetworkSyncManager* n,
 		this->thread = std::unique_ptr<std::thread>(
 		  new std::thread([client]() { client->run(); }));
 	} else
-		LOG->Trace("Failed to connect to ettp server: %s", address.c_str());
+		Locator::getLogger()->trace("Failed to connect to ettp server: {}", address.c_str());
 	return n->isSMOnline;
 }
 RoomData
@@ -736,7 +732,7 @@ void
 ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 {
 	if (this->client == nullptr) {
-		LOG->Trace("Disconnected from ett server %s", serverName.c_str());
+		Locator::getLogger()->trace("Disconnected from ett server {}", serverName.c_str());
 		n->isSMOnline = false;
 		n->CloseConnection();
 		SCREENMAN->SendMessageToTopScreen(ETTP_Disconnect);
@@ -758,13 +754,13 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 				StringBuffer buffer;
 				Writer<StringBuffer> writer(buffer);
 				d.Accept(writer);
-				LOG->Trace((string("Recieved ETTP message with no type: ") +
+				Locator::getLogger()->trace((string("Recieved ETTP message with no type: ") +
 							buffer.GetString())
 							 .c_str());
 				continue;
 			}
 			if (d.HasMember("error") && d["error"].IsString()) {
-				LOG->Trace((string("Error on ETTP message ") +
+				Locator::getLogger()->trace((string("Error on ETTP message ") +
 							d["type"].GetString() + ": " +
 							d["error"].GetString())
 							 .c_str());
@@ -772,7 +768,7 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 			}
 			auto type = ettServerMessageMap.find(d["type"].GetString());
 			if (ettServerMessageMap.end() == type) {
-				LOG->Trace(
+				Locator::getLogger()->trace(
 				  (string("Unknown ETTP message type ") + d["type"].GetString())
 					.c_str());
 				continue;
@@ -806,7 +802,7 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 						serverVersion = payload["version"].GetInt();
 					else
 						serverVersion = 1;
-					LOG->Trace("Ettp server identified: %s (Version: %d)",
+					Locator::getLogger()->trace("Ettp server identified: {} (Version: {})",
 							   serverName.c_str(),
 							   serverVersion);
 					n->DisplayStartupStatus();
@@ -1140,8 +1136,8 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 							  "ScreenNetRoom", "MusicSelectScreen");
 							SCREENMAN->SetNewScreen(SMOnlineSelectScreen);
 						} catch (exception e) {
-							LOG->Trace("Error while parsing ettp json enter "
-									   "room response: %s",
+							Locator::getLogger()->trace("Error while parsing ettp json enter "
+									   "room response: {}",
 									   e.what());
 						}
 					} else {
@@ -1164,7 +1160,7 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 						!payload["room"].IsObject() ||
 						!payload["room"].HasMember("name") ||
 						!payload["room"]["name"].IsString()) {
-						LOG->Trace("Invalid ETTP  deleteroom room message");
+						Locator::getLogger()->trace("Invalid ETTP  deleteroom room message");
 						continue;
 					}
 					string name = payload["room"]["name"].GetString();
@@ -1287,7 +1283,7 @@ ETTProtocol::Update(NetworkSyncManager* n, float fDeltaTime)
 				} break;
 			}
 		} catch (exception e) {
-			LOG->Trace("Error while parsing ettp json message: %s", e.what());
+			Locator::getLogger()->trace("Error while parsing ettp json message: {}", e.what());
 		}
 	}
 	newMessages.clear();
@@ -1933,7 +1929,7 @@ PacketFunctions::Write1(uint8_t data)
 	if (Position >= NETMAXBUFFERSIZE)
 		return;
 	if (data != 1)
-		LOG->Trace("testing");
+		Locator::getLogger()->trace("testing");
 	memcpy(&Data[Position], &data, 1);
 	++Position;
 }

@@ -6,7 +6,7 @@
 #include "Etterna/Models/Misc/Profile.h"
 #include "ProfileManager.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "SongManager.h"
@@ -121,7 +121,7 @@ ProfileManager::FixedProfiles() const
 ProfileLoadResult
 ProfileManager::LoadProfile(PlayerNumber pn, const RString& sProfileDir)
 {
-	LOG->Trace("LoadingProfile P%d, %s", pn + 1, sProfileDir.c_str());
+	Locator::getLogger()->trace("LoadingProfile P{}, {}", pn + 1, sProfileDir.c_str());
 
 	ASSERT(!sProfileDir.empty());
 	ASSERT(sProfileDir.Right(1) == "/");
@@ -156,14 +156,14 @@ ProfileManager::LoadProfile(PlayerNumber pn, const RString& sProfileDir)
 		 * was failed_tampered, then the error should be failed_tampered and not
 		 * failed_no_profile. */
 		if (lr == ProfileLoadResult_FailedNoProfile) {
-			LOG->Trace("Profile was corrupt and LastGood for %s doesn't exist; "
+			Locator::getLogger()->trace("Profile was corrupt and LastGood for {} doesn't exist; "
 					   "error is ProfileLoadResult_FailedTampered",
 					   sProfileDir.c_str());
 			lr = ProfileLoadResult_FailedTampered;
 		}
 	}
 
-	LOG->Trace("Done loading profile - result %d", lr);
+	Locator::getLogger()->trace("Done loading profile - result {}", lr);
 
 	return lr;
 }
@@ -491,15 +491,15 @@ ProfileManager::DeleteLocalProfile(const RString& sProfileID)
 				}
 				return true;
 			} else {
-				LOG->Warn("[ProfileManager::DeleteLocalProfile] "
-						  "DeleteRecursive(%s) failed",
+				Locator::getLogger()->warn("[ProfileManager::DeleteLocalProfile] "
+						  "DeleteRecursive({}) failed",
 						  sProfileID.c_str());
 				return false;
 			}
 		}
 	}
 
-	LOG->Warn("DeleteLocalProfile: ProfileID '%s' doesn't exist",
+	Locator::getLogger()->warn("DeleteLocalProfile: ProfileID '{}' doesn't exist",
 			  sProfileID.c_str());
 	return false;
 }

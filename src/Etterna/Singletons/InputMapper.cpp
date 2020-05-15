@@ -7,7 +7,7 @@
 #include "Etterna/Singletons/MessageManager.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/Misc/RageInput.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Globals/SpecialFiles.h"
 #include "arch/Dialog/Dialog.h"
@@ -696,8 +696,7 @@ InputMapper::AutoMapJoysticksForCurrentGame()
 				break; // stop mapping.  We already mapped one device for each
 					   // game controller.
 
-			LOG->Info(
-			  "Applying default joystick mapping #%d for device '%s' (%s)",
+			Locator::getLogger()->info("Applying default joystick mapping #{} for device '{}' ({})",
 			  iNumJoysticksMapped + 1,
 			  mapping->m_sDriverRegex.c_str(),
 			  mapping->m_sControllerName.c_str());
@@ -870,7 +869,7 @@ InputMapper::CheckForChangedInputDevicesAndRemap(RString& sMessageOut)
 		MESSAGEMAN->Broadcast(Message_AutoJoyMappingApplied);
 	}
 
-	LOG->Info("%s", sMessageOut.c_str());
+	Locator::getLogger()->info(sMessageOut.c_str());
 
 	// see above comment about not using ",". -aj
 	g_sLastSeenInputDevices.Set(join("|", vsCurrent));
@@ -1307,7 +1306,7 @@ InputMappings::ReadMappings(const InputScheme* pInputScheme,
 
 	IniFile ini;
 	if (!ini.ReadFile(sFilePath))
-		LOG->Trace("Couldn't open mapping file \"%s\": %s.",
+		Locator::getLogger()->trace("Couldn't open mapping file \"{}\": {}.",
 				   SpecialFiles::KEYMAPS_PATH.c_str(),
 				   ini.GetError().c_str());
 

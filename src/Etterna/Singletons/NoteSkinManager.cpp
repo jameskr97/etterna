@@ -8,7 +8,7 @@
 #include "NoteSkinManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Globals/SpecialFiles.h"
 #include "ThemeManager.h"
@@ -165,9 +165,8 @@ NoteSkinManager::LoadNoteSkinDataRecursive(const RString& sNoteSkinName_,
 		}
 
 		if (PREFSMAN->m_verbose_log > 1)
-			LOG->Trace("LoadNoteSkinDataRecursive: %s (%s)",
-					   sNoteSkinName.c_str(),
-					   sDir.c_str());
+			Locator::getLogger()->trace("LoadNoteSkinDataRecursive: {} ({})",
+					   sNoteSkinName.c_str(),sDir.c_str());
 
 		// read global fallback the current NoteSkin (if any)
 		IniFile ini;
@@ -209,7 +208,7 @@ NoteSkinManager::LoadNoteSkinDataRecursive(const RString& sNoteSkinName_,
 			continue;
 
 		if (PREFSMAN->m_verbose_log > 1)
-			LOG->Trace("Load script \"%s\"", sFile.c_str());
+			Locator::getLogger()->trace("Load script \"{}\"", sFile.c_str());
 
 		Lua* L = LUA->Get();
 		RString Error = "Error running " + sFile + ": ";

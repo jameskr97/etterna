@@ -20,7 +20,7 @@
 #include "ProfileManager.h"
 #include "RageUtil/File/RageFile.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "Etterna/Screen/Others/ScreenTextEntry.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Models/Songs/SongCacheIndex.h"
@@ -292,9 +292,8 @@ SongManager::DifferentialReloadDir(string dir)
 
 		if (!loaded)
 			continue;
-		LOG->Trace("Differential load of %i songs from \"%s\"",
-				   loaded,
-				   (dir + group.name).c_str());
+		Locator::getLogger()->trace("Differential load of {} songs from \"{}\"",
+				   loaded, (dir + group.name).c_str());
 
 		AddGroup(dir, group.name);
 		IMAGECACHE->CacheImage("Banner",
@@ -423,9 +422,7 @@ SongManager::InitSongsFromDisk(LoadingWindow* ld)
 	SONGINDEX->delay_save_cache = false;
 
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("Found %u songs in %f seconds.",
-				   (unsigned int)m_pSongs.size(),
-				   tm.GetDeltaTime());
+		Locator::getLogger()->trace("Found {} songs in {} seconds.", m_pSongs.size(), tm.GetDeltaTime());
 	for (auto& pair : cache)
 		delete pair;
 
@@ -446,8 +443,7 @@ SongManager::InitSongsFromDisk(LoadingWindow* ld)
 
 	FOREACH_ENUM(Skillset, ss)
 	if (!test_vals[ss].empty())
-		LOG->Trace(
-		  "%+0.2f avg delta for test group %s",
+		Locator::getLogger()->trace("{:+.2f} avg delta for test group {}",
 		  std::accumulate(begin(test_vals[ss]), end(test_vals[ss]), 0.f) /
 			test_vals[ss].size(),
 		  SkillsetToString(ss).c_str());
@@ -920,9 +916,8 @@ SongManager::LoadStepManiaSongDir(RString sDir, LoadingWindow* ld)
 			}
 			if (!loaded)
 				continue;
-			LOG->Trace("Loaded %i songs from \"%s\"",
-					   loaded,
-					   (sDir + sGroupName).c_str());
+			Locator::getLogger()->trace("Loaded {} songs from \"{}\"",
+					   loaded,(sDir + sGroupName).c_str());
 			{
 				std::lock_guard<std::mutex> lk(diskLoadGroupMutex);
 				SONGMAN->AddGroup(sDir, sGroupName);

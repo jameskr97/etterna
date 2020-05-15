@@ -67,7 +67,7 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Models/Misc/Preference.h"
 #include "RageUtil/Graphics/RageDisplay.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Screen/Others/Screen.h"
@@ -122,10 +122,8 @@ void
 PushLoadedScreen(const LoadedScreen& ls)
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("PushScreen: \"%s\"", ls.m_pScreen->GetName().c_str());
-	LOG->MapLog("ScreenManager::TopScreen",
-				"Top Screen: %s",
-				ls.m_pScreen->GetName().c_str());
+		Locator::getLogger()->trace("PushScreen: \"{}\"", ls.m_pScreen->GetName().c_str());
+    Locator::getLogger()->trace("Top Screen: {}",ls.m_pScreen->GetName().c_str());
 
 	// Be sure to push the screen first, so GetTopScreen returns the screen
 	// during BeginScreen.
@@ -267,8 +265,7 @@ ScreenManager::ScreenManager()
 ScreenManager::~ScreenManager()
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("ScreenManager::~ScreenManager()");
-	LOG->UnmapLog("ScreenManager::TopScreen");
+		Locator::getLogger()->trace("ScreenManager::~ScreenManager()");
 
 	SAFE_DELETE(g_pSharedBGA);
 	for (unsigned i = 0; i < g_ScreenStack.size(); i++) {
@@ -290,7 +287,7 @@ void
 ScreenManager::ThemeChanged()
 {
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("ScreenManager::ThemeChanged");
+		Locator::getLogger()->trace("ScreenManager::ThemeChanged");
 
 	// reload common sounds
 	m_soundStart.Load(THEME->GetPathS("Common", "start"));
@@ -434,11 +431,8 @@ ScreenManager::PopTopScreenInternal(bool bSendLoseFocus)
 	}
 
 	if (g_ScreenStack.size())
-		LOG->MapLog("ScreenManager::TopScreen",
-					"Top Screen: %s",
+        Locator::getLogger()->trace("Top Screen: {}",
 					g_ScreenStack.back().m_pScreen->GetName().c_str());
-	else
-		LOG->UnmapLog("ScreenManager::TopScreen");
 
 	return ls.m_SendOnPop;
 }
@@ -483,7 +477,7 @@ ScreenManager::Update(float fDeltaTime)
 	 * animations don't jump. */
 	if ((pScreen != nullptr) && m_bZeroNextUpdate) {
 		if (PREFSMAN->m_verbose_log > 1)
-			LOG->Trace("Zeroing this update.  Was %f", fDeltaTime);
+			Locator::getLogger()->trace("Zeroing this update.  Was {}", fDeltaTime);
 		fDeltaTime = 0;
 		m_bZeroNextUpdate = false;
 	}
@@ -587,7 +581,7 @@ ScreenManager::MakeNewScreen(const RString& sScreenName)
 {
 	RageTimer t;
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("Loading screen: \"%s\"", sScreenName.c_str());
+		Locator::getLogger()->trace("Loading screen: \"{}\"", sScreenName.c_str());
 
 	RString sClassName = THEME->GetMetric(sScreenName, "Class");
 
@@ -607,7 +601,7 @@ ScreenManager::MakeNewScreen(const RString& sScreenName)
 	Screen* ret = pfn(sScreenName);
 
 	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("Loaded \"%s\" (\"%s\") in %f",
+		Locator::getLogger()->trace("Loaded \"{}\" (\"{}\") in {}",
 				   sScreenName.c_str(),
 				   sClassName.c_str(),
 				   t.GetDeltaTime());
@@ -653,7 +647,7 @@ ScreenManager::PrepareScreen(const RString& sScreenName)
 		// keep any common textures loaded.
 		if (pNewBGA == NULL) {
 			if (PREFSMAN->m_verbose_log > 1)
-				LOG->Trace("Loading screen background \"%s\"", sNewBGA.c_str());
+				Locator::getLogger()->trace("Loading screen background \"{}\"", sNewBGA.c_str());
 			Actor* pActor = ActorUtil::MakeActor(sNewBGA);
 			if (pActor != NULL) {
 				pActor->SetName(sNewBGA);
@@ -875,7 +869,7 @@ ScreenManager::SendMessageToTopScreen(ScreenMessage SM)
 void
 ScreenManager::SystemMessage(const RString& sMessage)
 {
-	LOG->Trace("%s", sMessage.c_str());
+	Locator::getLogger()->trace(sMessage.c_str());
 	Message msg("SystemMessage");
 	msg.SetParam("Message", sMessage);
 	msg.SetParam("NoAnimate", false);

@@ -5,7 +5,7 @@
 #include "Etterna/Models/Misc/Preference.h"
 #include "PrefsManager.h"
 #include "RageUtil/Graphics/RageDisplay.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Globals/SpecialFiles.h"
 #include "ver.h"
@@ -477,7 +477,7 @@ PrefsManager::GetPreferencesSection() const
 
 	// OK if this fails
 	if (!GetCommandlineArgument("Type", &sSection) && m_verbose_log > 1)
-		LOG->Trace("Failed to find Type commandline argument (Not required)");
+		Locator::getLogger()->trace("Failed to find Type commandline argument (Not required)");
 
 	return sSection;
 }
@@ -531,9 +531,8 @@ class LunaPrefsManager : public Luna<PrefsManager>
 		}
 
 		pPref->LoadDefault();
-		LOG->Trace("Restored preference \"%s\" to default \"%s\"",
-				   sName.c_str(),
-				   pPref->ToString().c_str());
+		Locator::getLogger()->trace("Restored preference \"{}\" to default \"{}\"",
+				   sName.c_str(), pPref->ToString().c_str());
 		COMMON_RETURN_SELF;
 	}
 	static int PreferenceExists(T* p, lua_State* L)

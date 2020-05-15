@@ -3,7 +3,7 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "InputMapper.h"
 #include "InputQueue.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 
 InputQueue* INPUTQUEUE =
   NULL; // global and accessible from anywhere in our program
@@ -191,8 +191,7 @@ InputQueueCode::Load(RString sButtonsNames)
 
 		if (asButtonNames.size() < 1) {
 			if (sButtonsNames != "")
-				LOG->Trace("Ignoring empty code \"%s\".",
-						   sButtonsNames.c_str());
+				Locator::getLogger()->trace("Ignoring empty code \"{}\".", sButtonsNames.c_str());
 			return false;
 		}
 
@@ -227,8 +226,8 @@ InputQueueCode::Load(RString sButtonsNames)
 			const GameButton gb =
 			  INPUTMAPPER->GetInputScheme()->ButtonNameToIndex(sButtonName);
 			if (gb == GameButton_Invalid) {
-				LOG->Trace(
-				  "The code \"%s\" contains an unrecognized button \"%s\".",
+				Locator::getLogger()->trace(
+				  "The code \"{}\" contains an unrecognized button \"{}\".",
 				  sButtonsNames.c_str(),
 				  sButtonName.c_str());
 				m_aPresses.clear();
