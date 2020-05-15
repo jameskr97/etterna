@@ -63,12 +63,8 @@ CheckGameLoopTimerSkips(float fDeltaTime)
 	const float fExpectedTime = 1.0f / iThisFPS;
 	const float fDifference = fDeltaTime - fExpectedTime;
 	if (fabsf(fDifference) > 0.002f && fabsf(fDifference) < 0.100f)
-		LOG->Trace("GameLoop timer skip: %i FPS, expected %.3f, got %.3f (%.3f "
-				   "difference)",
-				   iThisFPS,
-				   fExpectedTime,
-				   fDeltaTime,
-				   fDifference);
+		Locator::getLogger()->trace("GameLoop timer skip: {} FPS, expected {:.3f}, got {:.3f} ({:.3f} difference)",
+				   iThisFPS, fExpectedTime, fDeltaTime, fDifference);
 }
 
 static bool
@@ -88,7 +84,7 @@ ChangeAppPri()
 			FOREACH_CONST(InputDeviceInfo, vDevices, d)
 			{
 				if (d->sDesc.find("NTPAD") != string::npos) {
-					LOG->Trace("Using NTPAD.  Don't boost priority.");
+					Locator::getLogger()->trace("Using NTPAD.  Don't boost priority.");
 					return false;
 				}
 			}
@@ -416,7 +412,7 @@ ConcurrentRenderer::RenderThread()
 			DISPLAY->BeginConcurrentRendering();
             Locator::getArchHooks()->SetupConcurrentRenderingThread();
 
-			LOG->Trace("ConcurrentRenderer::RenderThread start");
+			Locator::getLogger()->trace("ConcurrentRenderer::RenderThread start");
 
 			m_Event.Lock();
 			m_State = RENDERING_ACTIVE;
@@ -437,7 +433,7 @@ ConcurrentRenderer::RenderThread()
 		}
 
 		if (m_State == RENDERING_END) {
-			LOG->Trace("ConcurrentRenderer::RenderThread done");
+			Locator::getLogger()->trace("ConcurrentRenderer::RenderThread done");
 
 			DISPLAY->EndConcurrentRendering();
 
