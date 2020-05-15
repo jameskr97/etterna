@@ -6,7 +6,7 @@
 #include "Etterna/Singletons/LuaManager.h"
 #include "RageUtil/File/RageFile.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
+#include "Core/Services/Locator.hpp"
 #include "RageUtil/Misc/RageTypes.h"
 #include "XmlFile.h"
 #include "XmlFileUtil.h"
@@ -469,7 +469,7 @@ actor_template_t::load_frames_from_file(RString const& fname,
 {
 	IniFile ini;
 	if (!ini.ReadFile(fname)) {
-		LOG->Trace("Failed to read sprite file %s: %s",
+		Locator::getLogger()->trace("Failed to read sprite file {}: {}",
 				   fname.c_str(),
 				   ini.GetError().c_str());
 		return;
@@ -506,7 +506,7 @@ actor_template_t::load_model_from_file(RString const& fname,
 {
 	IniFile ini;
 	if (!ini.ReadFile(fname)) {
-		LOG->Trace("Failed to read model file %s: %s",
+		Locator::getLogger()->trace("Failed to read model file {}: {}",
 				   fname.c_str(),
 				   ini.GetError().c_str());
 		return;
@@ -721,10 +721,10 @@ convert_xml_file(RString const& fname, RString const& dirname)
 	if (arg_converters.empty()) {
 		init_parser_helpers();
 	}
-	LOG->Trace("Beginning conversion of entry: %s", fname.c_str());
+	Locator::getLogger()->trace("Beginning conversion of entry: {}", fname.c_str());
 	XNode xml;
 	if (!XmlFileUtil::LoadFromFileShowErrors(xml, fname)) {
-		LOG->Trace("Error when loading xml.");
+		Locator::getLogger()->trace("Error when loading xml.");
 		return;
 	}
 	actor_template_t plate;
@@ -733,11 +733,10 @@ convert_xml_file(RString const& fname, RString const& dirname)
 	RageFile* file = new RageFile;
 	RString out_name = fname.Left(fname.size() - 4) + ".lua";
 	if (!file->Open(out_name, RageFile::WRITE)) {
-		LOG->Trace(
-		  "Could not open %s: %s", out_name.c_str(), file->GetError().c_str());
+		Locator::getLogger()->trace("Could not open {}: {}", out_name.c_str(), file->GetError().c_str());
 		return;
 	}
-	LOG->Trace("Saving conversion to: %s", out_name.c_str());
+	Locator::getLogger()->trace("Saving conversion to: {}", out_name.c_str());
 	for (condition_set_t::iterator cond = conditions.begin();
 		 cond != conditions.end();
 		 ++cond) {
