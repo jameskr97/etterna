@@ -1,4 +1,4 @@
-﻿#include "Etterna/Globals/global.h"
+#include "Etterna/Globals/global.h"
 #include "Etterna/Models/Misc/Foreach.h"
 #include "RageFileDriverDirectHelpers.h"
 #include "RageUtil/Utils/RageUtil.h"
@@ -114,8 +114,7 @@ CreateDirectories(const RString& Path)
 		/* I can't reproduce this anymore.  If we get ENOENT, log it but keep
 		 * going. */
 		if (errno == ENOENT) {
-			WARN(ssprintf(
-			  "Couldn't create %s: %s", curpath.c_str(), strerror(errno)));
+			Locator::getLogger()->warn("Couldn't create {}: {}", curpath.c_str(), strerror(errno));
 			errno = EEXIST;
 		}
 #endif

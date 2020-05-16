@@ -362,7 +362,7 @@ RageFileObjDirect::~RageFileObjDirect()
 											"Error renaming \"%s\" to \"%s\"",
 											sOldPath.c_str(),
 											sNewPath.c_str());
-		Locator::getLogger()->warn((ssprintf("%s", error.c_str()));
+		Locator::getLogger()->warn("{}", error.c_str());
 		SetError(error);
 		break;
 #else
