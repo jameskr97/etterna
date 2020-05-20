@@ -144,8 +144,8 @@ DWIcharToNote(char c,
 			note2Out = DANCE_NOTE_PAD1_UPRIGHT;
 			break;
 		default:
-			LOG->UserLog(
-			  "Song file", sPath, "has an invalid DWI note character '%c'.", c);
+			/*LOG->UserLog(
+			  "Song file", sPath, "has an invalid DWI note character '%c'.", c);*/
 			note1Out = DANCE_NOTE_NONE;
 			note2Out = DANCE_NOTE_NONE;
 			break;
@@ -372,9 +372,9 @@ ParseNoteData(RString& step1, RString& step2, Steps& out, const RString& path)
 				  : // this is a note character
 				{
 					if (c == '!') {
-						LOG->UserLog("Song file",
+						/*LOG->UserLog("Song file",
 									 path,
-									 "has an unexpected character: '!'.");
+									 "has an unexpected character: '!'.");*/
 						continue;
 					}
 
@@ -471,12 +471,12 @@ ParseNoteData(RString& step1, RString& step2, Steps& out, const RString& path)
 
 			if (!bFound) {
 				/* The hold was never closed.  */
-				LOG->UserLog(
+				/*LOG->UserLog(
 				  "Song file",
 				  path,
 				  "failed to close a hold note in \"%s\" on track %i",
 				  DifficultyToString(out.GetDifficulty()).c_str(),
-				  t);
+				  t);*/
 
 				newNoteData.SetTapNote(t, iHeadRow, TAP_EMPTY);
 			}
@@ -649,10 +649,10 @@ DWILoader::LoadFromDir(const RString& sPath_,
 		RString sValueName = sParams[0];
 
 		if (iNumParams < 1) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 sPath,
 						 "has tag \"%s\" with no parameters.",
-						 sValueName.c_str());
+						 sValueName.c_str());*/
 			continue;
 		}
 
@@ -688,11 +688,11 @@ DWILoader::LoadFromDir(const RString& sPath_,
 			const float fBPM = StringToFloat(sParams[1]);
 
 			if (unlikely(fBPM <= 0.0f)) {
-				LOG->UserLog("Song file",
+				/*LOG->UserLog("Song file",
 							 sPath,
 							 "has an invalid BPM change at beat %f, BPM %f.",
 							 0.0f,
-							 fBPM);
+							 fBPM);*/
 			} else {
 				out.m_SongTiming.AddSegment(BPMSegment(0, fBPM));
 			}
@@ -745,10 +745,10 @@ DWILoader::LoadFromDir(const RString& sPath_,
 				vector<RString> arrayFreezeValues;
 				split(arrayFreezeExpressions[f], "=", arrayFreezeValues);
 				if (arrayFreezeValues.size() != 2) {
-					LOG->UserLog("Song file",
+					/*LOG->UserLog("Song file",
 								 sPath,
 								 "has an invalid FREEZE: '%s'.",
-								 arrayFreezeExpressions[f].c_str());
+								 arrayFreezeExpressions[f].c_str());*/
 					continue;
 				}
 				int iFreezeRow =
@@ -772,10 +772,10 @@ DWILoader::LoadFromDir(const RString& sPath_,
 				vector<RString> arrayBPMChangeValues;
 				split(arrayBPMChangeExpressions[b], "=", arrayBPMChangeValues);
 				if (arrayBPMChangeValues.size() != 2) {
-					LOG->UserLog("Song file",
+					/*LOG->UserLog("Song file",
 								 sPath,
 								 "has an invalid CHANGEBPM: '%s'.",
-								 arrayBPMChangeExpressions[b].c_str());
+								 arrayBPMChangeExpressions[b].c_str());*/
 					continue;
 				}
 
@@ -784,13 +784,13 @@ DWILoader::LoadFromDir(const RString& sPath_,
 				float fBPM = StringToFloat(arrayBPMChangeValues[1]);
 				if (fBPM > 0.0f)
 					out.m_SongTiming.AddSegment(BPMSegment(iStartIndex, fBPM));
-				else
+				/*else
 					LOG->UserLog(
 					  "Song file",
 					  sPath,
 					  "has an invalid BPM change at beat %f, BPM %f.",
 					  NoteRowToBeat(iStartIndex),
-					  fBPM);
+					  fBPM);*/
 			}
 		}
 

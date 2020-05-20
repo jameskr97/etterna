@@ -191,11 +191,11 @@ SMSetSelectable(SMSongTagInfo& info)
 		info.song->m_SelectionDisplay = info.song->SHOW_ALWAYS;
 	} else if (StringToInt((*info.params)[1]) > 0) {
 		info.song->m_SelectionDisplay = info.song->SHOW_ALWAYS;
-	} else {
+	/*} else {
 		LOG->UserLog("Song file",
 					 info.path,
 					 "has an unknown #SELECTABLE value, \"%s\"; ignored.",
-					 (*info.params)[1].c_str());
+					 (*info.params)[1].c_str());*/
 	}
 }
 void
@@ -396,10 +396,10 @@ SMLoader::ProcessBGChanges(Song& out,
 
 	bool bValid = iLayer >= 0 && iLayer < NUM_BackgroundLayer;
 	if (!bValid) {
-		LOG->UserLog("Song file",
+		/*LOG->UserLog("Song file",
 					 sPath,
 					 "has a #BGCHANGES tag \"%s\" that is out of range.",
-					 sValueName.c_str());
+					 sValueName.c_str());*/
 	} else {
 		vector<RString> aBGChangeExpressions;
 		split(sParam, ",", aBGChangeExpressions);
@@ -441,19 +441,19 @@ SMLoader::ParseBPMs(vector<pair<float, float>>& out,
 		vector<RString> arrayBPMChangeValues;
 		split(arrayBPMChangeExpressions[b], "=", arrayBPMChangeValues);
 		if (arrayBPMChangeValues.size() != 2) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 this->GetSongTitle(),
 						 "has an invalid #BPMs value \"%s\" (must have exactly "
 						 "one '='), ignored.",
-						 arrayBPMChangeExpressions[b].c_str());
+						 arrayBPMChangeExpressions[b].c_str());*/
 			continue;
 		}
 
 		const float fBeat = RowToBeat(arrayBPMChangeValues[0], rowsPerBeat);
 		const float fNewBPM = StringToFloat(arrayBPMChangeValues[1]);
 		if (fNewBPM == 0) {
-			LOG->UserLog(
-			  "Song file", this->GetSongTitle(), "has a zero BPM; ignored.");
+			/*LOG->UserLog(
+			  "Song file", this->GetSongTitle(), "has a zero BPM; ignored.");*/
 			continue;
 		}
 
@@ -473,20 +473,20 @@ SMLoader::ParseStops(vector<pair<float, float>>& out,
 		vector<RString> arrayFreezeValues;
 		split(arrayFreezeExpressions[f], "=", arrayFreezeValues);
 		if (arrayFreezeValues.size() != 2) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 this->GetSongTitle(),
 						 "has an invalid #STOPS value \"%s\" (must have "
 						 "exactly one '='), ignored.",
-						 arrayFreezeExpressions[f].c_str());
+						 arrayFreezeExpressions[f].c_str());*/
 			continue;
 		}
 
 		const float fFreezeBeat = RowToBeat(arrayFreezeValues[0], rowsPerBeat);
 		const float fFreezeSeconds = StringToFloat(arrayFreezeValues[1]);
 		if (fFreezeSeconds == 0) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 this->GetSongTitle(),
-						 "has a zero-length stop; ignored.");
+						 "has a zero-length stop; ignored.");*/
 			continue;
 		}
 
@@ -552,10 +552,10 @@ SMLoader::ProcessBPMsAndStops(TimingData& out,
 	for (/* ibpm */; ibpm != ibpmend && ibpm->first <= 0; ibpm++) {
 		bpm = ibpm->second;
 		if (bpm < 0 && ibpm->first < 0) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 this->GetSongTitle(),
 						 "has a negative BPM prior to beat 0.  "
-						 "These cause problems; ignoring.");
+						 "These cause problems; ignoring.");*/
 		}
 	}
 
@@ -565,17 +565,17 @@ SMLoader::ProcessBPMsAndStops(TimingData& out,
 		if (ibpm == ibpmend) {
 			// Nope.
 			bpm = 60;
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has no valid BPMs.  Defaulting to 60.");
+			//LOG->UserLog("Song file",
+			//			 this->GetSongTitle(),
+			//			 "has no valid BPMs.  Defaulting to 60.");
 		} else {
 			// Yep.  Get the next BPM.
 			ibpm++;
 			bpm = ibpm->second;
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 this->GetSongTitle(),
 						 "does not establish a BPM before beat 0.  "
-						 "Using the value from the next BPM change.");
+						 "Using the value from the next BPM change.");*/
 		}
 	}
 	// We always want to have an initial BPM.  If we start out warping, this
@@ -728,11 +728,11 @@ SMLoader::ProcessDelays(TimingData& out,
 		vector<RString> arrayDelayValues;
 		split(arrayDelayExpressions[f], "=", arrayDelayValues);
 		if (arrayDelayValues.size() != 2) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid #DELAYS value \"%s\" (must have "
 						 "exactly one '='), ignored.",
-						 arrayDelayExpressions[f].c_str());
+						 arrayDelayExpressions[f].c_str());*/
 			continue;
 		}
 		const float fFreezeBeat = RowToBeat(arrayDelayValues[0], rowsPerBeat);
@@ -743,12 +743,12 @@ SMLoader::ProcessDelays(TimingData& out,
 		if (fFreezeSeconds > 0.0f)
 			out.AddSegment(
 			  DelaySegment(BeatToNoteRow(fFreezeBeat), fFreezeSeconds));
-		else
+		/*else
 			LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid delay at beat %f, length %f.",
 						 fFreezeBeat,
-						 fFreezeSeconds);
+						 fFreezeSeconds);*/
 	}
 }
 
@@ -774,10 +774,10 @@ SMLoader::ProcessTimeSignatures(TimingData& out,
 		split(*s1, "=", vs2);
 
 		if (vs2.size() < 3) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid time signature change with %i values.",
-						 static_cast<int>(vs2.size()));
+						 static_cast<int>(vs2.size()));*/
 			continue;
 		}
 
@@ -786,30 +786,30 @@ SMLoader::ProcessTimeSignatures(TimingData& out,
 		const int iDenominator = StringToInt(vs2[2]);
 
 		if (fBeat < 0) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid time signature change with beat %f.",
-						 fBeat);
+						 fBeat);*/
 			continue;
 		}
 
 		if (iNumerator < 1) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid time signature change with beat %f, "
 						 "iNumerator %i.",
 						 fBeat,
-						 iNumerator);
+						 iNumerator);*/
 			continue;
 		}
 
 		if (iDenominator < 1) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid time signature change with beat %f, "
 						 "iDenominator %i.",
 						 fBeat,
-						 iDenominator);
+						 iDenominator);*/
 			continue;
 		}
 
@@ -838,11 +838,11 @@ SMLoader::ProcessTickcounts(TimingData& out,
 		vector<RString> arrayTickcountValues;
 		split(arrayTickcountExpressions[f], "=", arrayTickcountValues);
 		if (arrayTickcountValues.size() != 2) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid #TICKCOUNTS value \"%s\" (must have "
 						 "exactly one '='), ignored.",
-						 arrayTickcountExpressions[f].c_str());
+						 arrayTickcountExpressions[f].c_str());*/
 			continue;
 		}
 
@@ -903,19 +903,19 @@ SMLoader::ProcessSpeeds(TimingData& out,
 		  (iUnit == 0) ? SpeedSegment::UNIT_BEATS : SpeedSegment::UNIT_SECONDS;
 
 		if (fBeat < 0) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an speed change with beat %f.",
-						 fBeat);
+						 fBeat);*/
 			continue;
 		}
 
 		if (fDelay < 0) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an speed change with beat %f, length %f.",
 						 fBeat,
-						 fDelay);
+						 fDelay);*/
 			continue;
 		}
 
@@ -944,11 +944,11 @@ SMLoader::ProcessFakes(TimingData& out,
 		vector<RString> arrayFakeValues;
 		split(arrayFakeExpressions[b], "=", arrayFakeValues);
 		if (arrayFakeValues.size() != 2) {
-			LOG->UserLog("Song file",
+			/*LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid #FAKES value \"%s\" (must have "
 						 "exactly one '='), ignored.",
-						 arrayFakeExpressions[b].c_str());
+						 arrayFakeExpressions[b].c_str());*/
 			continue;
 		}
 
@@ -957,13 +957,13 @@ SMLoader::ProcessFakes(TimingData& out,
 
 		if (fSkippedBeats > 0)
 			out.AddSegment(FakeSegment(BeatToNoteRow(fBeat), fSkippedBeats));
-		else {
+		/*else {
 			LOG->UserLog("Song file",
 						 songname,
 						 "has an invalid Fake at beat %f, beats to skip %f.",
 						 fBeat,
 						 fSkippedBeats);
-		}
+		}*/
 	}
 }
 
@@ -1070,11 +1070,11 @@ SMLoader::LoadNoteDataFromSimfile(const RString& path, Steps& out)
 		// The only tag we care about is the #NOTES tag.
 		if (sValueName == "NOTES" || sValueName == "NOTES2") {
 			if (iNumParams < 7) {
-				LOG->UserLog(
+				/*LOG->UserLog(
 				  "Song file",
 				  path,
 				  "has %d fields in a #NOTES tag, but should have at least 7.",
-				  iNumParams);
+				  iNumParams);*/
 				continue;
 			}
 
@@ -1177,11 +1177,11 @@ SMLoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 			SMSetBGChanges(reused_song_info);
 		} else if (sValueName == "NOTES" || sValueName == "NOTES2") {
 			if (iNumParams < 7) {
-				LOG->UserLog(
+				/*LOG->UserLog(
 				  "Song file",
 				  sPath,
 				  "has %d fields in a #NOTES tag, but should have at least 7.",
-				  iNumParams);
+				  iNumParams);*/
 				continue;
 			}
 
@@ -1196,11 +1196,11 @@ SMLoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 
 			pNewNotes->SetFilename(sPath);
 			out.AddSteps(pNewNotes);
-		} else {
+		/*} else {
 			LOG->UserLog("Song file",
 						 sPath,
 						 "has an unexpected value named \"%s\".",
-						 sValueName.c_str());
+						 sValueName.c_str());*/
 		}
 	}
 
@@ -1313,11 +1313,11 @@ SMLoader::LoadEditFromMsd(const MsdFile& msd,
 			}
 
 			if (iNumParams < 7) {
-				LOG->UserLog(
+				/*LOG->UserLog(
 				  "Edit file",
 				  sEditFilePath,
 				  "has %d fields in a #NOTES tag, but should have at least 7.",
-				  iNumParams);
+				  iNumParams);*/
 				continue;
 			}
 
@@ -1348,11 +1348,11 @@ SMLoader::LoadEditFromMsd(const MsdFile& msd,
 
 			pSong->AddSteps(pNewNotes);
 			return true; // Only allow one Steps per edit file!
-		} else {
+		/*} else {
 			LOG->UserLog("Edit file",
 						 sEditFilePath,
 						 "has an unexpected value \"%s\".",
-						 sValueName.c_str());
+						 sValueName.c_str());*/
 		}
 	}
 
