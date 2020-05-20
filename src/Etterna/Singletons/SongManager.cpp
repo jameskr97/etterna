@@ -1665,10 +1665,8 @@ void
 	string fn = "Save/" + calctest_XML;
 	int iError;
 	unique_ptr<RageFileBasic> pFile(FILEMAN->Open(fn, RageFile::READ, iError));
-	if (pFile.get() == NULL) {
-		LOG->Trace("Error opening %s: %s", fn.c_str(), strerror(iError));
+	if (pFile.get() == NULL)
 		return;
-	}
 
 	XNode xml;
 	if (!XmlFileUtil::LoadFromFileShowErrors(xml, *pFile.get()))
