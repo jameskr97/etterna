@@ -693,10 +693,10 @@ Song::TidyUpData(bool from_cache, bool /* duringCache */)
 			 * originating from BMS files (which have no music file, per se)
 			 * but it's something of a hack. */
 			if (Sample == NULL && m_sMusicFile != "") {
-				LOG->UserLog("Sound file",
+				/*LOG->UserLog("Sound file",
 							 GetMusicPath(),
 							 "couldn't be opened: %s",
-							 error.c_str());
+							 error.c_str());*/
 
 				// Don't use this file.
 				m_sMusicFile = "";
@@ -709,22 +709,22 @@ Song::TidyUpData(bool from_cache, bool /* duringCache */)
 					// warning.
 					m_fMusicLengthSeconds = 100; // guess
 				} else if (m_fMusicLengthSeconds == 0) {
-					LOG->UserLog("Sound file", GetMusicPath(), "is empty.");
+					/*LOG->UserLog("Sound file", GetMusicPath(), "is empty.");*/
 				}
 			}
 		} else // ! HasMusic()
 		{
 			m_fMusicLengthSeconds = 100; // guess
-			LOG->UserLog("Song",
+			/*LOG->UserLog("Song",
 						 GetSongDir(),
 						 "has no music file; guessing at %f seconds",
-						 m_fMusicLengthSeconds);
+						 m_fMusicLengthSeconds);*/
 		}
 		if (m_fMusicLengthSeconds < 0) {
-			LOG->UserLog("Sound file",
+			/*LOG->UserLog("Sound file",
 						 GetMusicPath(),
 						 "has a negative length %f.",
-						 m_fMusicLengthSeconds);
+						 m_fMusicLengthSeconds);*/
 			m_fMusicLengthSeconds = 0;
 		}
 		if (!m_PreviewFile.empty() &&
@@ -735,10 +735,10 @@ Song::TidyUpData(bool from_cache, bool /* duringCache */)
 			RageSoundReader* Sample = RageSoundReader_FileReader::OpenFile(
 			  GetPreviewMusicPath(), error);
 			if (Sample == NULL && m_sMusicFile != "") {
-				LOG->UserLog("Sound file",
+				/*LOG->UserLog("Sound file",
 							 GetPreviewMusicPath(),
 							 "couldn't be opened: %s",
-							 error.c_str());
+							 error.c_str());*/
 
 				// Don't use this file.
 				m_PreviewFile = "";
@@ -752,8 +752,8 @@ Song::TidyUpData(bool from_cache, bool /* duringCache */)
 					// warning.
 					m_fMusicSampleLengthSeconds = DEFAULT_MUSIC_SAMPLE_LENGTH;
 				} else if (m_fMusicSampleLengthSeconds == 0) {
-					LOG->UserLog(
-					  "Sound file", GetPreviewMusicPath(), "is empty.");
+					/*LOG->UserLog(
+					  "Sound file", GetPreviewMusicPath(), "is empty.");*/
 				}
 			}
 		} else { // no preview file, calculate sample from music as normal
@@ -930,10 +930,10 @@ Song::TidyUpData(bool from_cache, bool /* duringCache */)
 			RString error;
 			RageSurface* img = RageSurfaceUtils::LoadFile(sPath, error, true);
 			if (!img) {
-				LOG->UserLog("Graphic file",
+			/*	LOG->UserLog("Graphic file",
 							 sPath,
 							 "couldn't be loaded: %s",
-							 error.c_str());
+							 error.c_str());*/
 				continue;
 			}
 
