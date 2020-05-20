@@ -543,7 +543,7 @@ SongCacheIndex::CacheSong(Song& song, string dir)
 			if (pSteps->GetChartKey() == "") { // Avoid writing cache tags for
 											   // invalid chartkey files(empty
 											   // steps) -Mina
-				Locator::getLogger()->info("Not caching empty difficulty in file {}", dir.c_str());
+				//Locator::getLogger()->info("Not caching empty difficulty in file {}", dir.c_str());
 				continue;
 			}
 			int64_t stepsID = InsertSteps(pSteps, songID);
