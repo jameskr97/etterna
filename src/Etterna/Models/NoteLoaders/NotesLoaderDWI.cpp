@@ -507,8 +507,6 @@ LoadFromDWITokens(RString sMode,
 				  Steps& out,
 				  const RString& sPath)
 {
-	CHECKPOINT_M("DWILoader::LoadFromDWITokens()");
-
 	out.m_StepsType = GetTypeFromMode(sMode);
 	if (out.m_StepsType == StepsType_Invalid)
 		return false;
