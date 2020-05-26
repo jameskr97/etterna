@@ -10,7 +10,6 @@
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "Etterna/Singletons/ProfileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "ScoreKeeperNormal.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "Etterna/Models/Songs/Song.h"

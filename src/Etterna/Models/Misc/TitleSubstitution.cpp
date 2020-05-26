@@ -5,7 +5,6 @@
 #include "Foreach.h"
 #include "Etterna/Singletons/LuaManager.h"
 #include "RageUtil/File/RageFile.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/FileTypes/XmlFile.h"
 #include "Etterna/FileTypes/XmlFileUtil.h"

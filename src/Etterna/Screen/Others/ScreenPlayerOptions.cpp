@@ -7,7 +7,6 @@
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Models/Misc/ScreenDimensions.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenPlayerOptions.h"

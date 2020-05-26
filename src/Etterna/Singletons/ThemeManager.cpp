@@ -3,7 +3,6 @@
 #include "Etterna/FileTypes/IniFile.h"
 #include "RageUtil/File/RageFile.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "arch/Dialog/Dialog.h"
 #if !defined(SMPACKAGE)

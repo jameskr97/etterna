@@ -5,7 +5,6 @@
 #include "Etterna/Singletons/NetworkSyncManager.h"
 #include "Etterna/Models/Misc/OptionRowHandler.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenNetworkOptions.h"
 #include "Etterna/Screen/Others/ScreenPrompt.h"

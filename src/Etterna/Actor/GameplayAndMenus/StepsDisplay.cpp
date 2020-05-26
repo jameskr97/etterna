@@ -5,7 +5,6 @@
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Models/Lua/LuaBinding.h"
 #include "Etterna/Models/Misc/PlayerState.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/SongManager.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"

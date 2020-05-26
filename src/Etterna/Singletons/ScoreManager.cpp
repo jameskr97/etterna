@@ -6,7 +6,6 @@
 #include "Etterna/Globals/MinaCalcOld.h"
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "Etterna/Models/NoteData/NoteDataStructures.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Misc/RageTimer.h"
 #include "ScoreManager.h"
 #include "Etterna/Models/Songs/Song.h"

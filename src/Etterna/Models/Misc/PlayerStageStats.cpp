@@ -9,7 +9,6 @@
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "PlayerStageStats.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Models/ScoreKeepers/ScoreKeeperNormal.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Singletons/ThemeManager.h"

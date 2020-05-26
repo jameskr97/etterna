@@ -10,7 +10,6 @@
 #include "Etterna/Models/Misc/Foreach.h"
 #include "Etterna/Singletons/LuaManager.h"
 #include "RageUtil/File/RageFile.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "XmlFile.h"
 

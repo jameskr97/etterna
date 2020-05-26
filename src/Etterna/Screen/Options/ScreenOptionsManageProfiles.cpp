@@ -4,7 +4,6 @@
 #include "Etterna/Models/Misc/LocalizedString.h"
 #include "Etterna/Models/Misc/OptionRowHandler.h"
 #include "Etterna/Singletons/ProfileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Models/Misc/ScreenDimensions.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "Etterna/Screen/Others/ScreenMiniMenu.h"

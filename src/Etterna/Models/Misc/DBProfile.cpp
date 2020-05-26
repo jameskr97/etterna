@@ -1,7 +1,6 @@
 
 #include "Etterna/Globals/global.h"
 #include "Profile.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Singletons/ProfileManager.h"
 #include "Etterna/Models/NoteData/NoteData.h"

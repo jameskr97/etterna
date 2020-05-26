@@ -1,7 +1,6 @@
 #include "Etterna/Globals/global.h"
 
 #include "Etterna/Singletons/GameState.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "ScreenNetEvaluation.h"
 #include "Etterna/Models/Songs/SongUtil.h"
 #include "Etterna/Models/StepsAndStyles/Style.h"

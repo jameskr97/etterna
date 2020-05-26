@@ -15,7 +15,6 @@
 #include "RageUtil/Graphics/RageSurface_Load.h"
 #include "RageUtil/Graphics/RageSurface.h"
 #include "RageUtil/Graphics/RageSurfaceUtils.h"
-#include "RageUtil/Misc/RageLog.h"
 #include <wchar.h>
 #include "Etterna/Globals/ProductInfo.h"
 #include "Etterna/Models/Misc/LocalizedString.h"

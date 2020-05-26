@@ -5,7 +5,6 @@
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "Etterna/Singletons/ProfileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Models/Misc/ScreenDimensions.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenSystemLayer.h"

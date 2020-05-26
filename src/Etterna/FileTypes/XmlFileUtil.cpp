@@ -3,7 +3,6 @@
 #include "Etterna/Singletons/LuaManager.h"
 #include "RageUtil/File/RageFile.h"
 #include "RageUtil/File/RageFileDriverMemory.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "XmlFile.h"
 #include "XmlFileUtil.h"

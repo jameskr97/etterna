@@ -7,7 +7,6 @@
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Models/Misc/InputEventPlus.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "Etterna/Singletons/ScreenManager.h"
 #include "ScreenSelectMaster.h"
 #include "Etterna/Singletons/ThemeManager.h"
