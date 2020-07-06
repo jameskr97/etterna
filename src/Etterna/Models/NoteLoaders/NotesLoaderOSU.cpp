@@ -6,7 +6,6 @@
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
 
 vector<string>
 split(string str, string token)
@@ -353,8 +352,8 @@ OsuLoader::LoadNoteDataFromSimfile(const RString& path, Steps& out)
 {
 	RageFile f;
 	if (!f.Open(path)) {
-		LOG->UserLog(
-		  "Song file", path, "couldn't be opened: %s", f.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", path, "couldn't be opened: %s", f.GetError().c_str());
 		return false;
 	}
 

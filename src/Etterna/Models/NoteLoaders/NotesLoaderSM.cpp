@@ -6,7 +6,6 @@
 #include "NotesLoaderSM.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
@@ -886,10 +885,10 @@ SMLoader::ProcessSpeeds(TimingData& out,
 		}
 
 		if (vs2.size() < 4) {
-			LOG->UserLog("Song file",
-						 songname,
-						 "has an speed change with %i values.",
-						 static_cast<int>(vs2.size()));
+//			LOG->UserLog("Song file",
+//						 songname,
+//						 "has an speed change with %i values.",
+//						 static_cast<int>(vs2.size()));
 			continue;
 		}
 
@@ -1057,8 +1056,8 @@ SMLoader::LoadNoteDataFromSimfile(const RString& path, Steps& out)
 	MsdFile msd;
 	if (!msd.ReadFile(path, true)) // unescape
 	{
-		LOG->UserLog(
-		  "Song file", path, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", path, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 	for (unsigned i = 0; i < msd.GetNumValues(); i++) {
@@ -1149,8 +1148,8 @@ SMLoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, true)) // unescape
 	{
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -1218,23 +1217,23 @@ SMLoader::LoadEditFromFile(const RString& sEditFilePath,
 						   bool bAddStepsToSong,
 						   Song* givenSong /* =NULL */)
 {
-	LOG->Trace("SMLoader::LoadEditFromFile(%s)", sEditFilePath.c_str());
+//	LOG->Trace("SMLoader::LoadEditFromFile(%s)", sEditFilePath.c_str());
 
 	int iBytes = FILEMAN->GetFileSizeInBytes(sEditFilePath);
 	if (iBytes > MAX_EDIT_STEPS_SIZE_BYTES) {
-		LOG->UserLog("Edit file",
-					 sEditFilePath,
-					 "is unreasonably large. It won't be loaded.");
+//		LOG->UserLog("Edit file",
+//					 sEditFilePath,
+//					 "is unreasonably large. It won't be loaded.");
 		return false;
 	}
 
 	MsdFile msd;
 	if (!msd.ReadFile(sEditFilePath, true)) // unescape
 	{
-		LOG->UserLog("Edit file",
-					 sEditFilePath,
-					 "couldn't be opened: %s",
-					 msd.GetError().c_str());
+//		LOG->UserLog("Edit file",
+//					 sEditFilePath,
+//					 "couldn't be opened: %s",
+//					 msd.GetError().c_str());
 		return false;
 	}
 
@@ -1284,31 +1283,31 @@ SMLoader::LoadEditFromMsd(const MsdFile& msd,
 
 			pSong = SONGMAN->FindSong(sSongFullTitle);
 			if (pSong == NULL) {
-				LOG->UserLog("Edit file",
-							 sEditFilePath,
-							 "requires a song \"%s\" that isn't present.",
-							 sSongFullTitle.c_str());
+//				LOG->UserLog("Edit file",
+//							 sEditFilePath,
+//							 "requires a song \"%s\" that isn't present.",
+//							 sSongFullTitle.c_str());
 				return false;
 			}
 
 			if (pSong->GetNumStepsLoadedFromProfile(slot) >=
 				MAX_EDITS_PER_SONG_PER_PROFILE) {
-				LOG->UserLog("Song file",
-							 sSongFullTitle,
-							 "already has the maximum number of edits allowed "
-							 "for ProfileSlotP%d.",
-							 slot + 1);
+//				LOG->UserLog("Song file",
+//							 sSongFullTitle,
+//							 "already has the maximum number of edits allowed "
+//							 "for ProfileSlotP%d.",
+//							 slot + 1);
 				return false;
 			}
 		}
 
 		else if (sValueName == "NOTES") {
 			if (pSong == NULL) {
-				LOG->UserLog("Edit file",
-							 sEditFilePath,
-							 "doesn't have a #SONG tag preceeding the first "
-							 "#NOTES tag, and is not in a valid song-specific "
-							 "folder.");
+//				LOG->UserLog("Edit file",
+//							 sEditFilePath,
+//							 "doesn't have a #SONG tag preceeding the first "
+//							 "#NOTES tag, and is not in a valid song-specific "
+//							 "folder.");
 				return false;
 			}
 
@@ -1338,10 +1337,10 @@ SMLoader::LoadEditFromMsd(const MsdFile& msd,
 			pNewNotes->SetFilename(sEditFilePath);
 
 			if (pSong->IsEditAlreadyLoaded(pNewNotes)) {
-				LOG->UserLog(
-				  "Edit file",
-				  sEditFilePath,
-				  "is a duplicate of another edit that was already loaded.");
+//				LOG->UserLog(
+//				  "Edit file",
+//				  sEditFilePath,
+//				  "is a duplicate of another edit that was already loaded.");
 				SAFE_DELETE(pNewNotes);
 				return false;
 			}

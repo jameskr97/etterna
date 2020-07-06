@@ -6,7 +6,6 @@
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Singletons/SongManager.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
-#include "RageUtil/Misc/RageLog.h"
 
 void
 SMALoader::ProcessMultipliers(TimingData& out,
@@ -21,11 +20,11 @@ SMALoader::ProcessMultipliers(TimingData& out,
 		split(arrayMultiplierExpressions[f], "=", arrayMultiplierValues);
 		unsigned size = arrayMultiplierValues.size();
 		if (size < 2) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an invalid #MULTIPLIER value \"%s\" (must have "
-						 "at least one '='), ignored.",
-						 arrayMultiplierExpressions[f].c_str());
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an invalid #MULTIPLIER value \"%s\" (must have "
+//						 "at least one '='), ignored.",
+//						 arrayMultiplierExpressions[f].c_str());
 			continue;
 		}
 		const float fComboBeat =
@@ -53,30 +52,30 @@ SMALoader::ProcessBeatsPerMeasure(TimingData& out, const RString& sParam)
 		split(*s1, "=", vs2);
 
 		if (vs2.size() < 2) {
-			LOG->UserLog(
-			  "Song file",
-			  this->GetSongTitle(),
-			  "has an invalid beats per measure change with %i values.",
-			  static_cast<int>(vs2.size()));
+//			LOG->UserLog(
+//			  "Song file",
+//			  this->GetSongTitle(),
+//			  "has an invalid beats per measure change with %i values.",
+//			  static_cast<int>(vs2.size()));
 			continue;
 		}
 		const float fBeat = StringToFloat(vs2[0]);
 		const int iNumerator = StringToInt(vs2[1]);
 
 		if (fBeat < 0) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an invalid time signature change with beat %f.",
-						 fBeat);
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an invalid time signature change with beat %f.",
+//						 fBeat);
 			continue;
 		}
 		if (iNumerator < 1) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an invalid time signature change with beat %f, "
-						 "iNumerator %i.",
-						 fBeat,
-						 iNumerator);
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an invalid time signature change with beat %f, "
+//						 "iNumerator %i.",
+//						 fBeat,
+//						 iNumerator);
 			continue;
 		}
 
@@ -108,10 +107,10 @@ SMALoader::ProcessSpeeds(TimingData& out,
 		}
 
 		if (vs2.size() < 3) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an speed change with %i values.",
-						 static_cast<int>(vs2.size()));
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an speed change with %i values.",
+//						 static_cast<int>(vs2.size()));
 			continue;
 		}
 
@@ -129,19 +128,19 @@ SMALoader::ProcessSpeeds(TimingData& out,
 							  : SpeedSegment::UNIT_BEATS);
 
 		if (fBeat < 0) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an speed change with beat %f.",
-						 fBeat);
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an speed change with beat %f.",
+//						 fBeat);
 			continue;
 		}
 
 		if (fDelay < 0) {
-			LOG->UserLog("Song file",
-						 this->GetSongTitle(),
-						 "has an speed change with beat %f, length %f.",
-						 fBeat,
-						 fDelay);
+//			LOG->UserLog("Song file",
+//						 this->GetSongTitle(),
+//						 "has an speed change with beat %f, length %f.",
+//						 fBeat,
+//						 fDelay);
 			continue;
 		}
 
@@ -153,13 +152,13 @@ SMALoader::ProcessSpeeds(TimingData& out,
 bool
 SMALoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 {
-	LOG->Trace("Song::LoadFromSMAFile(%s)", sPath.c_str());
+//	LOG->Trace("Song::LoadFromSMAFile(%s)", sPath.c_str());
 
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, true)) // unescape
 	{
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -322,12 +321,13 @@ SMALoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 				out.m_SelectionDisplay = out.SHOW_ALWAYS;
 			else if (StringToInt(sParams[1]) > 0)
 				out.m_SelectionDisplay = out.SHOW_ALWAYS;
-			else
-				LOG->UserLog(
-				  "Song file",
-				  sPath,
-				  "has an unknown #SELECTABLE value, \"%s\"; ignored.",
-				  sParams[1].c_str());
+			else {
+                //				LOG->UserLog(
+//				  "Song file",
+//				  sPath,
+//				  "has an unknown #SELECTABLE value, \"%s\"; ignored.",
+//				  sParams[1].c_str());
+			}
 		}
 
 		else if (sValueName.Left(strlen("BGCHANGES")) == "BGCHANGES" ||
@@ -404,11 +404,11 @@ SMALoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 
 		else if (sValueName == "NOTES" || sValueName == "NOTES2") {
 			if (iNumParams < 7) {
-				LOG->UserLog(
-				  "Song file",
-				  sPath,
-				  "has %d fields in a #NOTES tag, but should have at least 7.",
-				  iNumParams);
+//				LOG->UserLog(
+//				  "Song file",
+//				  sPath,
+//				  "has %d fields in a #NOTES tag, but should have at least 7.",
+//				  iNumParams);
 				continue;
 			}
 
@@ -432,11 +432,13 @@ SMALoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 			}
 		} else if (sValueName == "TIMESIGNATURES" || sValueName == "LEADTRACK")
 			;
-		else
-			LOG->UserLog("Song file",
-						 sPath,
-						 "has an unexpected value named \"%s\".",
-						 sValueName.c_str());
+		else {
+//			LOG->UserLog("Song file",
+//						 sPath,
+//						 "has an unexpected value named \"%s\".",
+//						 sValueName.c_str());
+		}
+
 	}
 	TidyUpData(out, false);
 	return true;

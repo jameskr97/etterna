@@ -6,7 +6,6 @@
 #include "NotesLoaderSM.h" // For programming shortcuts.
 #include "NotesLoaderSSC.h"
 #include "RageUtil/File/RageFileManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Singletons/SongManager.h"
@@ -917,15 +916,15 @@ SSCLoader::ProcessScrolls(TimingData& out,
 bool
 SSCLoader::LoadNoteDataFromSimfile(const RString& cachePath, Steps& out)
 {
-	if (PREFSMAN->m_verbose_log > 1)
-		LOG->Trace("Loading notes from %s", cachePath.c_str());
+//	if (PREFSMAN->m_verbose_log > 1)
+//		LOG->Trace("Loading notes from %s", cachePath.c_str());
 
 	MsdFile msd;
 	if (!msd.ReadFile(cachePath, true)) {
-		LOG->UserLog("Unable to load any notes from",
-					 cachePath,
-					 "for this reason: %s",
-					 msd.GetError().c_str());
+//		LOG->UserLog("Unable to load any notes from",
+//					 cachePath,
+//					 "for this reason: %s",
+//					 msd.GetError().c_str());
 		return false;
 	}
 
@@ -1028,8 +1027,8 @@ SSCLoader::LoadFromSimfile(const RString& sPath, Song& out, bool bFromCache)
 
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, true)) {
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -1118,23 +1117,23 @@ SSCLoader::LoadEditFromFile(const RString& sEditFilePath,
 							bool bAddStepsToSong,
 							Song* givenSong /* =NULL */)
 {
-	LOG->Trace("SSCLoader::LoadEditFromFile(%s)", sEditFilePath.c_str());
+//	LOG->Trace("SSCLoader::LoadEditFromFile(%s)", sEditFilePath.c_str());
 
 	int iBytes = FILEMAN->GetFileSizeInBytes(sEditFilePath);
 	if (iBytes > MAX_EDIT_STEPS_SIZE_BYTES) {
-		LOG->UserLog("Edit file",
-					 sEditFilePath,
-					 "is unreasonably large. It won't be loaded.");
+//		LOG->UserLog("Edit file",
+//					 sEditFilePath,
+//					 "is unreasonably large. It won't be loaded.");
 		return false;
 	}
 
 	MsdFile msd;
 	if (!msd.ReadFile(sEditFilePath, true)) // unescape
 	{
-		LOG->UserLog("Edit file",
-					 sEditFilePath,
-					 "couldn't be opened: %s",
-					 msd.GetError().c_str());
+//		LOG->UserLog("Edit file",
+//					 sEditFilePath,
+//					 "couldn't be opened: %s",
+//					 msd.GetError().c_str());
 		return false;
 	}
 
@@ -1202,10 +1201,10 @@ SSCLoader::LoadEditFromMsd(const MsdFile& msd,
 				if (pNewNotes != NULL) {
 					pNewNotes->SetDifficulty(Difficulty_Edit);
 					if (pSong->IsEditAlreadyLoaded(pNewNotes)) {
-						LOG->UserLog("Edit file",
-									 sEditFilePath,
-									 "is a duplicate of another edit that was "
-									 "already loaded.");
+//						LOG->UserLog("Edit file",
+//									 sEditFilePath,
+//									 "is a duplicate of another edit that was "
+//									 "already loaded.");
 						SAFE_DELETE(pNewNotes);
 						return false;
 					}
@@ -1248,19 +1247,19 @@ SSCLoader::LoadEditFromMsd(const MsdFile& msd,
 				pSong = SONGMAN->FindSong(sSongFullTitle);
 				reused_steps_info.song = pSong;
 				if (pSong == NULL) {
-					LOG->UserLog("Edit file",
-								 sEditFilePath,
-								 "requires a song \"%s\" that isn't present.",
-								 sSongFullTitle.c_str());
+//					LOG->UserLog("Edit file",
+//								 sEditFilePath,
+//								 "requires a song \"%s\" that isn't present.",
+//								 sSongFullTitle.c_str());
 					return false;
 				}
 				if (pSong->GetNumStepsLoadedFromProfile(slot) >=
 					MAX_EDITS_PER_SONG_PER_PROFILE) {
-					LOG->UserLog("Song file",
-								 sSongFullTitle,
-								 "already has the maximum number of edits "
-								 "allowed for ProfileSlotP%d.",
-								 slot + 1);
+//					LOG->UserLog("Song file",
+//								 sSongFullTitle,
+//								 "already has the maximum number of edits "
+//								 "allowed for ProfileSlotP%d.",
+//								 slot + 1);
 					return false;
 				}
 				reused_steps_info.song = pSong;

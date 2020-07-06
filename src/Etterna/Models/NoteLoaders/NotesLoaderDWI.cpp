@@ -6,7 +6,6 @@
 #include "NotesLoader.h"
 #include "NotesLoaderDWI.h"
 #include "Etterna/Singletons/PrefsManager.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/Utils/RageUtil_CharConversions.h"
 #include "Etterna/Models/Songs/Song.h"
@@ -575,8 +574,8 @@ DWILoader::LoadNoteDataFromSimfile(const RString& path, Steps& out)
 	MsdFile msd;
 	if (!msd.ReadFile(path, false)) // don't unescape
 	{
-		LOG->UserLog(
-		  "Song file", path, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", path, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -618,9 +617,9 @@ DWILoader::LoadFromDir(const RString& sPath_,
 	GetApplicableFiles(sPath_, aFileNames);
 
 	if (aFileNames.size() > 1) {
-		LOG->UserLog("Song",
-					 sPath_,
-					 "has more than one DWI file. There should be only one!");
+//		LOG->UserLog("Song",
+//					 sPath_,
+//					 "has more than one DWI file. There should be only one!");
 		return false;
 	}
 
@@ -629,13 +628,13 @@ DWILoader::LoadFromDir(const RString& sPath_,
 	ASSERT(aFileNames.size() == 1);
 	const RString sPath = sPath_ + aFileNames[0];
 
-	LOG->Trace("Song::LoadFromDWIFile(%s)", sPath.c_str());
+//	LOG->Trace("Song::LoadFromDWIFile(%s)", sPath.c_str());
 
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, false)) // don't unescape
 	{
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 

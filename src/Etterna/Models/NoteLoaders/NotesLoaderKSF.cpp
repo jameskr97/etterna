@@ -3,7 +3,6 @@
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "Etterna/Models/Misc/NoteTypes.h"
 #include "NotesLoaderKSF.h"
-#include "RageUtil/Misc/RageLog.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "RageUtil/Utils/RageUtil_CharConversions.h"
 #include "Etterna/Models/Songs/Song.h"
@@ -18,11 +17,11 @@ HandleBunki(TimingData& timing,
 {
 	const float BeatsPerSecond = fEarlyBPM / 60.0f;
 	const float beat = (fPos + fGap) * BeatsPerSecond;
-	LOG->Trace("BPM %f, BPS %f, BPMPos %f, beat %f",
-			   fEarlyBPM,
-			   BeatsPerSecond,
-			   fPos,
-			   beat);
+//	LOG->Trace("BPM %f, BPS %f, BPMPos %f, beat %f",
+//			   fEarlyBPM,
+//			   BeatsPerSecond,
+//			   fPos,
+//			   beat);
 	timing.AddSegment(BPMSegment(BeatToNoteRow(beat), fCurBPM));
 }
 
@@ -32,13 +31,13 @@ LoadFromKSFFile(const RString& sPath,
 				Song& song,
 				bool bKIUCompliant)
 {
-	LOG->Trace("Steps::LoadFromKSFFile( '%s' )", sPath.c_str());
+//	LOG->Trace("Steps::LoadFromKSFFile( '%s' )", sPath.c_str());
 
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, false)) // don't unescape
 	{
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -111,10 +110,10 @@ LoadFromKSFFile(const RString& sPath,
 		else if (sValueName == "TICKCOUNT") {
 			iTickCount = StringToInt(sParams[1]);
 			if (iTickCount <= 0) {
-				LOG->UserLog("Song file",
-							 sPath,
-							 "has an invalid tick count: %d.",
-							 iTickCount);
+//				LOG->UserLog("Song file",
+//							 sPath,
+//							 "has an invalid tick count: %d.",
+//							 iTickCount);
 				return false;
 			}
 			stepsTiming.AddSegment(TickcountSegment(0, iTickCount));
@@ -140,10 +139,10 @@ LoadFromKSFFile(const RString& sPath,
 
 	if (iTickCount == -1) {
 		iTickCount = 4;
-		LOG->UserLog("Song file",
-					 sPath,
-					 "doesn't have a TICKCOUNT. Defaulting to %i.",
-					 iTickCount);
+//		LOG->UserLog("Song file",
+//					 sPath,
+//					 "doesn't have a TICKCOUNT. Defaulting to %i.",
+//					 iTickCount);
 	}
 
 	// Prepare BPM stuff already if the file uses KSF syntax.
@@ -403,11 +402,11 @@ LoadFromKSFFile(const RString& sPath,
 					tap = TAP_ORIGINAL_LIFT;
 					break;
 				default:
-					LOG->UserLog(
-					  "Song file",
-					  sPath,
-					  "has an invalid row \"%s\"; corrupt notes ignored.",
-					  sRowString.c_str());
+//					LOG->UserLog(
+//					  "Song file",
+//					  sPath,
+//					  "has an invalid row \"%s\"; corrupt notes ignored.",
+//					  sRowString.c_str());
 					// return false;
 					tap = TAP_EMPTY;
 					break;
@@ -488,8 +487,8 @@ LoadGlobalData(const RString& sPath, Song& out, bool& bKIUCompliant)
 	MsdFile msd;
 	if (!msd.ReadFile(sPath, false)) // don't unescape
 	{
-		LOG->UserLog(
-		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
+//		LOG->UserLog(
+//		  "Song file", sPath, "couldn't be opened: %s", msd.GetError().c_str());
 		return false;
 	}
 
@@ -575,10 +574,10 @@ LoadGlobalData(const RString& sPath, Song& out, bool& bKIUCompliant)
 		//}
 		// end new cases
 		else {
-			LOG->UserLog("Song file",
-						 sPath,
-						 "has an unexpected value named \"%s\".",
-						 sValueName.c_str());
+//			LOG->UserLog("Song file",
+//						 sPath,
+//						 "has an unexpected value named \"%s\".",
+//						 sValueName.c_str());
 		}
 	}
 
@@ -667,7 +666,7 @@ KSFLoader::LoadNoteDataFromSimfile(const RString& cachePath, Steps& out)
 bool
 KSFLoader::LoadFromDir(const RString& sDir, Song& out)
 {
-	LOG->Trace("KSFLoader::LoadFromDir(%s)", sDir.c_str());
+//	LOG->Trace("KSFLoader::LoadFromDir(%s)", sDir.c_str());
 
 	vector<RString> arrayKSFFileNames;
 	GetDirListing(sDir + RString("*.ksf"), arrayKSFFileNames);
