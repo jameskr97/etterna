@@ -1,14 +1,11 @@
 #include "Etterna/Globals/global.h"
-#include "Etterna/Actor/Base/ActorUtil.h"
 #include "Etterna/Singletons/AnnouncerManager.h"
 #include "Etterna/Models/Misc/CodeDetector.h"
-#include "Etterna/Models/Misc/CommonMetrics.h"
 #include "Etterna/Singletons/CryptManager.h"
 #include "Etterna/Models/Misc/GameConstantsAndTypes.h"
 #include "Etterna/Singletons/GameManager.h"
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "Etterna/Singletons/GameState.h"
-#include "Etterna/Models/Misc/Grade.h"
 #include "Etterna/Models/Misc/InputEventPlus.h"
 #include "Etterna/Models/Misc/PlayerState.h"
 #include "Etterna/Singletons/PrefsManager.h"
@@ -44,7 +41,7 @@ REGISTER_SCREEN_CLASS(ScreenEvaluation);
 
 ScreenEvaluation::ScreenEvaluation()
 {
-	m_pStageStats = NULL;
+	m_pStageStats = nullptr;
 	m_bSavedScreenshot = false;
 }
 
@@ -222,7 +219,7 @@ ScreenEvaluation::Init()
 		  ANNOUNCER->GetPathTo("evaluation full combo W4"));
 	} else if ((bOneHasFullW1Combo || bOneHasFullW2Combo ||
 				bOneHasFullW3Combo)) {
-		RString sComboType =
+		std::string sComboType =
 		  bOneHasFullW1Combo ? "W1" : (bOneHasFullW2Combo ? "W2" : "W3");
 		SOUND->PlayOnceFromDir(
 		  ANNOUNCER->GetPathTo("evaluation full combo " + sComboType));
@@ -245,14 +242,14 @@ ScreenEvaluation::Input(const InputEventPlus& input)
 									DeviceInput(DEVICE_KEYBOARD, KEY_LSHIFT)) ||
 								  INPUTFILTER->IsBeingPressed(
 									DeviceInput(DEVICE_KEYBOARD, KEY_RSHIFT)));
-			RString sDir;
-			RString sFileName;
+			std::string sDir;
+			std::string sFileName;
 			// To save a screenshot to your own profile you must hold shift
 			// and press the button it saves compressed so you don't end up
 			// with an inflated profile size
 			// Otherwise, you can tap away at the screenshot button without
 			// holding shift.
-			if (bHoldingShift && PROFILEMAN->IsPersistentProfile(pn)) {
+			if (bHoldingShift) {
 				if (!m_bSavedScreenshot) {
 					Profile* pProfile = PROFILEMAN->GetProfile(pn);
 					sDir = PROFILEMAN->GetProfileDir((ProfileSlot)pn) +
@@ -260,7 +257,7 @@ ScreenEvaluation::Input(const InputEventPlus& input)
 					sFileName = StepMania::SaveScreenshot(
 					  sDir, bHoldingShift, true, "", "");
 					if (!sFileName.empty()) {
-						RString sPath = sDir + sFileName;
+						std::string sPath = sDir + sFileName;
 
 						const HighScore& hs =
 						  m_pStageStats->m_player.m_HighScore;
@@ -324,13 +321,13 @@ ScreenEvaluation::HandleMenuStart()
 	// Reset mods
 	if (GAMEMAN->m_bResetModifiers) {
 		float oldRate = GAMEMAN->m_fPreviousRate;
-		const RString mods = GAMEMAN->m_sModsToReset;
+		const std::string mods = GAMEMAN->m_sModsToReset;
 		GAMESTATE->m_SongOptions.GetSong().m_fMusicRate = oldRate;
 		GAMESTATE->m_SongOptions.GetCurrent().m_fMusicRate = oldRate;
 		GAMESTATE->m_SongOptions.GetPreferred().m_fMusicRate = oldRate;
 		GAMEMAN->m_bResetModifiers = false;
 
-		const vector<RString> oldturns = GAMEMAN->m_vTurnsToReset;
+		const vector<std::string> oldturns = GAMEMAN->m_vTurnsToReset;
 		if (GAMEMAN->m_bResetTurns) {
 			GAMESTATE->m_pPlayerState->m_PlayerOptions.GetSong()
 			  .ResetModsToStringVector(oldturns);
@@ -404,6 +401,7 @@ class LunaScreenEvaluation : public Luna<ScreenEvaluation>
 	}
 	static int GetReplayRate(T* p, lua_State* L)
 	{
+		CHECKPOINT_M("Getting replay rate");
 		// if we have a replay, give the data
 		if (PlayerAI::pScoreData != nullptr) {
 			lua_pushnumber(L, PlayerAI::pScoreData->GetMusicRate());
@@ -416,29 +414,36 @@ class LunaScreenEvaluation : public Luna<ScreenEvaluation>
 	}
 	static int GetReplayJudge(T* p, lua_State* L)
 	{
+		CHECKPOINT_M("Getting replay judge");
 		if (PlayerAI::pScoreData != nullptr) {
 			lua_pushnumber(L, PlayerAI::pScoreData->GetJudgeScale());
 		} else {
 			lua_pushnumber(L, Player::GetTimingWindowScale());
 		}
+		CHECKPOINT_M("Got replay judge");
 		return 1;
 	}
 	static int GetReplayModifiers(T* p, lua_State* L)
 	{
+		CHECKPOINT_M("Getting replay modifiers");
 		if (PlayerAI::pScoreData != nullptr) {
 			LuaHelpers::Push(L, PlayerAI::pScoreData->GetModifiers());
 		} else {
 			lua_pushnil(L);
 		}
+		CHECKPOINT_M("Got replay modifiers");
 		return 1;
 	}
 	static int ScoreUsedInvalidModifier(T* p, lua_State* L)
 	{
 		CHECKPOINT_M("Checking for invalid modifiers on Highscore via Lua");
 		HighScore* hs = SCOREMAN->GetMostRecentScore();
+		CHECKPOINT_M("Getting Player Options from HighScore...");
 		PlayerOptions potmp;
 		potmp.FromString(hs->GetModifiers());
+		CHECKPOINT_M("Checking modifiers...");
 		lua_pushboolean(L, potmp.ContainsTransformOrTurn());
+		CHECKPOINT_M("Done checking.");
 		return 1;
 	}
 

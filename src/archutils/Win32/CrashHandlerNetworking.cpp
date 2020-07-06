@@ -60,7 +60,7 @@ class NetworkStream
 	virtual ~NetworkStream() {}
 
 	// Open a connection. Must be in STATE_IDLE.
-	virtual void Open(const RString& sHost,
+	virtual void Open(const std::string& sHost,
 					  int iPort,
 					  ConnectionType ct = CONN_TCP) = 0;
 
@@ -112,11 +112,11 @@ class NetworkStream
 	};
 
 	State GetState() const { return m_State; }
-	RString GetError() const { return m_sError; }
+	std::string GetError() const { return m_sError; }
 
   protected:
 	State m_State;
-	RString m_sError;
+	std::string m_sError;
 };
 
 class NetworkStream_Win32 : public NetworkStream
@@ -125,7 +125,9 @@ class NetworkStream_Win32 : public NetworkStream
 	NetworkStream_Win32();
 	~NetworkStream_Win32();
 
-	void Open(const RString& sHost, int iPort, ConnectionType ct = CONN_TCP);
+	void Open(const std::string& sHost,
+			  int iPort,
+			  ConnectionType ct = CONN_TCP);
 	void Shutdown();
 	void Close();
 	int Read(void* pBuffer, size_t iSize);
@@ -135,8 +137,8 @@ class NetworkStream_Win32 : public NetworkStream
 
   private:
 	int WaitForCompletionOrCancellation(int iEvent);
-	void SetError(const RString& sError);
-	static RString WinSockErrorToString(int iError);
+	void SetError(const std::string& sError);
+	static std::string WinSockErrorToString(int iError);
 
 	SOCKET m_Socket;
 	HANDLE m_hResolve;
@@ -145,7 +147,7 @@ class NetworkStream_Win32 : public NetworkStream
 	// This event is signalled on cancellation, to wake us up if we're blocking.
 	HANDLE m_hCompletionEvent;
 
-	RString m_sHost;
+	std::string m_sHost;
 	int m_iPort;
 
 	RageMutex m_Mutex;
@@ -160,7 +162,7 @@ CreateNetworkStream()
 		WSADATA WSAData;
 		WORD iVersionRequested = MAKEWORD(2, 0);
 		if (WSAStartup(iVersionRequested, &WSAData) != 0)
-			return NULL;
+			return nullptr;
 	}
 
 	return new NetworkStream_Win32;
@@ -174,9 +176,9 @@ NetworkStream_Win32::NetworkStream_Win32()
 	m_State = STATE_IDLE;
 	m_Socket = NULL;
 #ifdef _WIN32
-	m_hResolve = NULL;
-	m_hResolveHwnd = NULL;
-	m_hCompletionEvent = CreateEvent(NULL, true, false, NULL);
+	m_hResolve = nullptr;
+	m_hResolveHwnd = nullptr;
+	m_hCompletionEvent = CreateEvent(nullptr, true, false, nullptr);
 #endif
 }
 
@@ -224,13 +226,13 @@ NetworkStream_Win32::WaitForCompletionOrCancellation(int iEvent)
 	}
 }
 
-RString
+std::string
 NetworkStream_Win32::WinSockErrorToString(int iError)
 {
 	/* If iError is -1, we were cancelled and WaitForCompletionOrCancellation
 	 * returned it. We won't use the error string. */
 	if (iError == -1)
-		return RString();
+		return std::string();
 
 	switch (iError) {
 		case WSAEINTR:
@@ -339,7 +341,7 @@ NetworkStream_Win32::WinSockErrorToString(int iError)
 }
 
 void
-NetworkStream_Win32::SetError(const RString& sError)
+NetworkStream_Win32::SetError(const std::string& sError)
 {
 	m_Mutex.Lock();
 	if (m_State != STATE_CANCELLED) {
@@ -390,7 +392,9 @@ class ResolveMessageWindow : public MessageWindow
 };
 
 void
-NetworkStream_Win32::Open(const RString& sHost, int iPort, ConnectionType ct)
+NetworkStream_Win32::Open(const std::string& sHost,
+						  int iPort,
+						  ConnectionType ct)
 {
 	m_Mutex.Lock();
 	if (m_State == STATE_CANCELLED) {
@@ -406,22 +410,25 @@ NetworkStream_Win32::Open(const RString& sHost, int iPort, ConnectionType ct)
 	m_iPort = iPort;
 
 	// Look up the hostname.
-	hostent* pHost = NULL;
+	hostent* pHost = nullptr;
 	char pBuf[MAXGETHOSTSTRUCT];
 	{
 		pHost = (hostent*)pBuf;
 
 		ResolveMessageWindow mw;
-		m_hResolve = WSAAsyncGetHostByName(
-		  mw.GetHwnd(), WM_USER, m_sHost, (char*)pHost, MAXGETHOSTSTRUCT);
+		m_hResolve = WSAAsyncGetHostByName(mw.GetHwnd(),
+										   WM_USER,
+										   m_sHost.c_str(),
+										   reinterpret_cast<char*>(pHost),
+										   MAXGETHOSTSTRUCT);
 		m_hResolveHwnd = mw.GetHwnd();
 		m_Mutex.Unlock();
 
 		mw.Run();
 
 		m_Mutex.Lock();
-		m_hResolve = NULL;
-		m_hResolveHwnd = NULL;
+		m_hResolve = nullptr;
+		m_hResolveHwnd = nullptr;
 		if (m_State == STATE_CANCELLED) {
 			m_Mutex.Unlock();
 			return;
@@ -524,7 +531,7 @@ NetworkStream_Win32::Cancel()
 	m_State = STATE_CANCELLED;
 
 	// If resolving, abort the resolve.
-	if (m_hResolve != NULL) {
+	if (m_hResolve != nullptr) {
 		/* When we cancel the request, no message at all will be sent to the
 		 * window, so we need to do it ourself to inform it that it was
 		 * cancelled. Be sure to only do this on successful cancel. */
@@ -629,20 +636,21 @@ NetworkPostData::~NetworkPostData()
 
 /** @brief Create a MIME multipart data block from the given set of fields. */
 void
-NetworkPostData::CreateMimeData(const map<RString, RString>& mapNameToData,
-								RString& sOut,
-								RString& sMimeBoundaryOut)
+NetworkPostData::CreateMimeData(
+  const map<std::string, std::string>& mapNameToData,
+  std::string& sOut,
+  std::string& sMimeBoundaryOut)
 {
 	// Find a non-conflicting mime boundary.
 	while (1) {
 		sMimeBoundaryOut = ssprintf("--%08i", rand());
-		FOREACHM_CONST(RString, RString, mapNameToData, d)
-		if (d->second.find(sMimeBoundaryOut) != RString::npos)
+		FOREACHM_CONST(std::string, std::string, mapNameToData, d)
+		if (d->second.find(sMimeBoundaryOut) != std::string::npos)
 			continue;
 		break;
 	}
 
-	FOREACHM_CONST(RString, RString, mapNameToData, d)
+	FOREACHM_CONST(std::string, std::string, mapNameToData, d)
 	{
 		sOut += "--" + sMimeBoundaryOut + "\r\n";
 		sOut += ssprintf("Content-Disposition: form-data; name=\"%s\"\r\n",
@@ -651,28 +659,29 @@ NetworkPostData::CreateMimeData(const map<RString, RString>& mapNameToData,
 		sOut += d->second;
 		sOut += "\r\n";
 	}
-	if (sOut.size())
+	if (!sOut.empty())
 		sOut += "--" + sMimeBoundaryOut + "--\r\n";
 }
 
 void
 NetworkPostData::HttpThread()
 {
-	RString sData, sMimeBoundary;
+	std::string sData, sMimeBoundary;
 	CreateMimeData(m_Data, sData, sMimeBoundary);
 
 	// Stick to HTTP/1.0, since the protocol is simpler.
-	RString sBuf = ssprintf("%s %s HTTP/1.0\r\n"
-							"Accept: */*\r\n"
-							"User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; "
-							"Windows NT 5.1; SV1; .NET CLR 1.1.4322)\r\n"
-							"Host: %s\r\n"
-							"Cache-Control: no-cache\r\n",
-							sData.size() ? "POST" : "GET",
-							m_sPath.c_str(),
-							m_sHost.c_str());
+	std::string sBuf =
+	  ssprintf("%s %s HTTP/1.0\r\n"
+			   "Accept: */*\r\n"
+			   "User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; "
+			   "Windows NT 5.1; SV1; .NET CLR 1.1.4322)\r\n"
+			   "Host: %s\r\n"
+			   "Cache-Control: no-cache\r\n",
+			   !sData.empty() ? "POST" : "GET",
+			   m_sPath.c_str(),
+			   m_sHost.c_str());
 
-	if (sData.size()) {
+	if (!sData.empty()) {
 		// sBuf += "Content-Type: application/x-www-form-urlencoded\r\n"
 		sBuf += "Content-Type: multipart/form-data; boundary=" + sMimeBoundary +
 				"\r\n";
@@ -680,7 +689,7 @@ NetworkPostData::HttpThread()
 	}
 	sBuf += "\r\n";
 
-	if (sData.size())
+	if (!sData.empty())
 		sBuf += sData;
 
 	/* The "progress" is currently faked; it shows when we've connected, and
@@ -696,13 +705,13 @@ NetworkPostData::HttpThread()
 	m_pStream->Write(sBuf.data(), sBuf.size());
 
 	// Read the result.
-	RString sResult;
+	std::string sResult;
 	while (m_pStream->GetState() == NetworkStream::STATE_CONNECTED) {
 		sBuf.clear();
 		char* buffer = new char[1024];
 		std::fill(buffer, buffer + 1024, '\0');
 		int iGot = m_pStream->Read(static_cast<void*>(buffer), 1024);
-		RString tmp = buffer;
+		std::string tmp = buffer;
 		delete[] buffer;
 		if (iGot < 0) {
 			break;
@@ -715,13 +724,13 @@ NetworkPostData::HttpThread()
 
 	// Parse the results.
 	int iStart = 0, iSize = -1;
-	map<RString, RString> mapHeaders;
+	map<std::string, std::string> mapHeaders;
 	while (1) {
 		split(sResult, "\n", iStart, iSize, false);
 		if (iStart == (int)sResult.size())
 			break;
 
-		RString sLine = sResult.substr(iStart, iSize);
+		std::string sLine = sResult.substr(iStart, iSize);
 		StripCrnl(sLine);
 		if (sLine.empty()) {
 			m_sResult = sResult.substr(iStart + iSize + 1);
@@ -733,7 +742,9 @@ NetworkPostData::HttpThread()
 }
 
 void
-NetworkPostData::Start(const RString& sHost, int iPort, const RString& sPath)
+NetworkPostData::Start(const std::string& sHost,
+					   int iPort,
+					   const std::string& sPath)
 {
 	m_bFinished = false;
 	m_sHost = sHost;
@@ -764,7 +775,7 @@ NetworkPostData::IsFinished()
 	return true;
 }
 
-RString
+std::string
 NetworkPostData::GetStatus() const
 {
 	LockMut(m_Mutex);
@@ -778,7 +789,7 @@ NetworkPostData::GetProgress() const
 	return m_fProgress;
 }
 
-RString
+std::string
 NetworkPostData::GetError() const
 {
 	return m_pStream->GetError();
@@ -793,7 +804,7 @@ NetworkPostData::SetProgress(float fProgress)
 }
 
 void
-NetworkPostData::SetData(const RString& sKey, const RString& sData)
+NetworkPostData::SetData(const std::string& sKey, const std::string& sData)
 {
 	m_Data[sKey] = sData;
 }

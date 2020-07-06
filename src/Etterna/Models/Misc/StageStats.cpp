@@ -12,13 +12,8 @@
 #include "PlayerAI.h"
 #include "Etterna/Singletons/NetworkSyncManager.h"
 #include "AdjustSync.h"
-#include <fstream>
-#include <sstream>
-#include "Etterna/Singletons/CryptManager.h"
 #include "Etterna/Singletons/ScoreManager.h"
 #include "Etterna/Singletons/DownloadManager.h"
-#include "Etterna/Globals/MinaCalc.h"
-#include "Etterna/Globals/MinaCalcOld.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Core/Services/Locator.hpp"
 #include "GamePreferences.h"
@@ -511,8 +506,8 @@ DetermineScoreEligibility(const PlayerStageStats& pss, const PlayerState& ps)
 static HighScore
 FillInHighScore(const PlayerStageStats& pss,
 				const PlayerState& ps,
-				RString sRankingToFillInMarker,
-				RString sPlayerGuid)
+				std::string sRankingToFillInMarker,
+				std::string sPlayerGuid)
 {
 	CHECKPOINT_M("Filling Highscore");
 	HighScore hs;
@@ -532,12 +527,13 @@ FillInHighScore(const PlayerStageStats& pss,
 	hs.SetAliveSeconds(pss.m_fAliveSeconds);
 	hs.SetMaxCombo(pss.GetMaxCombo().m_cnt);
 
-	vector<RString> asModifiers;
+	vector<std::string> asModifiers;
 	{
-		RString sPlayerOptions = ps.m_PlayerOptions.GetStage().GetString();
+		std::string sPlayerOptions = ps.m_PlayerOptions.GetStage().GetString();
 		if (!sPlayerOptions.empty())
 			asModifiers.push_back(sPlayerOptions);
-		RString sSongOptions = GAMESTATE->m_SongOptions.GetStage().GetString();
+		std::string sSongOptions =
+		  GAMESTATE->m_SongOptions.GetStage().GetString();
 		if (!sSongOptions.empty())
 			asModifiers.push_back(sSongOptions);
 	}
@@ -564,7 +560,7 @@ FillInHighScore(const PlayerStageStats& pss,
 
 	// should maybe just make the setscorekey function do this internally rather
 	// than recalling the datetime object -mina
-	RString ScoreKey =
+	std::string ScoreKey =
 	  "S" +
 	  BinaryToHex(CryptManager::GetSHA1ForString(hs.GetDateTime().GetString()));
 	hs.SetScoreKey(ScoreKey);
@@ -598,17 +594,23 @@ FillInHighScore(const PlayerStageStats& pss,
 		auto steps = GAMESTATE->m_pCurSteps;
 		auto nd = steps->GetNoteData();
 		auto* td = steps->GetTimingData();
+		auto maxpoints = static_cast<float>(nd.WifeTotalScoreCalc(td));
+
+		// i _think_ an assert is ok here.. if this can happen we probably want
+		// to know about it
+		ASSERT(maxpoints > 0);
+
 		if (pss.GetGrade() == Grade_Failed)
 			hs.SetSSRNormPercent(0.f);
 		else
-			hs.RescoreToWife3(static_cast<float>(nd.WifeTotalScoreCalc(td)));
+			hs.RescoreToWife3(maxpoints);
 
 		if (hs.GetEtternaValid()) {
 			vector<float> dakine = pss.CalcSSR(hs.GetSSRNormPercent());
 			FOREACH_ENUM(Skillset, ss)
 			hs.SetSkillsetSSR(ss, dakine[ss]);
 
-			hs.SetSSRCalcVersion(GetCalcVersion_OLD());
+			hs.SetSSRCalcVersion(GetCalcVersion());
 		} else {
 			FOREACH_ENUM(Skillset, ss)
 			hs.SetSkillsetSSR(ss, 0.f);
@@ -643,9 +645,7 @@ StageStats::FinalizeScores(bool bSummary)
 
 	// whether or not to save scores when the stage was failed depends on if
 	// this is a course or not... it's handled below in the switch.
-	RString sPlayerGuid = PROFILEMAN->IsPersistentProfile(PLAYER_1)
-							? PROFILEMAN->GetProfile(PLAYER_1)->m_sGuid
-							: RString("");
+	std::string sPlayerGuid = PROFILEMAN->GetProfile(PLAYER_1)->m_sGuid;
 	m_player.m_HighScore = FillInHighScore(m_player,
 										   *GAMESTATE->m_pPlayerState,
 										   RANKING_TO_FILL_IN_MARKER,
@@ -697,6 +697,20 @@ StageStats::FinalizeScores(bool bSummary)
 		DLMAN->UploadScoreWithReplayData(&hs);
 		hs.timeStamps.clear();
 		hs.timeStamps.shrink_to_fit();
+
+		// mega hack to stop non-pbs from overwriting pbs on eo (it happens rate
+		// specific), we're just going to also upload whatever the pb for the
+		// rate is now, since the site only tracks the best score per rate.
+		// If there's no more replaydata on disk for the old pb this could maybe
+		// be a problem and perhaps the better solution would be to check what
+		// is listed on the site for this rate before uploading the score just
+		// achieved but idk someone else can look into that
+
+		// this _should_ be sound since addscore handles all re-evaluation of
+		// top score flags and the setting of pbptrs
+		DLMAN->UploadScoreWithReplayDataFromDisk(SCOREMAN->GetChartPBAt(
+		  pSteps->GetChartKey(),
+		  GAMESTATE->m_SongOptions.GetCurrent().m_fMusicRate));
 	}
 	if (NSMAN->loggedIn)
 		NSMAN->ReportHighScore(&hs, m_player);

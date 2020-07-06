@@ -5,32 +5,28 @@
 #include "RageUtil/Utils/RageUtil.h"
 
 ModelManager* MODELMAN =
-  NULL; // global and accessible from anywhere in our program
+  nullptr; // global and accessible from anywhere in our program
 
 ModelManager::ModelManager() = default;
 
 ModelManager::~ModelManager()
 {
-	for (std::map<RString, RageModelGeometry*>::iterator i =
-		   m_mapFileToGeometry.begin();
-		 i != m_mapFileToGeometry.end();
-		 ++i) {
-		RageModelGeometry* pGeom = i->second;
+	for (auto& i : m_mapFileToGeometry) {
+		auto* pGeom = i.second;
 		if (pGeom->m_iRefCount)
 			Locator::getLogger()->trace("MODELMAN LEAK: '{}', RefCount = {}.",
-					   i->first.c_str(), pGeom->m_iRefCount);
+					   i.first.c_str(), pGeom->m_iRefCount);
 		SAFE_DELETE(pGeom);
 	}
 }
 
 RageModelGeometry*
-ModelManager::LoadMilkshapeAscii(const RString& sFile, bool bNeedNormals)
+ModelManager::LoadMilkshapeAscii(const std::string& sFile, bool bNeedNormals)
 {
-	std::map<RString, RageModelGeometry*>::iterator p =
-	  m_mapFileToGeometry.find(sFile);
+	const auto p = m_mapFileToGeometry.find(sFile);
 	if (p != m_mapFileToGeometry.end()) {
 		/* Found the geometry.  Just increase the refcount and return it. */
-		RageModelGeometry* pGeom = p->second;
+		auto* pGeom = p->second;
 		++pGeom->m_iRefCount;
 		return pGeom;
 	}
@@ -51,9 +47,7 @@ ModelManager::UnloadModel(RageModelGeometry* m)
 	if (m->m_iRefCount)
 		return; /* Can't unload models that are still referenced. */
 
-	for (std::map<RString, RageModelGeometry*>::iterator i =
-		   m_mapFileToGeometry.begin();
-		 i != m_mapFileToGeometry.end();
+	for (auto i = m_mapFileToGeometry.begin(); i != m_mapFileToGeometry.end();
 		 ++i) {
 		if (i->second == m) {
 			if (m_Prefs.m_bDelayedUnload) {

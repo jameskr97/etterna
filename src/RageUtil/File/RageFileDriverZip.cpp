@@ -18,7 +18,7 @@ static struct FileDriverEntry_ZIP : public FileDriverEntry
 	  : FileDriverEntry("ZIP")
 	{
 	}
-	RageFileDriver* Create(const RString& sRoot) const override
+	RageFileDriver* Create(const std::string& sRoot) const override
 	{
 		return new RageFileDriverZip(sRoot);
 	}
@@ -29,20 +29,20 @@ RageFileDriverZip::RageFileDriverZip()
   , m_Mutex("RageFileDriverZip")
 {
 	m_bFileOwned = false;
-	m_pZip = NULL;
+	m_pZip = nullptr;
 }
 
-RageFileDriverZip::RageFileDriverZip(const RString& sPath)
+RageFileDriverZip::RageFileDriverZip(const std::string& sPath)
   : RageFileDriver(new NullFilenameDB)
   , m_Mutex("RageFileDriverZip")
 {
 	m_bFileOwned = false;
-	m_pZip = NULL;
+	m_pZip = nullptr;
 	Load(sPath);
 }
 
 bool
-RageFileDriverZip::Load(const RString& sPath)
+RageFileDriverZip::Load(const std::string& sPath)
 {
 	ASSERT(m_pZip == NULL); /* don't load twice */
 
@@ -54,7 +54,7 @@ RageFileDriverZip::Load(const RString& sPath)
 
 	if (!pFile->Open(sPath)) {
         Locator::getLogger()->warn("Couldn't open {}: {}", sPath.c_str(), pFile->GetError().c_str());
-		delete pFile;
+        delete pFile;
 		return false;
 	}
 
@@ -79,8 +79,8 @@ bool
 RageFileDriverZip::ReadEndCentralRecord(int& iTotalEntries,
 										int& iCentralDirectoryOffset)
 {
-	RString sError;
-	RString sSig = FileReading::ReadString(*m_pZip, 4, sError);
+	std::string sError;
+	std::string sSig = FileReading::ReadString(*m_pZip, 4, sError);
 	FileReading::read_16_le(*m_pZip, sError); /* skip number of this disk */
 	FileReading::read_16_le(*m_pZip,
 							sError); /* skip disk with central directory */
@@ -179,8 +179,8 @@ RageFileDriverZip::ParseZipfile()
 int
 RageFileDriverZip::ProcessCdirFileHdr(FileInfo& info)
 {
-	RString sError;
-	RString sSig = FileReading::ReadString(*m_pZip, 4, sError);
+	std::string sError;
+	std::string sSig = FileReading::ReadString(*m_pZip, 4, sError);
 	if (sSig != "\x50\x4B\x01\x02") {
 		Locator::getLogger()->warn("{}: central directory record signature not found",
 					  m_sPath.c_str());
@@ -269,8 +269,8 @@ RageFileDriverZip::ReadLocalFileHeader(FileInfo& info)
 	/* Seek to and read the local file header. */
 	m_pZip->Seek(info.m_iOffset);
 
-	RString sError;
-	RString sSig = FileReading::ReadString(*m_pZip, 4, sError);
+	std::string sError;
+	std::string sSig = FileReading::ReadString(*m_pZip, 4, sError);
 
 	if (sError != "") {
 		Locator::getLogger()->warn("{}: error opening \"{}\": {}",
@@ -304,31 +304,31 @@ RageFileDriverZip::ReadLocalFileHeader(FileInfo& info)
 
 RageFileDriverZip::~RageFileDriverZip()
 {
-	for (unsigned i = 0; i < m_pFiles.size(); ++i)
-		delete m_pFiles[i];
+	for (auto& m_pFile : m_pFiles)
+		delete m_pFile;
 
 	if (m_bFileOwned)
 		delete m_pZip;
 }
 
 const RageFileDriverZip::FileInfo*
-RageFileDriverZip::GetFileInfo(const RString& sPath) const
+RageFileDriverZip::GetFileInfo(const std::string& sPath) const
 {
 	return reinterpret_cast<const FileInfo*>(FDB->GetFilePriv(sPath));
 }
 
 RageFileBasic*
-RageFileDriverZip::Open(const RString& sPath, int iMode, int& iErr)
+RageFileDriverZip::Open(const std::string& sPath, int iMode, int& iErr)
 {
 	if ((iMode & RageFile::WRITE) != 0) {
 		iErr = ERROR_WRITING_NOT_SUPPORTED;
-		return NULL;
+		return nullptr;
 	}
 
 	auto* info = reinterpret_cast<FileInfo*>(FDB->GetFilePriv(sPath));
-	if (info == NULL) {
+	if (info == nullptr) {
 		iErr = ENOENT;
-		return NULL;
+		return nullptr;
 	}
 
 	m_Mutex.Lock();
@@ -337,7 +337,7 @@ RageFileDriverZip::Open(const RString& sPath, int iMode, int& iErr)
 	if (info->m_iDataOffset == -1) {
 		if (!ReadLocalFileHeader(*info)) {
 			m_Mutex.Unlock();
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -361,13 +361,13 @@ RageFileDriverZip::Open(const RString& sPath, int iMode, int& iErr)
 		default:
 			/* unknown compression method */
 			iErr = ENOSYS;
-			return NULL;
+			return nullptr;
 	}
 }
 
 /* NOP for now.  This could check to see if the ZIP's mtime has changed, and
  * reload. */
 void
-RageFileDriverZip::FlushDirCache(const RString& sPath)
+RageFileDriverZip::FlushDirCache(const std::string& sPath)
 {
 }

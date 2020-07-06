@@ -21,10 +21,10 @@ static const UInt32 kFormatFlags =
 	str ": '{}' ({}).", ##extra, FourCCToString(num).c_str(), (num)
 #define ERROR(str, num, extra...) (ssprintf(WERROR(str, (num), ##extra)))
 
-static inline RString
+static inline std::string
 FourCCToString(uint32_t num)
 {
-	RString s(4, '?');
+	std::string s(4, '?');
 	char c;
 
 	c = (num >> 24) & 0xFF;
@@ -139,7 +139,7 @@ SetSampleRate(AudioUnit au, Float64 desiredRate)
 	}
 }
 
-RString
+std::string
 RageSoundDriver_AU::Init()
 {
 	ComponentDescription desc;
@@ -221,7 +221,7 @@ RageSoundDriver_AU::Init()
 	if ((error = AudioOutputUnitStart(m_OutputUnit)))
 		return ERROR("Could not start the AudioUnit", error);
 	m_bStarted = true;
-	return RString();
+	return std::string();
 }
 
 RageSoundDriver_AU::~RageSoundDriver_AU()
@@ -248,7 +248,7 @@ void
 RageSoundDriver_AU::SetupDecodingThread()
 {
 	/* Increase the scheduling precedence of the decoder thread. */
-	const RString sError = SetThreadPrecedence(0.75f);
+	const std::string sError = SetThreadPrecedence(0.75f);
 	if (!sError.empty())
 		Locator::getLogger()->warn("Could not set precedence of the decoding thread: {}",sError.c_str());
 }

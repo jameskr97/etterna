@@ -17,7 +17,8 @@ local translated_info = {
 	AssetSettings = THEME:GetString("TabProfile", "AssetSettingEntry"),
 	Success = THEME:GetString("TabProfile", "SaveSuccess"),
 	Failure = THEME:GetString("TabProfile", "SaveFail"),
-	ValidateAll = THEME:GetString("TabProfile", "ValidateAllScores")
+	ValidateAll = THEME:GetString("TabProfile", "ValidateAllScores"),
+	ForceRecalc = THEME:GetString("TabProfile", "ForceRecalcScores"),
 }
 
 local t =
@@ -132,7 +133,7 @@ local function rankingLabel(i)
 		UpdateRankingMessageCommand = function(self)
 			if rankingSkillset > 1 and update then
 				if not showOnline then
-					ths = SCOREMAN:GetTopSSRHighScore(i + (scoresperpage * (rankingPage - 1)), ms.SkillSets[rankingSkillset])
+					ths = SCOREMAN:GetTopSSRHighScoreForGame(i + (scoresperpage * (rankingPage - 1)), ms.SkillSets[rankingSkillset])
 					if ths then
 						self:visible(true)
 						ck = ths:GetChartKey()
@@ -331,12 +332,20 @@ local function rankingLabel(i)
 				if rankingSkillset > 1 and ButtonActive(self) then
 					if not showOnline then
 						if ths then
+							local srate = ths:GetMusicRate()
 							whee:SelectSong(thssong)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred"):MusicRate(srate)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Song"):MusicRate(srate)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Current"):MusicRate(srate)
 						end
 					elseif onlineScore and onlineScore.chartkey then
 						local song = SONGMAN:GetSongByChartKey(onlineScore.chartkey)
 						if song then
+							local srate = onlineScore.rate
 							whee:SelectSong(song)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Preferred"):MusicRate(srate)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Song"):MusicRate(srate)
+							GAMESTATE:GetSongOptionsObject("ModsLevel_Current"):MusicRate(srate)
 						end
 					end
 				end
@@ -367,7 +376,7 @@ local function rankingButton(i)
 				if ButtonActive(self) then
 					rankingSkillset = i
 					rankingPage = 1
-					SCOREMAN:SortSSRs(ms.SkillSets[rankingSkillset])
+					SCOREMAN:SortSSRsForGame(ms.SkillSets[rankingSkillset])
 					BroadcastIfActive("UpdateRanking")
 				end
 			end,
@@ -739,11 +748,28 @@ local profilebuttons =
 		end,
 		MouseLeftClickMessageCommand = function(self)
 			if ButtonActive(self) and rankingSkillset == 1 then
-				SCOREMAN:ValidateAllScores()
+				profile:UnInvalidateAllScores()
 				STATSMAN:UpdatePlayerRating()
 			end
 		end
-	}
+	},
+	LoadFont("Common Large") ..
+	{
+		InitCommand = function(self)
+			self:x(300):diffuse(getMainColor("positive")):settext(translated_info["ForceRecalc"]):zoom(0.3)
+		end
+	},
+	Def.Quad {
+	InitCommand = function(self)
+		self:x(300):zoomto(100, 20):diffusealpha(buttondiffuse)
+	end,
+	MouseLeftClickMessageCommand = function(self)
+		if ButtonActive(self) and rankingSkillset == 1 then
+			ms.ok("Recalculating Scores... this might be slow and may or may not crash")
+			profile:ForceRecalcScores()
+		end
+	end
+}
 }
 
 t[#t + 1] = profilebuttons

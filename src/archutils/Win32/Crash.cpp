@@ -5,12 +5,11 @@
 
 #include <windows.h>
 
-#include "Etterna/Globals/global.h"
 #include "arch/Threads/Threads_Win32.h"
 #include "crash.h"
 #include "CrashHandlerInternal.h"
-#include "RageUtil/Misc/RageLog.h"      // for RageLog::GetAdditionalLog and Flush
-#include "RageUtil/Misc/RageThreads.h"  // for GetCheckpointLogs
+//#include "RageUtil/Misc/RageLog.h" // for RageLog::GetAdditionalLog and Flush
+#include "RageUtil/Misc/RageThreads.h"		 // for GetCheckpointLogs
 #include "Etterna/Singletons/PrefsManager.h" // for g_bAutoRestart
 #include "RestartProgram.h"
 
@@ -150,15 +149,15 @@ StartChild(HANDLE& hProcess, HANDLE& hToStdin, HANDLE& hFromStdout)
 	strcat(szBuf, CHILD_MAGIC_PARAMETER);
 
 	PROCESS_INFORMATION pi;
-	int iRet = CreateProcess(NULL,  // pointer to name of executable module
+	int iRet = CreateProcess(NULL,	// pointer to name of executable module
 							 szBuf, // pointer to command line string
-							 NULL,  // process security attributes
-							 NULL,  // thread security attributes
-							 true,  // handle inheritance flag
+							 NULL,	// process security attributes
+							 NULL,	// thread security attributes
+							 true,	// handle inheritance flag
 							 0,		// creation flags
-							 NULL,  // pointer to new environment block
-							 cwd,   // pointer to current directory name
-							 &si,   // pointer to STARTUPINFO
+							 NULL,	// pointer to new environment block
+							 cwd,	// pointer to current directory name
+							 &si,	// pointer to STARTUPINFO
 							 &pi	// pointer to PROCESS_INFORMATION
 	);
 
@@ -237,61 +236,61 @@ RunChild()
 	WriteToChild(hToStdin, &g_CrashInfo, sizeof(g_CrashInfo));
 
 	// 2. Write info.
-	const TCHAR* p = RageLog::GetInfo();
-	int iSize = strlen(p);
-	WriteToChild(hToStdin, &iSize, sizeof(iSize));
-	WriteToChild(hToStdin, p, iSize);
+//	const TCHAR* p = RageLog::GetInfo();
+//	int iSize = strlen(p);
+//	WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//	WriteToChild(hToStdin, p, iSize);
 
 	// 3. Write AdditionalLog.
-	p = RageLog::GetAdditionalLog();
-	iSize = strlen(p);
-	WriteToChild(hToStdin, &iSize, sizeof(iSize));
-	WriteToChild(hToStdin, p, iSize);
+//	p = RageLog::GetAdditionalLog();
+//	iSize = strlen(p);
+//	WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//	WriteToChild(hToStdin, p, iSize);
 
 	// 4. Write RecentLogs.
-	int cnt = 0;
-	const TCHAR* ps[1024];
-	while (cnt < 1024 && (ps[cnt] = RageLog::GetRecentLog(cnt)) != NULL)
-		++cnt;
-
-	WriteToChild(hToStdin, &cnt, sizeof(cnt));
-	for (int i = 0; i < cnt; ++i) {
-		iSize = strlen(ps[i]) + 1;
-		WriteToChild(hToStdin, &iSize, sizeof(iSize));
-		WriteToChild(hToStdin, ps[i], iSize);
-	}
+//	int cnt = 0;
+//	const TCHAR* ps[1024];
+//	while (cnt < 1024 && (ps[cnt] = RageLog::GetRecentLog(cnt)) != NULL)
+//		++cnt;
+//
+//	WriteToChild(hToStdin, &cnt, sizeof(cnt));
+//	for (int i = 0; i < cnt; ++i) {
+//		iSize = strlen(ps[i]) + 1;
+//		WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//		WriteToChild(hToStdin, ps[i], iSize);
+//	}
 
 	// 5. Write CHECKPOINTs.
-	static TCHAR buf[1024 * 32];
-	Checkpoints::GetLogs(buf, sizeof(buf), "$$");
-	iSize = strlen(buf) + 1;
-	WriteToChild(hToStdin, &iSize, sizeof(iSize));
-	WriteToChild(hToStdin, buf, iSize);
+//	static TCHAR buf[1024 * 32];
+//	Checkpoints::GetLogs(buf, sizeof(buf), "$$");
+//	iSize = strlen(buf) + 1;
+//	WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//	WriteToChild(hToStdin, buf, iSize);
 
 	// 6. Write the crashed thread's name.
-	p = RageThread::GetCurrentThreadName();
-	iSize = strlen(p) + 1;
-	WriteToChild(hToStdin, &iSize, sizeof(iSize));
-	WriteToChild(hToStdin, p, iSize);
-
-	/* The parent process needs to access this process briefly. When it's done,
-	 * it'll close the handle. Wait until we see that before exiting. */
-	while (1) {
-		/* Ugly: the new process can't execute GetModuleFileName on this
-		 * process, since GetModuleFileNameEx might not be available. Run the
-		 * requests here. */
-		HMODULE hMod;
-		DWORD iActual;
-		if (!ReadFile(hFromStdout, &hMod, sizeof(hMod), &iActual, NULL))
-			break;
-
-		TCHAR szName[MAX_PATH];
-		if (!CrashGetModuleBaseName(hMod, szName))
-			strcpy(szName, "???");
-		iSize = strlen(szName);
-		WriteToChild(hToStdin, &iSize, sizeof(iSize));
-		WriteToChild(hToStdin, szName, iSize);
-	}
+//	p = RageThread::GetCurrentThreadName();
+//	iSize = strlen(p) + 1;
+//	WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//	WriteToChild(hToStdin, p, iSize);
+//
+//	/* The parent process needs to access this process briefly. When it's done,
+//	 * it'll close the handle. Wait until we see that before exiting. */
+//	while (1) {
+//		/* Ugly: the new process can't execute GetModuleFileName on this
+//		 * process, since GetModuleFileNameEx might not be available. Run the
+//		 * requests here. */
+//		HMODULE hMod;
+//		DWORD iActual;
+//		if (!ReadFile(hFromStdout, &hMod, sizeof(hMod), &iActual, NULL))
+//			break;
+//
+//		TCHAR szName[MAX_PATH];
+//		if (!CrashGetModuleBaseName(hMod, szName))
+//			strcpy(szName, "???");
+//		iSize = strlen(szName);
+//		WriteToChild(hToStdin, &iSize, sizeof(iSize));
+//		WriteToChild(hToStdin, szName, iSize);
+//	}
 }
 
 static DWORD WINAPI
@@ -313,7 +312,8 @@ MainExceptionHandler(LPVOID lpParameter)
 	 * However, once in a while some driver or library turns evil and unmasks an
 	 * exception flag on us. If this happens, re-mask it and continue execution.
 	 */
-	PEXCEPTION_POINTERS pExc = reinterpret_cast<PEXCEPTION_POINTERS>(lpParameter);
+	PEXCEPTION_POINTERS pExc =
+	  reinterpret_cast<PEXCEPTION_POINTERS>(lpParameter);
 	switch (pExc->ExceptionRecord->ExceptionCode) {
 		case EXCEPTION_FLT_INVALID_OPERATION:
 		case EXCEPTION_FLT_DENORMAL_OPERAND:
@@ -401,9 +401,13 @@ long __stdcall CrashHandler::ExceptionHandler(EXCEPTION_POINTERS* pExc)
 	/* If the stack overflowed, we have a very limited amount of stack space.
 	 * Allocate a new stack, and run the exception handler in it, to increase
 	 * the chances of success. */
-	HANDLE hExceptionHandler = CreateThread(nullptr, 1024 * 32, MainExceptionHandler, reinterpret_cast<LPVOID>(pExc), 0, nullptr);
-	if (hExceptionHandler == NULL)
-	{
+	HANDLE hExceptionHandler = CreateThread(nullptr,
+											1024 * 32,
+											MainExceptionHandler,
+											reinterpret_cast<LPVOID>(pExc),
+											0,
+											nullptr);
+	if (hExceptionHandler == NULL) {
 		TerminateProcess(GetCurrentProcess(), 0);
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
@@ -478,7 +482,7 @@ IsExecutableProtection(DWORD dwProtect)
 	VirtualQuery((LPCVOID)IsExecutableProtection, &meminfo, sizeof meminfo);
 
 	switch ((unsigned char)dwProtect) {
-		case PAGE_READONLY:  // *sigh* Win9x...
+		case PAGE_READONLY:	 // *sigh* Win9x...
 		case PAGE_READWRITE: // *sigh*
 			return meminfo.Protect == PAGE_READONLY ||
 				   meminfo.Protect == PAGE_READWRITE;
@@ -637,10 +641,11 @@ debug_crash()
  * If iID == GetInvalidThreadId(), then output a stack trace for every thread.
  */
 void
-CrashHandler::ForceDeadlock(const RString& reason, uint64_t iID)
+CrashHandler::ForceDeadlock(const std::string& reason, uint64_t iID)
 {
-	strncpy(
-	  g_CrashInfo.m_CrashReason, reason, sizeof(g_CrashInfo.m_CrashReason));
+	strncpy(g_CrashInfo.m_CrashReason,
+			reason.c_str(),
+			sizeof(g_CrashInfo.m_CrashReason));
 	g_CrashInfo.m_CrashReason[sizeof(g_CrashInfo.m_CrashReason) - 1] = 0;
 
 	/* Suspend the other thread we're going to backtrace. (We need to at least

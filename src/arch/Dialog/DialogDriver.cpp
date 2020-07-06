@@ -7,7 +7,7 @@ map<istring, CreateDialogDriverFn>* RegisterDialogDriver::g_pRegistrees;
 RegisterDialogDriver::RegisterDialogDriver(const istring& sName,
 										   CreateDialogDriverFn pfn)
 {
-	if (g_pRegistrees == NULL)
+	if (g_pRegistrees == nullptr)
 		g_pRegistrees = new map<istring, CreateDialogDriverFn>;
 
 	ASSERT(g_pRegistrees->find(sName) == g_pRegistrees->end());
@@ -19,28 +19,27 @@ REGISTER_DIALOG_DRIVER_CLASS(Null);
 DialogDriver*
 DialogDriver::Create()
 {
-	RString sDrivers = "win32,macosx,null";
-	vector<RString> asDriversToTry;
+	std::string sDrivers = "win32,macosx,null";
+	vector<std::string> asDriversToTry;
 	split(sDrivers, ",", asDriversToTry, true);
 
 	ASSERT(asDriversToTry.size() != 0);
 
-	FOREACH_CONST(RString, asDriversToTry, Driver)
-	{
+	for (auto& Driver : asDriversToTry) {
 		map<istring, CreateDialogDriverFn>::const_iterator iter =
-		  RegisterDialogDriver::g_pRegistrees->find(istring(*Driver));
+		  RegisterDialogDriver::g_pRegistrees->find(istring(Driver.c_str()));
 
 		if (iter == RegisterDialogDriver::g_pRegistrees->end())
 			continue;
 
 		DialogDriver* pRet = (iter->second)();
 		DEBUG_ASSERT(pRet);
-		const RString sError = pRet->Init();
+		const std::string sError = pRet->Init();
 
 		if (sError.empty())
 			return pRet;
-        Locator::getLogger()->info("Couldn't load driver {}: {}", Driver->c_str(), sError.c_str());
+        Locator::getLogger()->info("Couldn't load driver {}: {}", Driver.c_str(), sError.c_str());
 		SAFE_DELETE(pRet);
 	}
-	return NULL;
+	return nullptr;
 }

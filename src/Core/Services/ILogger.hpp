@@ -2,7 +2,7 @@
 #define CORE_SERVICES_ILOGGER_HPP
 
 #include <string>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 namespace Core {
 /**

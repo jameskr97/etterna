@@ -1,16 +1,19 @@
-﻿#ifndef MODS_GROUP_H
+#ifndef MODS_GROUP_H
 #define MODS_GROUP_H
 
 #include "EnumHelper.h"
 #include "RageUtil/Misc/RageTimer.h"
 #include "Etterna/Models/Songs/SongOptions.h"
+
+#include <cassert>
+
 enum ModsLevel
 {
 	ModsLevel_Preferred, // user-chosen player options.  Does not include any
 						 // forced mods.
 	ModsLevel_Stage,	 // Preferred + forced stage mods
 	ModsLevel_Song,		 // Stage + forced attack mods
-	ModsLevel_Current,   // Approaches Song
+	ModsLevel_Current,	 // Approaches Song
 	NUM_ModsLevel,
 	ModsLevel_Invalid
 };
@@ -53,7 +56,7 @@ class ModsGroup
 	}
 
 	template<typename U>
-	inline void Assign(ModsLevel level, U T::*member, const U& val)
+	void Assign(ModsLevel level, U T::*member, const U& val)
 	{
 		if (level != ModsLevel_Song)
 			m_[ModsLevel_Current].*member = val;
@@ -62,12 +65,12 @@ class ModsGroup
 	}
 
 	template<typename U, int n>
-	inline void Assign_n(ModsLevel level,
-						 U (T::*member)[n],
-						 size_t index,
-						 const U& val)
+	void Assign_n(ModsLevel level,
+				  U (T::*member)[n],
+				  size_t index,
+				  const U& val)
 	{
-		DEBUG_ASSERT(index < n);
+		assert(index < n);
 		if (level != ModsLevel_Song)
 			(m_[ModsLevel_Current].*member)[index] = val;
 		for (; level < ModsLevel_Current; enum_add(level, 1))
@@ -90,7 +93,7 @@ class ModsGroup
 			(m_[level].*fun)();
 	}
 
-	void FromString(ModsLevel level, const RString& str)
+	void FromString(ModsLevel level, const std::string& str)
 	{
 		if (level != ModsLevel_Song)
 			m_[ModsLevel_Current].FromString(str);

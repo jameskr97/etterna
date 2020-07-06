@@ -51,13 +51,13 @@ RageDisplay_Null::RageDisplay_Null()
 	Locator::getLogger()->trace("Current renderer: null");
 }
 
-RString
+std::string
 RageDisplay_Null::Init(const VideoModeParams& p,
 					   bool /* bAllowUnacceleratedRenderer */)
 {
 	bool bIgnore = false;
 	SetVideoMode(p, bIgnore);
-	return RString();
+	return std::string();
 }
 
 void

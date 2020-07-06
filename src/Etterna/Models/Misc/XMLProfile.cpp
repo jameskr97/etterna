@@ -1,4 +1,3 @@
-
 #include "Etterna/Globals/global.h"
 #include "Etterna/FileTypes/XmlFile.h"
 #include "Etterna/FileTypes/XmlFileUtil.h"
@@ -13,15 +12,13 @@
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Singletons/GameManager.h"
 #include "Etterna/Singletons/LuaManager.h"
-#include "Etterna/Models/NoteData/NoteData.h"
 #include "RageUtil/File/RageFileManager.h"
-
 #include "Etterna/Singletons/ScoreManager.h"
 #include "Etterna/Singletons/CryptManager.h"
 #include "Etterna/Models/Songs/Song.h"
 #include "Etterna/Singletons/SongManager.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
-#include "Core/Services/Locator.hpp"
+#include "Etterna/Models/Misc/Foreach.h"
 
 using std::string;
 
@@ -40,8 +37,8 @@ XMLProfile::LoadEttFromDir(string dir)
 
 	int iError;
 	unique_ptr<RageFileBasic> pFile(FILEMAN->Open(fn, RageFile::READ, iError));
-	if (pFile.get() == NULL) {
-		Locator::getLogger()->trace("Error opening {}: {}", fn.c_str(), strerror(iError));
+	if (pFile.get() == nullptr) {
+        Locator::getLogger()->trace("Error opening {}: {}", fn.c_str(), strerror(iError));
 		return ProfileLoadResult_FailedTampered;
 	}
 
@@ -292,8 +289,9 @@ XMLProfile::SaveEttGeneralDataCreateNode(const Profile* profile) const
 	{
 		XNode* pDefaultModifiers =
 		  pGeneralDataNode->AppendChild("DefaultModifiers");
-		FOREACHM_CONST(RString, RString, profile->m_sDefaultModifiers, it)
-		pDefaultModifiers->AppendChild(it->first, it->second);
+		for (auto& it : profile->m_sDefaultModifiers) {
+			pDefaultModifiers->AppendChild(it.first, it.second);
+		}
 	}
 
 	{
@@ -470,9 +468,8 @@ XMLProfile::SaveScreenshotDataCreateNode(const Profile* profile) const
 
 	XNode* pNode = new XNode("ScreenshotData");
 
-	FOREACH_CONST(Screenshot, profile->m_vScreenshots, ss)
-	{
-		pNode->AppendChild(ss->CreateNode());
+	for (auto& ss : profile->m_vScreenshots) {
+		pNode->AppendChild(ss.CreateNode());
 	}
 
 	return pNode;

@@ -15,7 +15,7 @@ extern "C" {
 #include "archutils/Win32/ddk/hidsdi.h"
 }
 
-static RString
+static std::string
 GetUSBDevicePath(int iNum)
 {
 	GUID guid;
@@ -30,7 +30,7 @@ GetUSBDevicePath(int iNum)
 	if (!SetupDiEnumDeviceInterfaces(
 		  DeviceInfo, NULL, &guid, iNum, &DeviceInterface)) {
 		SetupDiDestroyDeviceInfoList(DeviceInfo);
-		return RString();
+		return std::string();
 	}
 
 	unsigned long iSize;
@@ -41,7 +41,7 @@ GetUSBDevicePath(int iNum)
 	  (PSP_INTERFACE_DEVICE_DETAIL_DATA)malloc(iSize);
 	DeviceDetail->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
 
-	RString sRet;
+	std::string sRet;
 	if (SetupDiGetDeviceInterfaceDetail(
 		  DeviceInfo, &DeviceInterface, DeviceDetail, iSize, &iSize, NULL))
 		sRet = DeviceDetail->DevicePath;
@@ -60,9 +60,9 @@ USBDevice::Open(int iVID,
 {
 	DWORD iIndex = 0;
 
-	RString path;
-	while ((path = GetUSBDevicePath(iIndex++)) != "") {
-		HANDLE h = CreateFile(path,
+	std::string path;
+	while (!(path = GetUSBDevicePath(iIndex++)).empty()) {
+		HANDLE h = CreateFile(path.c_str(),
 							  GENERIC_READ,
 							  FILE_SHARE_READ | FILE_SHARE_WRITE,
 							  NULL,
@@ -136,7 +136,7 @@ WindowsFileIO::~WindowsFileIO()
 }
 
 bool
-WindowsFileIO::Open(const RString& path, int iBlockSize)
+WindowsFileIO::Open(const std::string& path, int iBlockSize)
 {
 	Locator::getLogger()->trace("WindowsFileIO::open({})", path.c_str());
 	m_iBlockSize = iBlockSize;
@@ -148,7 +148,7 @@ WindowsFileIO::Open(const RString& path, int iBlockSize)
 	if (m_Handle != INVALID_HANDLE_VALUE)
 		CloseHandle(m_Handle);
 
-	m_Handle = CreateFile(path,
+	m_Handle = CreateFile(path.c_str(),
 						  GENERIC_READ,
 						  FILE_SHARE_READ | FILE_SHARE_WRITE,
 						  NULL,

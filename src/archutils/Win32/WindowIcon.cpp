@@ -93,9 +93,9 @@ IconFromSurface(const RageSurface* pSrcImg)
 }
 
 HICON
-IconFromFile(const RString& sIconFile)
+IconFromFile(const std::string& sIconFile)
 {
-	RString sError;
+	std::string sError;
 	RageSurface* pImg = RageSurfaceUtils::LoadFile(sIconFile, sError);
 	if (pImg == NULL) {
 		Locator::getLogger()->warn("Couldn't open icon \"{}\": {}", sIconFile.c_str(), sError.c_str());

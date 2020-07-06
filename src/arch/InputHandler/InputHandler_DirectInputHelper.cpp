@@ -13,7 +13,7 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 #endif
-LPDIRECTINPUT8 g_dinput = NULL;
+LPDIRECTINPUT8 g_dinput = nullptr;
 
 static int
 ConvertScancodeToKey(int scancode);
@@ -28,7 +28,7 @@ DIDevice::DIDevice()
 	dev = InputDevice_Invalid;
 	buffered = true;
 	memset(&JoystickInst, 0, sizeof(JoystickInst));
-	Device = NULL;
+	Device = nullptr;
 }
 
 bool
@@ -44,7 +44,7 @@ DIDevice::Open()
 
 	// load joystick
 	HRESULT hr =
-	  g_dinput->CreateDevice(JoystickInst.guidInstance, &tmpdevice, NULL);
+	  g_dinput->CreateDevice(JoystickInst.guidInstance, &tmpdevice, nullptr);
 	if (hr != DI_OK) {
 		Locator::getLogger()->info(hr_ssprintf(hr, "OpenDevice: IDirectInput_CreateDevice"));
 		return false;
@@ -55,7 +55,8 @@ DIDevice::Open()
 		Locator::getLogger()->info(
 		  hr_ssprintf(hr,
 					  "OpenDevice(%s): IDirectInputDevice::QueryInterface",
-					  m_sName.c_str()));
+					  m_sName.c_str())
+			.c_str());
 		return false;
 	}
 
@@ -87,7 +88,8 @@ DIDevice::Open()
 		Locator::getLogger()->info(
 		  hr_ssprintf(hr,
 					  "OpenDevice(%s): IDirectInputDevice2::SetDataFormat",
-					  m_sName.c_str()));
+					  m_sName.c_str())
+			.c_str());
 		return false;
 	}
 
@@ -133,7 +135,8 @@ DIDevice::Open()
 			Locator::getLogger()->info(
 			  hr_ssprintf(hr,
 						  "OpenDevice(%s): IDirectInputDevice2::SetProperty",
-						  m_sName.c_str()));
+						  m_sName.c_str())
+				.c_str());
 			return false;
 		}
 	}
@@ -150,7 +153,7 @@ DIDevice::Close()
 	Device->Unacquire();
 	Device->Release();
 
-	Device = NULL;
+	Device = nullptr;
 	buttons = axes = hats = 0;
 	Inputs.clear();
 }

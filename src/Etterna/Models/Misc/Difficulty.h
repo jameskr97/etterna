@@ -3,6 +3,7 @@
 
 #include "EnumHelper.h"
 #include "GameConstantsAndTypes.h"
+
 class Song;
 class Steps;
 
@@ -18,30 +19,30 @@ enum Difficulty
 	NUM_Difficulty,
 	Difficulty_Invalid
 };
-const RString&
+const std::string&
 DifficultyToString(Difficulty dc);
 Difficulty
-StringToDifficulty(const RString& sDC);
+StringToDifficulty(const std::string& sDC);
 LuaDeclareType(Difficulty);
 
 Difficulty
-OldStyleStringToDifficulty(const RString& sDC); // compatibility
+OldStyleStringToDifficulty(const std::string& sDC); // compatibility
 
 // CustomDifficulty is a themeable difficulty name based on Difficulty, string
 // matching on StepsType, and CourseType. It is used to look up localized
 // strings and look up colors.
-RString
+std::string
 GetCustomDifficulty(StepsType st, Difficulty dc);
-RString
-CustomDifficultyToLocalizedString(const RString& sCustomDifficulty);
-RString
+std::string
+CustomDifficultyToLocalizedString(const std::string& sCustomDifficulty);
+std::string
 StepsToCustomDifficulty(const Steps* pSteps);
 
 struct Chart
 {
-	string key;
-	RString lastsong;
-	RString lastpack;
+	std::string key;
+	std::string lastsong;
+	std::string lastpack;
 	Difficulty lastdiff = Difficulty_Invalid;
 	float rate = 1.f;
 	Song* songptr;
@@ -50,7 +51,7 @@ struct Chart
 	bool IsLoaded() { return loaded; }
 
 	bool loaded = false;
-	void FromKey(const string& ck);
+	void FromKey(const std::string& ck);
 	XNode* CreateNode(bool includerate) const;
 	void LoadFromNode(const XNode* node);
 	void PushSelf(lua_State* L);
@@ -58,37 +59,37 @@ struct Chart
 
 struct Playlist
 {
-	RString name;
-	vector<Chart> chartlist;
+	std::string name;
+	std::vector<Chart> chartlist;
 	void Add(Chart ch) { chartlist.emplace_back(ch); }
-	void AddChart(const string& ck);
+	void AddChart(const std::string& ck);
 	void SwapPosition();
 
-	void Create();
-	vector<vector<string>> courseruns;
+	std::vector<std::vector<std::string>> courseruns;
 
 	XNode* CreateNode() const;
 	void LoadFromNode(const XNode* node);
 	int GetNumCharts() { return chartlist.size(); }
-	vector<string> GetKeys();
-	string GetName() { return name; }
+	std::vector<std::string> GetKeys();
+	std::string GetName() { return name; }
 	float GetAverageRating();
 	void DeleteChart(int i);
 
 	void PushSelf(lua_State* L);
 };
 
-struct CalcTest	{
-	string ck;
+struct CalcTest
+{
+	std::string ck;
 	float ev;
 	float rate;
-	map<int, float> version_history;
+	std::map<int, float> version_history;
 };
 
 struct CalcTestList
 {
 	Skillset skillset;
-	map<string, CalcTest> filemapping;
+	std::map<std::string, CalcTest> filemapping;
 	XNode* CreateNode() const;
 };
 

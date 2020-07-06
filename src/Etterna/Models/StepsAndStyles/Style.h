@@ -89,7 +89,7 @@ class Style
 
 	void StyleInputToGameInput(int iCol,
 							   PlayerNumber pn,
-							   vector<GameInput>& ret) const;
+							   std::vector<GameInput>& ret) const;
 	/**
 	 * @brief Retrieve the column based on the game input.
 	 * @param GameI the game input.
@@ -97,7 +97,7 @@ class Style
 	 * invalid column. Examples of this include getting the upper left hand
 	 * corner in a traditional four panel mode. */
 	int GameInputToColumn(const GameInput& GameI) const;
-	RString ColToButtonName(int iCol) const;
+	std::string ColToButtonName(int iCol) const;
 
 	bool GetUsesCenteredArrows() const;
 	void GetTransformedNoteDataForStyle(PlayerNumber pn,

@@ -16,7 +16,7 @@ TextBanner::LoadFromNode(const XNode* pNode)
 }
 
 void
-TextBanner::Load(const RString& sMetricsGroup)
+TextBanner::Load(const std::string& sMetricsGroup)
 {
 	m_bInitted = true;
 
@@ -80,7 +80,7 @@ TextBanner::SetFromString(const string& sDisplayTitle,
 void
 TextBanner::SetFromSong(const Song* pSong)
 {
-	if (pSong == NULL) {
+	if (pSong == nullptr) {
 		SetFromString("", "", "", "", "", "");
 		return;
 	}

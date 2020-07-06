@@ -1,17 +1,17 @@
 #include "Etterna/Globals/global.h"
 #include "CommonMetrics.h"
-#include "Etterna/Singletons/CryptManager.h"
-#include "Foreach.h"
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Singletons/LuaManager.h"
 #include "Etterna/Globals/MinaCalc.h"
-#include "Etterna/Globals/MinaCalcOld.h"
+#include "Etterna/Globals/SoloCalc.h"
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "PlayerStageStats.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "Etterna/Models/ScoreKeepers/ScoreKeeperNormal.h"
+#include "Etterna/Models/Songs/SongOptions.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "Etterna/Singletons/ThemeManager.h"
+#include "Etterna/Singletons/SongManager.h"
 
 // deprecated, but no solution to replace them exists yet:
 #define GRADE_TIER02_IS_ALL_W2S                                                \
@@ -112,8 +112,8 @@ PlayerStageStats::AddStats(const PlayerStageStats& other)
 {
 	m_pStyle = other.m_pStyle;
 	m_bJoined = other.m_bJoined;
-	FOREACH_CONST(Steps*, other.m_vpPossibleSteps, s)
-	m_vpPossibleSteps.push_back(*s);
+	for (auto& s : other.m_vpPossibleSteps)
+		m_vpPossibleSteps.push_back(s);
 	m_iStepsPlayed += other.m_iStepsPlayed;
 	m_fAliveSeconds += other.m_fAliveSeconds;
 	m_bFailed |= static_cast<int>(other.m_bFailed);
@@ -156,9 +156,7 @@ PlayerStageStats::AddStats(const PlayerStageStats& other)
 		m_fLifeRecord[fOtherFirstSecond + pos] = life;
 	}
 
-	for (unsigned i = 0; i < other.m_ComboList.size(); ++i) {
-		const Combo_t& combo = other.m_ComboList[i];
-
+	for (auto combo : other.m_ComboList) {
 		Combo_t newcombo(combo);
 		newcombo.m_fStartSecond += fOtherFirstSecond;
 		m_ComboList.push_back(newcombo);
@@ -188,19 +186,19 @@ PlayerStageStats::AddStats(const PlayerStageStats& other)
 Grade
 GetGradeFromPercent(float fPercent)
 {
-	if (fPercent >= 0.99999f)
+	if (fPercent >= 0.99996f)
 		return Grade_Tier01;
-	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.9999f)
-		return Grade_Tier02;
 	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.9998f)
+		return Grade_Tier02;
+	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.9997f)
 		return Grade_Tier03;
-	if (fPercent >= 0.9997f)
+	if (fPercent >= 0.99955f)
 		return Grade_Tier04;
-	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.9992f)
+	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.999f)
 		return Grade_Tier05;
-	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.9985f)
+	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.998f)
 		return Grade_Tier06;
-	if (fPercent >= 0.9975f)
+	if (fPercent >= 0.997f)
 		return Grade_Tier07;
 	if (PREFSMAN->m_bUseMidGrades && fPercent >= 0.99f)
 		return Grade_Tier08;
@@ -340,13 +338,13 @@ PlayerStageStats::MakePercentScore(int iActual, int iPossible)
 	return fPercent;
 }
 
-RString
+std::string
 PlayerStageStats::FormatPercentScore(float fPercentDancePoints)
 {
 	int iPercentTotalDigits =
 	  3 + CommonMetrics::PERCENT_SCORE_DECIMAL_PLACES; // "100" + "." + "00"
 
-	RString s =
+	std::string s =
 	  ssprintf("%*.*f%%",
 			   iPercentTotalDigits,
 			   static_cast<int>(CommonMetrics::PERCENT_SCORE_DECIMAL_PLACES),
@@ -379,10 +377,19 @@ PlayerStageStats::CalcSSR(float ssrpercent) const
 {
 	Steps* steps = GAMESTATE->m_pCurSteps;
 	float musicrate = GAMESTATE->m_SongOptions.GetCurrent().m_fMusicRate;
+
+	// 4k
+	if (steps->m_StepsType == StepsType_dance_single) {
+		return MinaSDCalc(
+		  serializednd, musicrate, ssrpercent, SONGMAN->calc.get());
+	}
+
+	// solo calc
 	if (steps->m_StepsType == StepsType_dance_solo)
 		return SoloCalc(serializednd, musicrate, ssrpercent);
-	else
-		return MinaSDCalc_OLD(serializednd, musicrate, ssrpercent);
+
+	// anything else
+	return { 0.F, 0.F, 0.F, 0.F, 0.F, 0.F, 0.F, 0.F };
 }
 
 float
@@ -470,9 +477,8 @@ PlayerStageStats::GetLessonScoreNeeded() const
 {
 	float fScore = 0;
 
-	FOREACH_CONST(Steps*, m_vpPossibleSteps, steps)
-	{
-		fScore += (*steps)->GetRadarValues()[RadarCategory_TapsAndHolds];
+	for (auto& steps : m_vpPossibleSteps) {
+		fScore += steps->GetRadarValues()[RadarCategory_TapsAndHolds];
 	}
 
 	return lround(fScore * LESSON_PASS_THRESHOLD);
@@ -976,8 +982,8 @@ LuaFunction(GetGradeFromPercent, GetGradeFromPercent(FArg(1)))
 					doot.emplace_back(offs[i] * 1000);
 		} else {
 			// But type is empty if the replay is old :(
-			for (size_t i = 0; i < offs.size(); ++i)
-				doot.emplace_back(offs[i] * 1000);
+			for (float off : offs)
+				doot.emplace_back(off * 1000);
 		}
 		LuaHelpers::CreateTableFromArray(doot, L);
 		return 1;

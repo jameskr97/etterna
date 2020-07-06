@@ -65,7 +65,7 @@ class LineReader
 	// false (line undefined) if there is an error or EOF condition,
 	// true (line = next line from stream) if a whole line is available,
 	// true (line = "") if no error but still waiting for next line.
-	virtual bool ReadLine(RString& line) = 0;
+	virtual bool ReadLine(std::string& line) = 0;
 };
 }
 
@@ -145,7 +145,7 @@ class InputHandler_SextetStream::Impl
 		return 0;
 	}
 
-	inline void GetNewState(uint8_t* buffer, RString& line)
+	inline void GetNewState(uint8_t* buffer, std::string& line)
 	{
 		size_t lineLen = line.length();
 		size_t i, cursor;
@@ -212,7 +212,7 @@ class InputHandler_SextetStream::Impl
 
 	void RunInputThread()
 	{
-		RString line;
+		std::string line;
 		LineReader* linereader;
 
 		Locator::getLogger()->trace("Input thread started; getting line reader");
@@ -273,7 +273,7 @@ REGISTER_INPUT_HANDLER_CLASS(SextetStreamFromFile);
 #else
 #define DEFAULT_INPUT_FILENAME "Data/StepMania-Input-SextetStream.in"
 #endif
-static Preference<RString> g_sSextetStreamInputFilename(
+static Preference<std::string> g_sSextetStreamInputFilename(
   "SextetStreamInputFilename",
   DEFAULT_INPUT_FILENAME);
 
@@ -281,7 +281,7 @@ namespace {
 class StdCFileLineReader : public LineReader
 {
   private:
-	// The buffer size isn't critical; the RString will simply be
+	// The buffer size isn't critical; the std::string will simply be
 	// extended until the line is done.
 	static const size_t BUFFER_SIZE = 64;
 	char buffer[BUFFER_SIZE];
@@ -296,7 +296,7 @@ class StdCFileLineReader : public LineReader
 		this->file = file;
 	}
 
-	StdCFileLineReader(const RString& filename)
+	StdCFileLineReader(const std::string& filename)
 	{
 		Locator::getLogger()->info("Starting InputHandler_SextetStreamFromFile from std::FILE with filename '{}'",
 				  filename.c_str());
@@ -321,7 +321,7 @@ class StdCFileLineReader : public LineReader
 
 	virtual bool IsValid() { return file != NULL; }
 
-	virtual bool ReadLine(RString& line)
+	virtual bool ReadLine(std::string& line)
 	{
 		bool afterFirst = false;
 		size_t len;
@@ -370,11 +370,11 @@ class StdCFileHandleImpl : public InputHandler_SextetStream::Impl
 class StdCFileNameImpl : public InputHandler_SextetStream::Impl
 {
   protected:
-	RString filename;
+	std::string filename;
 
   public:
 	StdCFileNameImpl(InputHandler_SextetStreamFromFile* handler,
-					 const RString& filename)
+					 const std::string& filename)
 	  : InputHandler_SextetStream::Impl(handler)
 	{
 		this->filename = filename;
@@ -398,7 +398,7 @@ InputHandler_SextetStreamFromFile::InputHandler_SextetStreamFromFile(FILE* file)
 }
 
 InputHandler_SextetStreamFromFile::InputHandler_SextetStreamFromFile(
-  const RString& filename)
+  const std::string& filename)
 {
 	_impl = new StdCFileNameImpl(this, filename);
 }

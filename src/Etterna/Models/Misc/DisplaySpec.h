@@ -3,6 +3,7 @@
 
 #include <set>
 #include "RageUtil/Misc/RageTypes.h"
+#include "Core/Services/Locator.hpp"
 
 struct DisplayMode
 {
@@ -77,7 +78,7 @@ class DisplaySpec
 			// Drop the trailing ", "
 			msg.resize(msg.size() - 2);
 
-			ASSERT_M(false, msg.c_str());
+			Locator::getLogger()->warn(msg.c_str());
 		}
 	}
 

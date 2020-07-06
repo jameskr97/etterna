@@ -1,4 +1,4 @@
-﻿#include "Etterna/Globals/global.h"
+#include "Etterna/Globals/global.h"
 #include "LyricsLoader.h"
 #include "RageUtil/File/RageFile.h"
 #include "Core/Services/Locator.hpp"
@@ -18,7 +18,7 @@ CompareLyricSegments(const LyricSegment& seg1, const LyricSegment& seg2)
 }
 
 bool
-LyricsLoader::LoadFromLRCFile(const RString& sPath, Song& out)
+LyricsLoader::LoadFromLRCFile(const std::string& sPath, Song& out)
 {
 	Locator::getLogger()->trace("LyricsLoader::LoadFromLRCFile({})", sPath.c_str());
 
@@ -36,7 +36,7 @@ LyricsLoader::LoadFromLRCFile(const RString& sPath, Song& out)
 	out.m_LyricSegments.clear();
 
 	for (;;) {
-		RString line;
+		std::string line;
 		int ret = input.GetLine(line);
 		if (ret == 0) {
 			break;
@@ -57,19 +57,19 @@ LyricsLoader::LoadFromLRCFile(const RString& sPath, Song& out)
 		// "[data1] data2".  Ignore whitespace at the beginning of the line.
 		static Regex x("^ *\\[([^]]+)\\] *(.*)$");
 
-		vector<RString> matches;
+		vector<std::string> matches;
 		if (!x.Compare(line, matches)) {
 			continue;
 		}
 		ASSERT(matches.size() == 2);
 
-		RString& sValueName = matches[0];
-		RString& sValueData = matches[1];
+		std::string& sValueName = matches[0];
+		std::string& sValueData = matches[1];
 		StripCrnl(sValueData);
 
 		// handle the data
-		if (sValueName.EqualsNoCase("COLOUR") ||
-			sValueName.EqualsNoCase("COLOR")) {
+		if (EqualsNoCase(sValueName, "COLOUR") ||
+			EqualsNoCase(sValueName, "COLOR")) {
 			// set color var here for this segment
 			int r, g, b;
 			int result = sscanf(sValueData.c_str(), "0x%2x%2x%2x", &r, &g, &b);
@@ -98,8 +98,12 @@ LyricsLoader::LoadFromLRCFile(const RString& sPath, Song& out)
 			seg.m_fStartTime = HHMMSSToSeconds(sValueName);
 			seg.m_sLyric = sValueData;
 
-			seg.m_sLyric.Replace(
-			  "|", "\n"); // Pipe symbols denote a new line in LRC files
+			std::string bloo = seg.m_sLyric;
+
+			s_replace(bloo,
+					  "|",
+					  "\n"); // Pipe symbols denote a new line in LRC files
+			seg.m_sLyric = bloo;
 			out.AddLyricSegment(seg);
 		}
 	}

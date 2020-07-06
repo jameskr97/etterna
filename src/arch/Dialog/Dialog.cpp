@@ -9,44 +9,44 @@
 #include "RageUtil/Misc/RageThreads.h"
 
 #if !defined(SMPACKAGE)
-static Preference<RString> g_sIgnoredDialogs("IgnoredDialogs", "");
+static Preference<std::string> g_sIgnoredDialogs("IgnoredDialogs", "");
 #endif
 
 DialogDriver*
 MakeDialogDriver()
 {
-	RString sDrivers = "win32,cocoa,null";
-	vector<RString> asDriversToTry;
+	std::string sDrivers = "win32,cocoa,null";
+	vector<std::string> asDriversToTry;
 	split(sDrivers, ",", asDriversToTry, true);
 
-	ASSERT(asDriversToTry.size() != 0);
+	ASSERT(!asDriversToTry.empty());
 
-	RString sDriver;
-	DialogDriver* pRet = NULL;
+	std::string sDriver;
+	DialogDriver* pRet = nullptr;
 
-	for (unsigned i = 0; pRet == NULL && i < asDriversToTry.size(); ++i) {
+	for (unsigned i = 0; pRet == nullptr && i < asDriversToTry.size(); ++i) {
 		sDriver = asDriversToTry[i];
 
 #ifdef USE_DIALOG_DRIVER_COCOA
-		if (!asDriversToTry[i].CompareNoCase("Cocoa"))
+		if (!CompareNoCase(asDriversToTry[i], "Cocoa"))
 			pRet = new DialogDriver_MacOSX;
 #endif
 #ifdef USE_DIALOG_DRIVER_WIN32
-		if (!asDriversToTry[i].CompareNoCase("Win32"))
+		if (!CompareNoCase(asDriversToTry[i], "Win32"))
 			pRet = new DialogDriver_Win32;
 #endif
 #ifdef USE_DIALOG_DRIVER_NULL
-		if (!asDriversToTry[i].CompareNoCase("Null"))
+		if (!CompareNoCase(asDriversToTry[i], "Null"))
 			pRet = new DialogDriver_Null;
 #endif
 
-		if (pRet == NULL) {
+		if (pRet == nullptr) {
 			continue;
 		}
 
-		RString sError = pRet->Init();
-		if (sError != "") {
-		    Locator::getLogger()->info("Couldn't load driver {}: {}}", asDriversToTry[i], sError);
+		std::string sError = pRet->Init();
+		if (!sError.empty()) {
+            Locator::getLogger()->info("Couldn't load driver {}: {}}", asDriversToTry[i], sError);
 			SAFE_DELETE(pRet);
 		}
 	}
@@ -54,7 +54,7 @@ MakeDialogDriver()
 	return pRet;
 }
 
-static DialogDriver* g_pImpl = NULL;
+static DialogDriver* g_pImpl = nullptr;
 static DialogDriver_Null g_NullDriver;
 static bool g_bWindowed =
   true; // Start out true so that we'll show errors before DISPLAY is init'd.
@@ -68,7 +68,7 @@ DialogsEnabled()
 void
 Dialog::Init()
 {
-	if (g_pImpl != NULL)
+	if (g_pImpl != nullptr)
 		return;
 
 	g_pImpl = DialogDriver::Create();
@@ -81,40 +81,40 @@ void
 Dialog::Shutdown()
 {
 	delete g_pImpl;
-	g_pImpl = NULL;
+	g_pImpl = nullptr;
 }
 
 static bool
-MessageIsIgnored(const RString& sID)
+MessageIsIgnored(const std::string& sID)
 {
 #if !defined(SMPACKAGE)
-	vector<RString> asList;
+	vector<std::string> asList;
 	split(g_sIgnoredDialogs, ",", asList);
 	for (unsigned i = 0; i < asList.size(); ++i)
-		if (!sID.CompareNoCase(asList[i]))
+		if (!CompareNoCase(sID, asList[i]))
 			return true;
 #endif
 	return false;
 }
 
 void
-Dialog::IgnoreMessage(const RString& sID)
+Dialog::IgnoreMessage(const std::string& sID)
 {
 // We can't ignore messages before PREFSMAN is around.
 #if !defined(SMPACKAGE)
-	if (PREFSMAN == NULL) {
-		if (sID != "")
-            Locator::getLogger()->warn("Dialog: message \"{}\" set ID too early for ignorable messages", sID);
+	if (PREFSMAN == nullptr) {
+		if (!sID.empty())
+			Locator::getLogger()->warn("Dialog: message \"{}\" set ID too early for ignorable messages", sID);
 		return;
 	}
 
-	if (sID == "")
+	if (sID.empty())
 		return;
 
 	if (MessageIsIgnored(sID))
 		return;
 
-	vector<RString> asList;
+	vector<std::string> asList;
 	split(g_sIgnoredDialogs, ",", asList);
 	asList.push_back(sID);
 	g_sIgnoredDialogs.Set(join(",", asList));
@@ -123,13 +123,13 @@ Dialog::IgnoreMessage(const RString& sID)
 }
 
 void
-Dialog::Error(const RString& sMessage, const RString& sID)
+Dialog::Error(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 
     Locator::getLogger()->trace("Dialog: \"{}\" [{}]", sMessage, sID);
 
-	if (sID != "" && MessageIsIgnored(sID))
+	if (!sID.empty() && MessageIsIgnored(sID))
 		return;
 
 	RageThread::SetIsShowingDialog(true);
@@ -146,13 +146,13 @@ Dialog::SetWindowed(bool bWindowed)
 }
 
 void
-Dialog::OK(const RString& sMessage, const RString& sID)
+Dialog::OK(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 
     Locator::getLogger()->trace("Dialog: \"{}\" [{}]", sMessage, sID);
 
-	if (sID != "" && MessageIsIgnored(sID))
+	if (!sID.empty() && MessageIsIgnored(sID))
 		return;
 
 	RageThread::SetIsShowingDialog(true);
@@ -167,7 +167,7 @@ Dialog::OK(const RString& sMessage, const RString& sID)
 }
 
 Dialog::Result
-Dialog::OKCancel(const RString& sMessage, const RString& sID)
+Dialog::OKCancel(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 
@@ -191,7 +191,7 @@ Dialog::OKCancel(const RString& sMessage, const RString& sID)
 }
 
 Dialog::Result
-Dialog::AbortRetryIgnore(const RString& sMessage, const RString& sID)
+Dialog::AbortRetryIgnore(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 
@@ -215,7 +215,7 @@ Dialog::AbortRetryIgnore(const RString& sMessage, const RString& sID)
 }
 
 Dialog::Result
-Dialog::AbortRetry(const RString& sMessage, const RString& sID)
+Dialog::AbortRetry(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 
@@ -239,7 +239,7 @@ Dialog::AbortRetry(const RString& sMessage, const RString& sID)
 }
 
 Dialog::Result
-Dialog::YesNo(const RString& sMessage, const RString& sID)
+Dialog::YesNo(const std::string& sMessage, const std::string& sID)
 {
 	Dialog::Init();
 

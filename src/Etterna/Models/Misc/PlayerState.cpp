@@ -69,7 +69,7 @@ const TimingData&
 PlayerState::GetDisplayedTiming() const
 {
 	Steps* steps = GAMESTATE->m_pCurSteps;
-	if (steps == NULL)
+	if (steps == nullptr)
 		return GAMESTATE->m_pCurSong->m_SongTiming;
 	return *steps->GetTimingData();
 }
@@ -112,15 +112,15 @@ class LunaPlayerState : public Luna<PlayerState>
 	static int GetPlayerOptionsArray(T* p, lua_State* L)
 	{
 		ModsLevel m = Enum::Check<ModsLevel>(L, 1);
-		vector<RString> s;
+		vector<std::string> s;
 		p->m_PlayerOptions.Get(m).GetMods(s);
-		LuaHelpers::CreateTableFromArray<RString>(s, L);
+		LuaHelpers::CreateTableFromArray<std::string>(s, L);
 		return 1;
 	}
 	static int GetPlayerOptionsString(T* p, lua_State* L)
 	{
 		ModsLevel m = Enum::Check<ModsLevel>(L, 1);
-		RString s = p->m_PlayerOptions.Get(m).GetString();
+		std::string s = p->m_PlayerOptions.Get(m).GetString();
 		LuaHelpers::Push(L, s);
 		return 1;
 	}

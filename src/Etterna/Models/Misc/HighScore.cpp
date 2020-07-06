@@ -1,24 +1,22 @@
 #include "Etterna/Globals/global.h"
 #include "Etterna/Singletons/CryptManager.h"
-#include "Foreach.h"
 #include "GameConstantsAndTypes.h"
 #include "HighScore.h"
 #include "Etterna/Globals/picosha2.h"
-#include "PlayerNumber.h"
 #include "Etterna/Singletons/ProfileManager.h"
 #include "RadarValues.h"
 #include "Core/Services/Locator.hpp"
 #include "Etterna/FileTypes/XmlFile.h"
 #include "NoteTypes.h"
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include "Etterna/Singletons/CryptManager.h"
 #include "Etterna/Singletons/GameState.h"
 #include "Etterna/Models/NoteData/NoteData.h"
 #include "Etterna/Models/Misc/TimingData.h"
 #include "Etterna/Models/StepsAndStyles/Steps.h"
 #include "RageUtil/File/RageFileManager.h"
+
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 const string BASIC_REPLAY_DIR =
   "Save/Replays/"; // contains only tap offset data for rescoring/plots -mina
@@ -58,9 +56,9 @@ struct HighScoreImpl
 	vector<int> vRescoreJudgeVector;
 	unsigned int iMaxCombo; // maximum combo obtained [SM5 alpha 1a+]
 	string sModifiers;
-	DateTime dateTime;   // return value of time() for when the highscore object
+	DateTime dateTime;	 // return value of time() for when the highscore object
 						 // was created (immediately after achieved)
-	string sPlayerGuid;  // who made this high score
+	string sPlayerGuid;	 // who made this high score
 	string sMachineGuid; // where this high score was made
 	string countryCode;
 	int iProductID;
@@ -169,7 +167,7 @@ HighScoreImpl::GetWifeGrade() const
 		return Grade_Tier05;
 	if (PREFSMAN->m_bUseMidGrades && prc >= 0.998f)
 		return Grade_Tier06;
-	if (prc >= 0.9975f)
+	if (prc >= 0.997f)
 		return Grade_Tier07;
 	if (PREFSMAN->m_bUseMidGrades && prc >= 0.99f)
 		return Grade_Tier08;
@@ -203,7 +201,7 @@ HighScoreImpl::HighScoreImpl()
 	ChartKey = "";
 	ScoreKey = "";
 	SSRCalcVersion = 0;
-	grade = Grade_NoData;
+	grade = Grade_Invalid;
 	iScore = 0;
 	fPercentDP = 0.f;
 	fWifeScore = 0.f;
@@ -238,7 +236,7 @@ HighScoreImpl::HighScoreImpl()
 XNode*
 HighScoreImpl::CreateEttNode() const
 {
-	XNode* pNode = new XNode("Score");
+	auto pNode = new XNode("Score");
 
 	if (ScoreKey == "")
 		pNode->AppendAttr("Key",
@@ -265,19 +263,19 @@ HighScoreImpl::CreateEttNode() const
 	pNode->AppendChild("DateTime", dateTime.GetString());
 	pNode->AppendChild("TopScore", TopScore);
 	if (!uploaded.empty()) {
-		XNode* pServerNode = pNode->AppendChild("Servs");
+		auto pServerNode = pNode->AppendChild("Servs");
 		for (auto server : uploaded)
 			pServerNode->AppendChild("server", server);
 	}
 
-	XNode* pTapNoteScores = pNode->AppendChild("TapNoteScores");
+	auto pTapNoteScores = pNode->AppendChild("TapNoteScores");
 	FOREACH_ENUM(TapNoteScore, tns)
 	if (tns != TNS_None && tns != TNS_CheckpointMiss &&
 		tns != TNS_CheckpointHit)
 		pTapNoteScores->AppendChild(TapNoteScoreToString(tns),
 									iTapNoteScores[tns]);
 
-	XNode* pHoldNoteScores = pNode->AppendChild("HoldNoteScores");
+	auto pHoldNoteScores = pNode->AppendChild("HoldNoteScores");
 	FOREACH_ENUM(HoldNoteScore, hns)
 	if (hns != HNS_None) // HACK: don't save meaningless "none" count
 		pHoldNoteScores->AppendChild(HoldNoteScoreToString(hns),
@@ -286,13 +284,13 @@ HighScoreImpl::CreateEttNode() const
 	// dont bother writing skillset ssrs for non-applicable scores
 	if (fWifeScore > 0.f && grade != Grade_Failed &&
 		fSkillsetSSRs[Skill_Overall] > 0.f) {
-		XNode* pSkillsetSSRs = pNode->AppendChild("SkillsetSSRs");
+		auto pSkillsetSSRs = pNode->AppendChild("SkillsetSSRs");
 		FOREACH_ENUM(Skillset, ss)
 		pSkillsetSSRs->AppendChild(
 		  SkillsetToString(ss), FloatToString(fSkillsetSSRs[ss]).substr(0, 5));
 	}
 
-	XNode* pValidationKeys = pNode->AppendChild("ValidationKeys");
+	auto pValidationKeys = pNode->AppendChild("ValidationKeys");
 	pValidationKeys->AppendChild(ValidationKeyToString(ValidationKey_Brittle),
 								 ValidationKeys[ValidationKey_Brittle]);
 	pValidationKeys->AppendChild(ValidationKeyToString(ValidationKey_Weak),
@@ -306,7 +304,7 @@ HighScoreImpl::LoadFromEttNode(const XNode* pNode)
 {
 	// ASSERT(pNode->GetName() == "Score");
 
-	RString s;
+	std::string s;
 	pNode->GetChildValue("SSRCalcVersion", SSRCalcVersion);
 	if (pNode->GetChildValue("Grade", s))
 		grade = StringToGrade(s);
@@ -317,11 +315,11 @@ HighScoreImpl::LoadFromEttNode(const XNode* pNode)
 	pNode->GetChildValue("JudgeScale", fJudgeScale);
 	pNode->GetChildValue("NoChordCohesion", bNoChordCohesion);
 	pNode->GetChildValue("EtternaValid", bEtternaValid);
-	const XNode* pUploadedServers = pNode->GetChild("Servs");
+	auto pUploadedServers = pNode->GetChild("Servs");
 	if (pUploadedServers != nullptr) {
 		FOREACH_CONST_Child(pUploadedServers, p)
 		{
-			RString server;
+			std::string server;
 			p->GetTextValue(server);
 			uploaded.emplace_back(server.c_str());
 		}
@@ -337,27 +335,27 @@ HighScoreImpl::LoadFromEttNode(const XNode* pNode)
 	if (pNode->GetChildValue("MachineGuid", s))
 		sMachineGuid = s;
 
-	const XNode* pTapNoteScores = pNode->GetChild("TapNoteScores");
+	auto pTapNoteScores = pNode->GetChild("TapNoteScores");
 	if (pTapNoteScores)
 		FOREACH_ENUM(TapNoteScore, tns)
 	pTapNoteScores->GetChildValue(TapNoteScoreToString(tns),
 								  iTapNoteScores[tns]);
 
-	const XNode* pHoldNoteScores = pNode->GetChild("HoldNoteScores");
+	auto pHoldNoteScores = pNode->GetChild("HoldNoteScores");
 	if (pHoldNoteScores)
 		FOREACH_ENUM(HoldNoteScore, hns)
 	pHoldNoteScores->GetChildValue(HoldNoteScoreToString(hns),
 								   iHoldNoteScores[hns]);
 
 	if (fWifeScore > 0.f) {
-		const XNode* pSkillsetSSRs = pNode->GetChild("SkillsetSSRs");
+		auto pSkillsetSSRs = pNode->GetChild("SkillsetSSRs");
 		if (pSkillsetSSRs)
 			FOREACH_ENUM(Skillset, ss)
 		pSkillsetSSRs->GetChildValue(SkillsetToString(ss), fSkillsetSSRs[ss]);
 	}
 
 	if (fWifeScore > 0.f) {
-		const XNode* pValidationKeys = pNode->GetChild("ValidationKeys");
+		auto pValidationKeys = pNode->GetChild("ValidationKeys");
 		if (pValidationKeys != nullptr) {
 			if (pValidationKeys->GetChildValue(
 				  ValidationKeyToString(ValidationKey_Brittle), s))
@@ -375,9 +373,7 @@ HighScoreImpl::LoadFromEttNode(const XNode* pNode)
 
 	pNode->GetChildValue("wv", WifeVersion);
 
-	// Validate input. Wifegrade is calculated on the fly for themes, we are
-	// only keeping the old dp grades to check for grade_failed during various
-	// parts of load, so don't remove it
+	// Validate input.
 	grade = clamp(grade, Grade_Tier01, Grade_Failed);
 }
 
@@ -390,7 +386,7 @@ HighScoreImpl::WriteReplayData()
 	// These two lines should probably be somewhere else
 	if (!FILEMAN->IsADirectory(FULL_REPLAY_DIR))
 		FILEMAN->CreateDir(FULL_REPLAY_DIR);
-	string path = FULL_REPLAY_DIR + ScoreKey;
+	auto path = FULL_REPLAY_DIR + ScoreKey;
 	ofstream fileStream(path, ios::binary);
 	// check file
 
@@ -432,7 +428,7 @@ HighScore::WriteInputData(const vector<float>& oop)
 	string append;
 	string profiledir;
 
-	string path = FULL_REPLAY_DIR + m_Impl->ScoreKey;
+	auto path = FULL_REPLAY_DIR + m_Impl->ScoreKey;
 	ofstream fileStream(path, ios::binary);
 	// check file
 
@@ -458,13 +454,13 @@ HighScore::WriteInputData(const vector<float>& oop)
 bool
 HighScore::LoadReplayData()
 { // see dir definition comments at the top -mina
-	if (LoadReplayDataFull())
+	if (LoadReplayDataFull(FULL_REPLAY_DIR))
 		return true;
-	return LoadReplayDataBasic();
+	return LoadReplayDataBasic(BASIC_REPLAY_DIR);
 }
 
 bool
-HighScore::LoadReplayDataBasic()
+HighScore::LoadReplayDataBasic(string dir)
 {
 	// already exists
 	if (m_Impl->vNoteRowVector.size() > 4 && m_Impl->vOffsetVector.size() > 4)
@@ -473,7 +469,7 @@ HighScore::LoadReplayDataBasic()
 	string profiledir;
 	vector<int> vNoteRowVector;
 	vector<float> vOffsetVector;
-	string path = BASIC_REPLAY_DIR + m_Impl->ScoreKey;
+	auto path = dir + m_Impl->ScoreKey;
 
 	std::ifstream fileStream(path, ios::binary);
 	string line;
@@ -497,6 +493,17 @@ HighScore::LoadReplayDataBasic()
 			// split line into tokens
 			while (ss >> buffer)
 				tokens.emplace_back(buffer);
+
+			if (tokens.size() > 2) {
+				Locator::getLogger()->warn(
+				  "looks like u got v2 replays in the v1 folder, move them "
+				  "into Save/ReplaysV2 folder if you want them to load. If %s "
+				  "is not a v2 replay that you placed into the Save/Replays "
+				  "folder by accident, then it is probably corrupted and you "
+				  "should delete it or move it out. {}",
+				  GetScoreKey().c_str());
+				ASSERT(tokens.size() < 2);
+			}
 
 			noteRow = std::stoi(tokens[0]);
 			if (!(typeid(noteRow) == typeid(int))) {
@@ -528,7 +535,7 @@ HighScore::LoadReplayDataBasic()
 }
 
 bool
-HighScore::LoadReplayDataFull()
+HighScore::LoadReplayDataFull(string dir)
 {
 	if (m_Impl->vNoteRowVector.size() > 4 && m_Impl->vOffsetVector.size() > 4 &&
 		m_Impl->vTrackVector.size() > 4) {
@@ -542,7 +549,7 @@ HighScore::LoadReplayDataFull()
 	vector<int> vTrackVector;
 	vector<TapNoteType> vTapNoteTypeVector;
 	vector<HoldReplayResult> vHoldReplayDataVector;
-	string path = FULL_REPLAY_DIR + m_Impl->ScoreKey;
+	auto path = dir + m_Impl->ScoreKey;
 
 	std::ifstream fileStream(path, ios::binary);
 	string line;
@@ -565,6 +572,14 @@ HighScore::LoadReplayDataFull()
 		while (ss >> buffer)
 			tokens.emplace_back(buffer);
 
+		// probably replaydatav1 in the wrong folder, we could throw a trace or
+		// a warn but i feel like nobody will care or do anything about it and
+		// it will just pollute the log, nobody is going to parse the log and
+		// properly split up their replays back into the respective folders
+		// so...
+		if (tokens.size() < 3)
+			return LoadReplayDataBasic(dir);
+
 		if (tokens[0] == "H") {
 			HoldReplayResult hrr;
 			hrr.row = std::stoi(tokens[1]);
@@ -580,18 +595,19 @@ HighScore::LoadReplayDataFull()
 			tokens.clear();
 			continue;
 		}
-		 bool a = buffer == "1";
-		 a = buffer == "2" || a;
-		 a = buffer == "3" || a;
-		 a = buffer == "4" || a;
-		 a = buffer == "5" || a;
-		 a = buffer == "6" || a;
-		 a = buffer == "7" || a;
-		 a = buffer == "8" || a;
-		 a = buffer == "9" || a;
-		 a = buffer == "0" || a;
-      if (!a) {
-			  Locator::getLogger()->warn("Replay data at %s appears to be HOT BROKEN GARBAGE WTF", path.c_str());
+
+		auto a = buffer == "1";
+		a = buffer == "2" || a;
+		a = buffer == "3" || a;
+		a = buffer == "4" || a;
+		a = buffer == "5" || a;
+		a = buffer == "6" || a;
+		a = buffer == "7" || a;
+		a = buffer == "8" || a;
+		a = buffer == "9" || a;
+		a = buffer == "0" || a;
+		if (!a) {
+		    Locator::getLogger()->warn("Replay data at %s appears to be HOT BROKEN GARBAGE WTF", path.c_str());
 			return false;
 		}
 
@@ -646,8 +662,8 @@ HighScore::LoadReplayDataFull()
 bool
 HighScore::HasReplayData()
 {
-	RString fullpath = FULL_REPLAY_DIR + m_Impl->ScoreKey;
-	RString basicpath = BASIC_REPLAY_DIR + m_Impl->ScoreKey;
+	auto fullpath = FULL_REPLAY_DIR + m_Impl->ScoreKey;
+	auto basicpath = BASIC_REPLAY_DIR + m_Impl->ScoreKey;
 	if (DoesFileExist(fullpath)) // check for full replays first then default to
 								 // basic replays -mina
 		return true;
@@ -1236,95 +1252,10 @@ HighScore::GetDisplayName() const
 	return GetName();
 }
 
-/* begin HighScoreList */
-void
-HighScoreList::Init()
-{
-	iNumTimesPlayed = 0;
-	vHighScores.clear();
-	HighGrade = Grade_NoData;
-}
-
-void
-HighScoreList::AddHighScore(const HighScore& hs,
-							int& iIndexOut,
-							bool bIsMachine)
-{
-	int i;
-	for (i = 0; i < static_cast<int>(vHighScores.size()); i++) {
-		if (hs >= vHighScores[i])
-			break;
-	}
-	// Unlimited score saving - Mina
-	vHighScores.insert(vHighScores.begin() + i, hs);
-	iIndexOut = i;
-	// Delete extra machine high scores in RemoveAllButOneOfEachNameAndClampSize
-	// and not here so that we don't end up with fewer than iMaxScores after
-	// removing HighScores with duplicate names.
-	//
-	HighGrade = min(hs.GetWifeGrade(), HighGrade);
-}
-
-void
-HighScoreList::IncrementPlayCount(DateTime _dtLastPlayed)
-{
-	dtLastPlayed = _dtLastPlayed;
-	iNumTimesPlayed++;
-}
-
-const HighScore&
-HighScoreList::GetTopScore() const
-{
-	if (vHighScores.empty()) {
-		static HighScore hs;
-		hs = HighScore();
-		return hs;
-	} else {
-		return vHighScores[0];
-	}
-}
-
-void
-HighScoreList::RemoveAllButOneOfEachName()
-{
-	FOREACH(HighScore, vHighScores, i)
-	{
-		for (vector<HighScore>::iterator j = i + 1; j != vHighScores.end();
-			 j++) {
-			if (i->GetName() == j->GetName()) {
-				j--;
-				vHighScores.erase(j + 1);
-			}
-		}
-	}
-}
-
-void
-HighScoreList::MergeFromOtherHSL(HighScoreList& other, bool is_machine)
-{
-	iNumTimesPlayed += other.iNumTimesPlayed;
-	if (other.dtLastPlayed > dtLastPlayed) {
-		dtLastPlayed = other.dtLastPlayed;
-	}
-	if (other.HighGrade > HighGrade) {
-		HighGrade = other.HighGrade;
-	}
-	vHighScores.insert(
-	  vHighScores.end(), other.vHighScores.begin(), other.vHighScores.end());
-	std::sort(vHighScores.begin(), vHighScores.end());
-	// Remove non-unique scores because they probably come from an accidental
-	// repeated merge. -Kyz
-	vector<HighScore>::iterator unique_end =
-	  std::unique(vHighScores.begin(), vHighScores.end());
-	vHighScores.erase(unique_end, vHighScores.end());
-	// Reverse it because sort moved the lesser scores to the top.
-	std::reverse(vHighScores.begin(), vHighScores.end());
-}
-
 XNode*
 Screenshot::CreateNode() const
 {
-	XNode* pNode = new XNode("Screenshot");
+	auto pNode = new XNode("Screenshot");
 
 	// TRICKY:  Don't write "name to fill in" markers.
 	pNode->AppendChild("FileName", sFileName);
@@ -1339,7 +1270,7 @@ Screenshot::LoadFromNode(const XNode* pNode)
 
 	pNode->GetChildValue("FileName", sFileName);
 	pNode->GetChildValue("MD5", sMD5);
-	const XNode* pHighScore = pNode->GetChild("HighScore");
+	auto pHighScore = pNode->GetChild("HighScore");
 }
 
 float
@@ -1350,7 +1281,7 @@ HighScore::RescoreToWife2Judge(int x)
 
 	const float tso[] = { 1.50f, 1.33f, 1.16f, 1.00f, 0.84f,
 						  0.66f, 0.50f, 0.33f, 0.20f };
-	float ts = tso[x - 1];
+	auto ts = tso[x - 1];
 	float p = 0;
 
 	// the typevector is only available for full replays
@@ -1377,7 +1308,7 @@ HighScore::RescoreToWife2Judge(int x)
 	p += m_Impl->iTapNoteScores[TNS_HitMine] * -8.f;
 
 	// this is a bad assumption but im leaving it here
-	float pmax = static_cast<float>(m_Impl->vOffsetVector.size() * 2);
+	auto pmax = static_cast<float>(m_Impl->vOffsetVector.size() * 2);
 
 	/* we don't want to have to access notedata when loading or rescording
 	scores so we use the vector length of offset replay data to determine point
@@ -1398,19 +1329,14 @@ HighScore::RescoreToWife2Judge(int x)
 bool
 HighScore::RescoreToWife3(float pmax)
 {
-	// can't do it
+	// HAHAHA WE NEED TO LOAD THE REPLAY DATA EVEN IF WE KNOW WE HAVE IT
 	if (!LoadReplayData())
 		return false;
-	// we can do it, but the result won't make sense
-	if (!m_Impl->bNoChordCohesion) {
-		m_Impl->WifeVersion = 2;
-		return false;
-	}
 
 	// SSRNormPercent
-	float p4 = 0.f;
+	auto p4 = 0.f;
 	// WifeScore for HighScore Judge
-	float pj = 0.f;
+	auto pj = 0.f;
 
 	// the typevector is only available for full replays
 	if (m_Impl->ReplayType == 2) {
@@ -1432,10 +1358,10 @@ HighScore::RescoreToWife3(float pmax)
 		}
 	}
 
-	float holdpoints = (m_Impl->iHoldNoteScores[HNS_LetGo] +
-						m_Impl->iHoldNoteScores[HNS_Missed]) *
-					   wife3_hold_drop_weight;
-	float minepoints =
+	auto holdpoints = (m_Impl->iHoldNoteScores[HNS_LetGo] +
+					   m_Impl->iHoldNoteScores[HNS_Missed]) *
+					  wife3_hold_drop_weight;
+	auto minepoints =
 	  m_Impl->iTapNoteScores[TNS_HitMine] * wife3_mine_hit_weight;
 
 	p4 += holdpoints + minepoints;
@@ -1454,19 +1380,18 @@ HighScore::RescoreToDPJudge(int x)
 {
 	const float tso[] = { 1.50f, 1.33f, 1.16f, 1.00f, 0.84f,
 						  0.66f, 0.50f, 0.33f, 0.20f };
-	float ts = tso[x - 1];
+	auto ts = tso[x - 1];
 	vector<int> vRescoreJudgeVector;
-	int marv = 0;
-	int perf = 0;
-	int great = 0;
-	int good = 0;
-	int boo = 0;
-	int miss = 0;
-	int m2 = 0;
-	FOREACH_CONST(float, m_Impl->vOffsetVector, f)
-	{
+	auto marv = 0;
+	auto perf = 0;
+	auto great = 0;
+	auto good = 0;
+	auto boo = 0;
+	auto miss = 0;
+	auto m2 = 0;
+	for (auto& f : m_Impl->vOffsetVector) {
 		m2 += 2;
-		float x = abs(*f * 1000.f);
+		auto x = abs(f * 1000.f);
 		if (x <= ts * 22.5f)
 			++marv;
 		else if (x <= ts * 45.f)
@@ -1491,7 +1416,7 @@ HighScore::RescoreToDPJudge(int x)
 	vRescoreJudgeVector.push_back(miss);
 	SetRescoreJudgeVector(vRescoreJudgeVector);
 
-	int p = 0;
+	auto p = 0;
 	p += (marv + perf) * 2;
 	p += great * 1;
 	p += boo * -4;
@@ -1502,7 +1427,7 @@ HighScore::RescoreToDPJudge(int x)
 		  m_Impl->iHoldNoteScores[HNS_Missed]) *
 		 -6;
 
-	float m = static_cast<float>(m_Impl->vOffsetVector.size() * 2);
+	auto m = static_cast<float>(m_Impl->vOffsetVector.size() * 2);
 	m += (m_Impl->radarValues[RadarCategory_Holds] +
 		  m_Impl->radarValues[RadarCategory_Rolls]) *
 		 6;
@@ -1544,9 +1469,9 @@ HighScore::ConvertDpToWife()
 	if (m_Impl->grade == Grade_Failed)
 		return 0.f;
 
-	float ts = 1.f;
-	float estpoints = 0.f;
-	float maxpoints = 0.f;
+	auto ts = 1.f;
+	auto estpoints = 0.f;
+	auto maxpoints = 0.f;
 	estpoints += m_Impl->iTapNoteScores[TNS_W1] * wife3(.01125f, ts);
 	estpoints += m_Impl->iTapNoteScores[TNS_W2] * wife3(.03375f, ts);
 	estpoints += m_Impl->iTapNoteScores[TNS_W3] * wife3(.0675f, ts);
@@ -1607,7 +1532,7 @@ class LunaHighScore : public Luna<HighScore>
 	}
 	static int GetDate(T* p, lua_State* L)
 	{
-		lua_pushstring(L, p->GetDateTime().GetString());
+		lua_pushstring(L, p->GetDateTime().GetString().c_str());
 		return 1;
 	}
 	static int GetSurvivalSeconds(T* p, lua_State* L)
@@ -1617,7 +1542,7 @@ class LunaHighScore : public Luna<HighScore>
 	}
 	static int IsFillInMarker(T* p, lua_State* L)
 	{
-		bool bIsFillInMarker = false;
+		auto bIsFillInMarker = false;
 		bIsFillInMarker |= p->GetName() == RANKING_TO_FILL_IN_MARKER;
 		lua_pushboolean(L, static_cast<int>(bIsFillInMarker));
 		return 1;
@@ -1646,7 +1571,7 @@ class LunaHighScore : public Luna<HighScore>
 	static int RescoreJudges(T* p, lua_State* L)
 	{
 		lua_newtable(L);
-		for (int i = 0; i < 6; ++i) {
+		for (auto i = 0; i < 6; ++i) {
 			lua_pushnumber(L, p->GetRescoreJudgeVector(IArg(1))[i]);
 			lua_rawseti(L, -2, i + 1);
 		}
@@ -1655,7 +1580,7 @@ class LunaHighScore : public Luna<HighScore>
 	}
 	static int GetRadarValues(T* p, lua_State* L)
 	{
-		RadarValues& rv = const_cast<RadarValues&>(p->GetRadarValues());
+		auto& rv = const_cast<RadarValues&>(p->GetRadarValues());
 		rv.PushSelf(L);
 		return 1;
 	}
@@ -1677,7 +1602,7 @@ class LunaHighScore : public Luna<HighScore>
 	static int GetOffsetVector(T* p, lua_State* L)
 	{
 		auto v = p->GetOffsetVector();
-		bool loaded = v.size() > 0;
+		auto loaded = v.size() > 0;
 		if (loaded || p->LoadReplayData()) {
 			if (!loaded)
 				v = p->GetOffsetVector();
@@ -1692,7 +1617,7 @@ class LunaHighScore : public Luna<HighScore>
 	static int GetNoteRowVector(T* p, lua_State* L)
 	{
 		auto* v = &(p->GetNoteRowVector());
-		bool loaded = v->size() > 0;
+		auto loaded = v->size() > 0;
 
 		auto timestamps = p->GetCopyOfSetOnlineReplayTimestampVector();
 
@@ -1720,7 +1645,7 @@ class LunaHighScore : public Luna<HighScore>
 				auto noterowfrombeat = BeatToNoteRow(timestamptobeat);
 				noterows.emplace_back(noterowfrombeat);
 			}
-			int noterowoffsetter = nerv[0] - noterows[0];
+			auto noterowoffsetter = nerv[0] - noterows[0];
 			for (auto& noterowwithoffset : noterows)
 				noterowwithoffset += noterowoffsetter;
 			GAMESTATE->SetProcessedTimingData(nullptr);
@@ -1739,7 +1664,7 @@ class LunaHighScore : public Luna<HighScore>
 	static int GetTrackVector(T* p, lua_State* L)
 	{
 		auto* v = &(p->GetTrackVector());
-		bool loaded = v->size() > 0;
+		auto loaded = v->size() > 0;
 		if (loaded || p->LoadReplayData()) {
 			if (!loaded)
 				v = &(p->GetTrackVector());
@@ -1752,7 +1677,7 @@ class LunaHighScore : public Luna<HighScore>
 	static int GetTapNoteTypeVector(T* p, lua_State* L)
 	{
 		auto* v = &(p->GetTapNoteTypeVector());
-		bool loaded = v->size() > 0;
+		auto loaded = v->size() > 0;
 		if (loaded || p->LoadReplayData()) {
 			if (!loaded)
 				v = &(p->GetTapNoteTypeVector());
@@ -1763,15 +1688,15 @@ class LunaHighScore : public Luna<HighScore>
 	}
 	static int GetJudgmentString(T* p, lua_State* L)
 	{
-		RString doot = ssprintf("%d I %d I %d I %d I %d I %d  x%d",
-								p->GetTapNoteScore(TNS_W1),
-								p->GetTapNoteScore(TNS_W2),
-								p->GetTapNoteScore(TNS_W3),
-								p->GetTapNoteScore(TNS_W4),
-								p->GetTapNoteScore(TNS_W5),
-								p->GetTapNoteScore(TNS_Miss),
-								p->GetMaxCombo());
-		lua_pushstring(L, doot);
+		auto doot = ssprintf("%d I %d I %d I %d I %d I %d  x%d",
+							 p->GetTapNoteScore(TNS_W1),
+							 p->GetTapNoteScore(TNS_W2),
+							 p->GetTapNoteScore(TNS_W3),
+							 p->GetTapNoteScore(TNS_W4),
+							 p->GetTapNoteScore(TNS_W5),
+							 p->GetTapNoteScore(TNS_Miss),
+							 p->GetMaxCombo());
+		lua_pushstring(L, doot.c_str());
 		return 1;
 	}
 
@@ -1782,17 +1707,17 @@ class LunaHighScore : public Luna<HighScore>
 	}
 	static int GetScoreid(T* p, lua_State* L)
 	{
-		lua_pushstring(L, RString(p->scoreid));
+		lua_pushstring(L, std::string(p->scoreid).c_str());
 		return 1;
 	}
 	static int GetAvatar(T* p, lua_State* L)
 	{
-		lua_pushstring(L, RString(p->avatar));
+		lua_pushstring(L, std::string(p->avatar).c_str());
 		return 1;
 	}
 	static int GetWifeVers(T* p, lua_State* L)
 	{
-		int vers = p->GetWifeVersion();
+		auto vers = p->GetWifeVersion();
 		if (vers != 3)
 			vers = 2;
 		lua_pushnumber(L, vers);
@@ -1852,58 +1777,4 @@ class LunaHighScore : public Luna<HighScore>
 };
 
 LUA_REGISTER_CLASS(HighScore)
-
-/** @brief Allow Lua to have access to the HighScoreList. */
-class LunaHighScoreList : public Luna<HighScoreList>
-{
-  public:
-	static int GetHighScores(T* p, lua_State* L)
-	{
-		lua_newtable(L);
-		for (int i = 0; i < static_cast<int>(p->vHighScores.size()); ++i) {
-			p->vHighScores[i].PushSelf(L);
-			lua_rawseti(L, -2, i + 1);
-		}
-
-		return 1;
-	}
-
-	static int GetHighestScoreOfName(T* p, lua_State* L)
-	{
-		string name = SArg(1);
-		for (size_t i = 0; i < p->vHighScores.size(); ++i) {
-			if (name == p->vHighScores[i].GetName()) {
-				p->vHighScores[i].PushSelf(L);
-				return 1;
-			}
-		}
-		lua_pushnil(L);
-		return 1;
-	}
-
-	static int GetRankOfName(T* p, lua_State* L)
-	{
-		string name = SArg(1);
-		size_t rank = 0;
-		for (size_t i = 0; i < p->vHighScores.size(); ++i) {
-			if (name == p->vHighScores[i].GetName()) {
-				// Indices from Lua are one-indexed.  +1 to adjust.
-				rank = i + 1;
-				break;
-			}
-		}
-		// The themer is expected to check for validity before using.
-		lua_pushnumber(L, rank);
-		return 1;
-	}
-
-	LunaHighScoreList()
-	{
-		ADD_METHOD(GetHighScores);
-		ADD_METHOD(GetHighestScoreOfName);
-		ADD_METHOD(GetRankOfName);
-	}
-};
-
-LUA_REGISTER_CLASS(HighScoreList)
 // lua end

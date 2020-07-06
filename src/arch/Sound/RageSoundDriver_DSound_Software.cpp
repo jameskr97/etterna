@@ -4,7 +4,6 @@
 
 #include "Core/Services/Locator.hpp"
 #include "RageUtil/Utils/RageUtil.h"
-#include "RageUtil/Sound/RageSoundManager.h"
 #include "Etterna/Singletons/PrefsManager.h"
 #include "archutils/Win32/ErrorStrings.h"
 
@@ -90,10 +89,10 @@ RageSoundDriver_DSound_Software::RageSoundDriver_DSound_Software()
 	m_pPCM = NULL;
 }
 
-RString
+std::string
 RageSoundDriver_DSound_Software::Init()
 {
-	RString sError = ds.Init();
+	std::string sError = ds.Init();
 	if (sError != "")
 		return sError;
 
@@ -127,7 +126,7 @@ RageSoundDriver_DSound_Software::Init()
 	m_MixingThread.SetName("Mixer thread");
 	m_MixingThread.Create(MixerThread_start, this);
 
-	return RString();
+	return std::string();
 }
 
 RageSoundDriver_DSound_Software::~RageSoundDriver_DSound_Software()
