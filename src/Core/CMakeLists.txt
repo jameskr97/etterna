@@ -7,4 +7,9 @@ list(APPEND CORE_CPP
         Services/Locator.cpp
         Misc/PlogLogger.cpp)
 
+if(APPLE)
+    list(APPEND CORE_HPP Arch/MacArchitecture.hpp)
+    list(APPEND CORE_CPP Arch/MacArchitecture.mm)
+endif()
+
 target_sources(Etterna PRIVATE ${CORE_HPP} ${CORE_CPP})

@@ -5,6 +5,7 @@
 // Rage global classes
 #include "Core/Services/Locator.hpp"
 #include "Core/Misc/PlogLogger.hpp"
+#include "Core/Arch/MacArchitecture.hpp"
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "Etterna/Models/Misc/LocalizedString.h"
 #include "RageUtil/Graphics/RageDisplay.h"
@@ -1009,9 +1010,11 @@ sm_main(int argc, char* argv[])
 	g_RandomNumberGenerator.seed(static_cast<unsigned int>(time(nullptr)));
 	seed_lua_prng();
 
-	// Initialize Logging
+    // Initialize Logging
     Locator::provide(new PlogLogger());
-
+    #ifdef __APPLE__
+        Locator::provide(new MacArchitecture());
+    #endif
 	RageThreadRegister thread("Main thread");
 	RageException::SetCleanupHandler(HandleException);
 
