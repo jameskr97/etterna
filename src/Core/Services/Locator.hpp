@@ -3,6 +3,7 @@
 
 #include "arch/ArchHooks/ArchHooks.h"
 #include "Core/Services/ILogger.hpp"
+#include "Core/Services/IArchitecture.hpp"
 
 #include <memory>
 
@@ -16,13 +17,16 @@ public:
     // Getters
     static ArchHooks* getArchHooks();
     static Core::ILogger* getLogger();
+    static Core::IArchitecture* getArch();
 
     // Providers
     static void provide(ArchHooks* hooks);
     static void provide(Core::ILogger* logger);
+    static void provide(Core::IArchitecture* arch);
 
 private:
     static std::unique_ptr<ArchHooks> archHooks;
     static std::unique_ptr<Core::ILogger> logger;
+    static std::unique_ptr<Core::IArchitecture> arch;
 };
 #endif //CORE_SERVICES_SERVICELOCATOR_HPP
