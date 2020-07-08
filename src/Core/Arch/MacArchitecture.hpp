@@ -20,7 +20,7 @@ public:
 
     unsigned getSystemCores() const override;
 
-    std::vector<std::string> getSystemGPUS() const override;
+    std::string getSystemGPU() const override;
 
     Core::ScreenDimensions getScreenDimensions() const override;
 

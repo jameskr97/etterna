@@ -69,7 +69,7 @@ public:
      * - GPU Model
      * - GPU VRAM
      */
-    virtual std::vector<std::string> getSystemGPUS() const = 0;
+    virtual std::string getSystemGPU() const = 0;
     
     /**
      * Get the screen dimensions of the screen the game window is currently displayed on.

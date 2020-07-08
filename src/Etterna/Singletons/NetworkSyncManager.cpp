@@ -34,8 +34,6 @@ NetworkSyncManager* NSMAN;
 // Aldo: version_num used by GetCurrentSMVersion()
 // XXX: That's probably not what you want... --rootc
 
-#include "ver.h"
-
 // Maps to associate the strings with the enum values
 std::map<ETTClientMessageTypes, std::string> ettClientMessageMap = {
 	{ ettpc_login, "login" },

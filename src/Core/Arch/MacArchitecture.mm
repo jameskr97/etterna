@@ -33,18 +33,9 @@ unsigned MacArchitecture::getSystemCores() const {
     return static_cast<unsigned>(NSProcessInfo.processInfo.activeProcessorCount);
 }
 
-std::vector<std::string> MacArchitecture::getSystemGPUS() const {
-    // Get a list of references to all MTLDevices
-    auto videoDevices = MTLCopyAllDevices();
-
-    // Result list
-    std::vector<std::string> deviceNames;
-
-    // Loop through devices, get name, add to list
-    for(id device in videoDevices)
-        deviceNames.push_back([device name].UTF8String);
-
-    return deviceNames;
+std::string MacArchitecture::getSystemGPU() const {
+    // MTLCreateSystemDefaultDevice will get the preferred gpu device
+    return [MTLCreateSystemDefaultDevice() name].UTF8String;
 }
 
 Core::ScreenDimensions MacArchitecture::getScreenDimensions() const {

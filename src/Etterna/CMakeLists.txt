@@ -13,9 +13,9 @@ add_subdirectory(Screen)
 add_subdirectory(Singletons)
 
 # Generated Source Code
-include(${PROJECT_SOURCE_DIR}/CMake/Helpers/SetupGit.cmake)
+include(${PROJECT_SOURCE_DIR}/CMake/Helpers/GameInfoSetup.cmake)
 configure_file(config.in.hpp ${CMAKE_BINARY_DIR}/generated/config.hpp)
-configure_file(verstub.in.cpp ${CMAKE_BINARY_DIR}/generated/verstub.cpp)
+configure_file(../Core/Misc/GameInfo.in.cpp ${CMAKE_BINARY_DIR}/generated/GameInfo.cpp)
 
 # Add generated source to target
-target_sources(Etterna PUBLIC ${PROJECT_BINARY_DIR}/generated/verstub.cpp)
+target_sources(Etterna PUBLIC ${PROJECT_BINARY_DIR}/generated/GameInfo.cpp)

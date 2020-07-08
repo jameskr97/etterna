@@ -6,6 +6,8 @@
 #include "Core/Services/Locator.hpp"
 #include "Core/Misc/PlogLogger.hpp"
 #include "Core/Arch/MacArchitecture.hpp"
+#include "Core/Misc/GameInfo.hpp"
+
 #include "Etterna/Singletons/GameSoundManager.h"
 #include "Etterna/Models/Misc/LocalizedString.h"
 #include "RageUtil/Graphics/RageDisplay.h"
@@ -58,7 +60,6 @@
 #include "Etterna/Singletons/MessageManager.h"
 #include "Etterna/Singletons/NetworkSyncManager.h"
 #include "Etterna/Singletons/StatsManager.h"
-#include "ver.h"
 #include "discord_rpc.h"
 
 #ifdef _WIN32
@@ -970,35 +971,6 @@ MountTreeOfZips(const std::string& dir)
 	}
 }
 
-static void
-WriteLogHeader()
-{
-	Locator::getLogger()->info("{}{}", PRODUCT_FAMILY, product_version);
-
-	Locator::getLogger()->info("(build {})", ::version_git_hash);
-
-	time_t cur_time;
-	time(&cur_time);
-	struct tm now;
-	localtime_r(&cur_time, &now);
-
-	Locator::getLogger()->info("\tVerbosity: {}", PREFSMAN->m_verbose_log.ToString().c_str());
-	Locator::getLogger()->trace(" ");
-
-	if (g_argc > 1) {
-		std::string args;
-		for (int i = 1; i < g_argc; ++i) {
-			if (i > 1)
-				args += " ";
-
-			// surround all params with some marker, as they might have
-			// whitespace. using [[ and ]], as they are not likely to be in the
-			// params.
-			args += ssprintf("[[%s]]", g_argv[i]);
-		}
-		Locator::getLogger()->info("Command line args (count={}): {}", (g_argc - 1), args.c_str());
-	}
-}
 
 static LocalizedString COULDNT_OPEN_LOADING_WINDOW(
   "LoadingWindow",
@@ -1015,6 +987,17 @@ sm_main(int argc, char* argv[])
     #ifdef __APPLE__
         Locator::provide(new MacArchitecture());
     #endif
+
+    // Log Header
+    Locator::getLogger()->info("Initializing {} v{} compiled on {}", Core::GameInfo::GAME_TITLE, Core::GameInfo::GAME_VERSION, Core::GameInfo::BUILD_DATE);
+    Locator::getLogger()->info("Git Version on {}", Core::GameInfo::GIT_HASH);
+    Locator::getLogger()->info("System CPU: {}", Locator::getArch()->getSystemCPU());
+    Locator::getLogger()->info("Primary GPU: {}", Locator::getArch()->getSystemGPU());
+
+    std::size_t ram = Locator::getArch()->getSystemMemory() / 1024 / 1024 / 1024;
+    Locator::getLogger()->info("System RAM: {} GB", ram);
+
+
 	RageThreadRegister thread("Main thread");
 	RageException::SetCleanupHandler(HandleException);
 
@@ -1063,7 +1046,7 @@ sm_main(int argc, char* argv[])
 		return 0;
 	}
 
-	WriteLogHeader();
+//	WriteLogHeader();
 
 	// Set up alternative filesystem trees.
 	if (PREFSMAN->m_sAdditionalFolders.Get() != "") {

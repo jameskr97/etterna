@@ -11,7 +11,7 @@
 #include "Etterna/FileTypes/XmlFile.h"
 #include "Etterna/FileTypes/XmlFileUtil.h"
 #include "arch/LoadingWindow/LoadingWindow.h"
-#include "ver.h"
+#include "Core/Misc/GameInfo.hpp"
 
 // only used for Version()
 #ifdef _WIN32
@@ -67,7 +67,7 @@ LuaInformation()
 	pNode->AppendAttr("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 	pNode->AppendAttr("xsi:schemaLocation", "http://www.stepmania.com Lua.xsd");
 
-	pNode->AppendChild("Version", string(PRODUCT_FAMILY) + product_version);
+	pNode->AppendChild("Version", string(PRODUCT_FAMILY) + Core::GameInfo::GAME_VERSION);
 	pNode->AppendChild("Date", DateTime::GetNowDate().GetString());
 
 	XmlFileUtil::SaveToFile(pNode, "Lua.xml", "Lua.xsl");

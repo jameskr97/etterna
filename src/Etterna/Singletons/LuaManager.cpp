@@ -5,12 +5,12 @@
 #include "Etterna/Singletons/MessageManager.h"
 #include "RageUtil/File/RageFile.h"
 #include "Core/Services/Locator.hpp"
+#include "Core/Misc/GameInfo.hpp"
 #include "RageUtil/Misc/RageThreads.h"
 #include "RageUtil/Misc/RageTypes.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Etterna/FileTypes/XmlFile.h"
 #include "arch/Dialog/Dialog.h"
-#include "ver.h"
 
 #include <array>
 #include <cassert>
@@ -1480,7 +1480,7 @@ GetFuncArg(int n, lua_State* L)
 
 #include "Etterna/Globals/ProductInfo.h"
 LuaFunction(ProductFamily, (std::string)PRODUCT_FAMILY);
-LuaFunction(ProductVersion, (std::string)product_version);
+LuaFunction(ProductVersion, (std::string)Core::GameInfo::GAME_VERSION);
 LuaFunction(ProductID, (std::string)PRODUCT_ID);
 
 LuaFunction(scale, SCALE(FArg(1), FArg(2), FArg(3), FArg(4), FArg(5)));

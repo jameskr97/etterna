@@ -17,13 +17,12 @@
 #include "CrashHandlerInternal.h"
 #include "Etterna/Globals/ProductInfo.h"
 #include "Core/Services/Locator.hpp"
+#include "Core/Misc/GameInfo.hpp"
 
 
 #ifdef __APPLE__
 #include "archutils/Darwin/Crash.h"
 #endif
-
-#include "ver.h"
 
 bool
 child_read(int fd, void* p, int size);
@@ -202,8 +201,8 @@ child_process()
 		exit(1);
 	}
 
-	fprintf(CrashDump, "%s%s crash report", PRODUCT_FAMILY, product_version);
-	fprintf(CrashDump, " (build %s)", ::version_git_hash);
+	fprintf(CrashDump, "%s%s crash report", PRODUCT_FAMILY, Core::GameInfo::GAME_VERSION);
+	fprintf(CrashDump, " (build %s)", Core::GameInfo::GIT_HASH);
 	fprintf(CrashDump, "\n");
 	fprintf(CrashDump, "--------------------------------------\n");
 	fprintf(CrashDump, "\n");
