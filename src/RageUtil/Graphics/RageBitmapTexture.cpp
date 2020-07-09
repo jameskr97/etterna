@@ -155,15 +155,6 @@ RageBitmapTexture::Create()
 	m_iImageWidth = m_iSourceWidth;
 	m_iImageHeight = m_iSourceHeight;
 
-	/* if "doubleres" (high resolution) and we're not allowing high res
-	 * textures, then image dimensions are half of the source */
-	if (sHintString.find("doubleres") != string::npos) {
-		if (!StepMania::GetHighResolutionTextures()) {
-			m_iImageWidth = m_iImageWidth / 2;
-			m_iImageHeight = m_iImageHeight / 2;
-		}
-	}
-
 	/* image size cannot exceed max size */
 	m_iImageWidth = min(m_iImageWidth, actualID.iMaxSize);
 	m_iImageHeight = min(m_iImageHeight, actualID.iMaxSize);
