@@ -227,12 +227,6 @@ RageDisplay::EndFrame()
 }
 
 void
-RageDisplay::BeginConcurrentRendering()
-{
-	this->SetDefaultRenderStates();
-}
-
-void
 RageDisplay::StatsAddVerts(int iNumVertsRendered)
 {
 	g_iVertsRenderedSinceLastCheck += iNumVertsRendered;
