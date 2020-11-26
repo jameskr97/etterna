@@ -229,15 +229,6 @@ FixLittleEndian()
 	}
 }
 
-static void
-TurnOffHardwareVBO()
-{
-	if (GLEW_ARB_vertex_buffer_object) {
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
-	}
-}
-
 RageDisplay_Legacy::RageDisplay_Legacy()
 {
 	if (PREFSMAN->m_verbose_log > 1) {
@@ -894,8 +885,6 @@ class RageCompiledGeometrySWOGL : public RageCompiledGeometry
 	}
 	void Draw(int iMeshIndex) const override
 	{
-		TurnOffHardwareVBO();
-
 		const auto& meshInfo = m_vMeshInfo[iMeshIndex];
 
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -1296,7 +1285,6 @@ RageDisplay_Legacy::DeleteCompiledGeometry(RageCompiledGeometry* p)
 void
 RageDisplay_Legacy::DrawQuadsInternal(const RageSpriteVertex v[], int iNumVerts)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1307,7 +1295,6 @@ void
 RageDisplay_Legacy::DrawQuadStripInternal(const RageSpriteVertex v[],
 										  int iNumVerts)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1344,8 +1331,6 @@ RageDisplay_Legacy::DrawSymmetricQuadStripInternal(const RageSpriteVertex v[],
 		vIndices[i * 12 + 10] = i * 3 + 2;
 		vIndices[i * 12 + 11] = i * 3 + 5;
 	}
-
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1355,7 +1340,6 @@ RageDisplay_Legacy::DrawSymmetricQuadStripInternal(const RageSpriteVertex v[],
 void
 RageDisplay_Legacy::DrawFanInternal(const RageSpriteVertex v[], int iNumVerts)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1365,7 +1349,6 @@ RageDisplay_Legacy::DrawFanInternal(const RageSpriteVertex v[], int iNumVerts)
 void
 RageDisplay_Legacy::DrawStripInternal(const RageSpriteVertex v[], int iNumVerts)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1376,7 +1359,6 @@ void
 RageDisplay_Legacy::DrawTrianglesInternal(const RageSpriteVertex v[],
 										  int iNumVerts)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	SetupVertices(v, iNumVerts);
@@ -1387,7 +1369,6 @@ void
 RageDisplay_Legacy::DrawCompiledGeometryInternal(const RageCompiledGeometry* p,
 												 int iMeshIndex)
 {
-	TurnOffHardwareVBO();
 	SendCurrentMatrices();
 
 	p->Draw(iMeshIndex);
