@@ -61,13 +61,6 @@ void ShaderGL::setUniform1i(const std::string &name, int value) {
     GLCall(glUniform1i(this->getUniformLocation(name), value));
 }
 
-int ShaderGL::getUniformLocation(const std::string &name) const {
-    GLCall(int location = glGetUniformLocation(programID, name.c_str()));
-    if(location == -1)
-        std::cout << "Warning: Uniform \"" << name << "\" does not exist.\n";
-    return location;
-}
-
 unsigned int ShaderGL::compileShader(unsigned int type, const ghc::filesystem::path &path) {
     // Load Source
     RageFile file;
@@ -103,4 +96,11 @@ unsigned int ShaderGL::compileShader(unsigned int type, const ghc::filesystem::p
 
 bool ShaderGL::isActive() {
     return this->programID != 0;
+}
+
+int ShaderGL::getUniformLocation(const std::string &name) const {
+    GLCall(int location = glGetUniformLocation(programID, name.c_str()));
+    if(location == -1)
+        std::cout << "Warning: Uniform \"" << name << "\" does not exist.\n";
+    return location;
 }

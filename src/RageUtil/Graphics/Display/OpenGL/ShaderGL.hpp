@@ -27,7 +27,6 @@ public:
 
     // Uniform
     void setUniform1i(const std::string& name, int value);
-    int getUniformLocation(const std::string& name) const;
 
     // Compilation
     static unsigned int compileShader(unsigned int type, const ghc::filesystem::path &path);
@@ -36,6 +35,9 @@ private:
     // Fields
     unsigned int programID;
     std::vector<unsigned int> shaderIDs;
+
+    // Functions
+    int getUniformLocation(const std::string& name) const;
 };
 
 

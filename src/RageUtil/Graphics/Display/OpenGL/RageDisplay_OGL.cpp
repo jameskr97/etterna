@@ -1617,10 +1617,9 @@ void RageDisplay_Legacy::SetEffectMode(EffectMode effect) {
 	shader->setUniform1i("Texture2", 1);
 
 	if (effect == EffectMode_YUYV422) {
-		const auto iTextureWidthUniform = shader->getUniformLocation("TextureWidth");
 		GLint iWidth;
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &iWidth);
-		glUniform1i(iTextureWidthUniform, iWidth);
+		shader->setUniform1i("TextureWidth", iWidth);
 	}
 
 	DebugAssertNoGLError();
