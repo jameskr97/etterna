@@ -3005,9 +3005,3 @@ RageDisplay_Legacy::SetCelShaded(int stage)
 			break;
 	}
 }
-
-bool
-RageDisplay_Legacy::IsD3DInternal()
-{
-	return false;
-}
