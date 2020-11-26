@@ -254,190 +254,55 @@ RageDisplay_Legacy::RageDisplay_Legacy()
 	g_bTextureMatrixShader = 0;
 }
 
-std::string
-GetInfoLog(GLhandleARB h)
-{
-	GLint iLength;
-	glGetObjectParameterivARB(h, GL_OBJECT_INFO_LOG_LENGTH_ARB, &iLength);
-	if (!iLength)
-		return std::string();
-
-	auto* pInfoLog = new GLcharARB[iLength];
-	glGetInfoLogARB(h, iLength, &iLength, pInfoLog);
-	std::string sRet = pInfoLog;
-	delete[] pInfoLog;
-	TrimRight(sRet);
-	return sRet;
-}
-
-GLhandleARB CompileShader(GLenum ShaderType, std::string sFile) {
-	/* XXX: This would not be necessary if it wasn't for the special case for
-	 * Cel. */
-	if (ShaderType == GL_FRAGMENT_SHADER_ARB &&
-		!glewIsSupported("GL_VERSION_2_0")) {
-		Locator::getLogger()->warn("Fragment shaders not supported by driver. Some effects will "
-				  "not be available.");
-		return 0;
-	}
-
-	std::string sBuffer;
-	{
-		RageFile file;
-		if (!file.Open(sFile)) {
-			Locator::getLogger()->warn("Error compiling shader {}: {}",
-					  sFile.c_str(),
-					  file.GetError().c_str());
-			return 0;
-		}
-
-		if (file.Read(sBuffer, file.GetFileSize()) == -1) {
-			Locator::getLogger()->warn("Error compiling shader {}: {}",
-					  sFile.c_str(),
-					  file.GetError().c_str());
-			return 0;
-		}
-	}
-
-	if (PREFSMAN->m_verbose_log > 1)
-		Locator::getLogger()->trace("Compiling shader {}", sFile.c_str());
-	const auto hShader = glCreateShaderObjectARB(ShaderType);
-	vector<const GLcharARB*> apData;
-	vector<GLint> aiLength;
-	apData.push_back("#line 1\n");
-	aiLength.push_back(8);
-
-	apData.push_back(sBuffer.data());
-	aiLength.push_back(sBuffer.size());
-	glShaderSourceARB(hShader, apData.size(), &apData[0], &aiLength[0]);
-
-	glCompileShaderARB(hShader);
-
-	const auto sInfo = GetInfoLog(hShader);
-
-	auto bCompileStatus = GL_FALSE;
-	glGetObjectParameterivARB(
-	  hShader, GL_OBJECT_COMPILE_STATUS_ARB, &bCompileStatus);
-	if (!bCompileStatus) {
-		Locator::getLogger()->warn("Error compiling shader {}:\n{}", sFile.c_str(), sInfo.c_str());
-		glDeleteObjectARB(hShader);
-		return 0;
-	}
-
-	if (!sInfo.empty())
-		Locator::getLogger()->trace("Messages compiling shader {}:\n{}", sFile.c_str(), sInfo.c_str());
-
-	return hShader;
-}
-
-GLhandleARB LoadShader(GLenum ShaderType, std::string sFile) {
-	/* Vertex shaders are supported by more hardware than fragment shaders.
-	 * If this causes any trouble I will have to up the requirement for both
-	 * of them to at least GL 2.0. Regardless we need basic GLSL support.
-	 * -Colby */
-	if (!glewIsSupported("GL_ARB_shading_language_100 GL_ARB_shader_objects") ||
-		(ShaderType == GL_FRAGMENT_SHADER_ARB &&
-		 !glewIsSupported("GL_VERSION_2_0")) ||
-		(ShaderType == GL_VERTEX_SHADER_ARB &&
-		 !glewIsSupported("GL_ARB_vertex_shader"))) {
-		Locator::getLogger()->warn("{} shaders not supported by driver. Some effects will not "
-				  "be available.",
-				  (ShaderType == GL_FRAGMENT_SHADER_ARB) ? "Fragment"
-														 : "Vertex");
-		return 0;
-	}
-
-	// XXX: dumb, but I don't feel like refactoring ragedisplay for this. -Colby
-	GLhandleARB secondaryShader = 0;
-	if (sFile == "Data/Shaders/GLSL/Cel.vert")
-		secondaryShader = CompileShader(
-		  GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Cel.frag");
-	else if (sFile == "Data/Shaders/GLSL/Shell.vert")
-		secondaryShader = CompileShader(
-		  GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Shell.frag");
-
-	const auto hShader = CompileShader(ShaderType, sFile);
-	if (hShader == 0)
-		return 0;
-
-	const auto hProgram = glCreateProgramObjectARB();
-	glAttachObjectARB(hProgram, hShader);
-
-	if (secondaryShader) {
-		glAttachObjectARB(hProgram, secondaryShader);
-		glDeleteObjectARB(secondaryShader);
-	}
-	glDeleteObjectARB(hShader);
-
-	// Link the program.
-	glLinkProgramARB(hProgram);
-	GLint bLinkStatus = false;
-	glGetObjectParameterivARB(
-	  hProgram, GL_OBJECT_LINK_STATUS_ARB, &bLinkStatus);
-
-	if (!bLinkStatus) {
-		Locator::getLogger()->warn("Error linking shader {}: {}", sFile.c_str(), GetInfoLog(hProgram).c_str());
-		glDeleteObjectARB(hProgram);
-		return 0;
-	}
-	return hProgram;
-}
 
 static int g_iAttribTextureMatrixScale;
 
-static GLhandleARB g_bUnpremultiplyShader = 0;
-static GLhandleARB g_bColorBurnShader = 0;
-static GLhandleARB g_bColorDodgeShader = 0;
-static GLhandleARB g_bVividLightShader = 0;
-static GLhandleARB g_hHardMixShader = 0;
-static GLhandleARB g_hOverlayShader = 0;
-static GLhandleARB g_hScreenShader = 0;
-static GLhandleARB g_hYUYV422Shader = 0;
-static GLhandleARB g_gShellShader = 0;
-static GLhandleARB g_gCelShader = 0;
 
-void InitShaders() {
+void RageDisplay_Legacy::setupGLShaders() {
 	// used for scrolling textures (I think)
-	g_bTextureMatrixShader = LoadShader(GL_VERTEX_SHADER_ARB,"Data/Shaders/GLSL/Texture matrix scaling.vert");
+	g_bTextureMatrixShader = ShaderGL::compileShader(GL_VERTEX_SHADER,"Data/Shaders/GLSL/Texture matrix scaling.vert");
 
 	// these two are for dancing characters and are both actually shader pairs
-	g_gShellShader = LoadShader(GL_VERTEX_SHADER_ARB, "Data/Shaders/GLSL/Shell.vert");
-	g_gCelShader = LoadShader(GL_VERTEX_SHADER_ARB, "Data/Shaders/GLSL/Cel.vert");
+	shaderGShell = ShaderGL("Data/Shaders/GLSL/Shell.vert", "Data/Shaders/GLSL/Shell.frag");
+	shaderGCel = ShaderGL("Data/Shaders/GLSL/Cel.vert", "Data/Shaders/GLSL/Cel.frag");
 
 	// effects
-	g_bUnpremultiplyShader = LoadShader(GL_FRAGMENT_SHADER_ARB,"Data/Shaders/GLSL/Unpremultiply.frag");
-	g_bColorBurnShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Color burn.frag");
-	g_bColorDodgeShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Color dodge.frag");
-	g_bVividLightShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Vivid light.frag");
-	g_hHardMixShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Hard mix.frag");
-	g_hOverlayShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Overlay.frag");
-	g_hScreenShader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/Screen.frag");
-	g_hYUYV422Shader = LoadShader(GL_FRAGMENT_SHADER_ARB, "Data/Shaders/GLSL/YUYV422.frag");
+	shaderUnPreMultiply = ShaderGL(GL_FRAGMENT_SHADER,"Data/Shaders/GLSL/Unpremultiply.frag");
+	shaderColorBurn = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Color burn.frag");
+	shaderColorDodge = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Color dodge.frag");
+	shaderVividLight = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Vivid light.frag");
+	shaderHHardMix = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Hard mix.frag");
+	shaderHOverlay = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Overlay.frag");
+	shaderHScreen = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/Screen.frag");
+	shaderHYUYV422 = ShaderGL(GL_FRAGMENT_SHADER, "Data/Shaders/GLSL/YUYV422.frag");
 
 	// Bind attributes.
-	if (g_bTextureMatrixShader) {
-		FlushGLErrors();
-		g_iAttribTextureMatrixScale = glGetAttribLocationARB(g_bTextureMatrixShader, "TextureMatrixScale");
-		if (g_iAttribTextureMatrixScale == -1) {
-			Locator::getLogger()->trace(R"(Scaling shader link failed: couldn't bind attribute "TextureMatrixScale")");
-			glDeleteObjectARB(g_bTextureMatrixShader);
-			g_bTextureMatrixShader = 0;
-		} else {
-			AssertNoGLError();
-
-			/* Older Catalyst drivers seem to throw GL_INVALID_OPERATION here.
-			 */
-			glVertexAttrib2fARB(g_iAttribTextureMatrixScale, 1, 1);
-			const auto iError = glGetError();
-			if (iError == GL_INVALID_OPERATION) {
-				Locator::getLogger()->trace("Scaling shader failed: glVertexAttrib2fARB "
-						   "returned GL_INVALID_OPERATION");
-				glDeleteObjectARB(g_bTextureMatrixShader);
-				g_bTextureMatrixShader = 0;
-			} else {
-				ASSERT_M(iError == GL_NO_ERROR, GLToString(iError));
-			}
-		}
+	if (!g_bTextureMatrixShader){
+	    Locator::getLogger()->trace("TextureMatrixShader not supported.");
+	    return;
 	}
+
+    FlushGLErrors();
+    g_iAttribTextureMatrixScale = glGetAttribLocationARB(g_bTextureMatrixShader, "TextureMatrixScale");
+    if (g_iAttribTextureMatrixScale == -1) {
+        Locator::getLogger()->trace(R"(Scaling shader link failed: couldn't bind attribute "TextureMatrixScale")");
+        glDeleteObjectARB(g_bTextureMatrixShader);
+        g_bTextureMatrixShader = 0;
+        return;
+    }
+    AssertNoGLError();
+
+    /* Older Catalyst drivers seem to throw GL_INVALID_OPERATION here.
+     */
+    glVertexAttrib2fARB(g_iAttribTextureMatrixScale, 1, 1);
+    const auto iError = glGetError();
+    if (iError == GL_INVALID_OPERATION) {
+        Locator::getLogger()->trace("Scaling shader failed: glVertexAttrib2fARB returned GL_INVALID_OPERATION");
+        glDeleteObjectARB(g_bTextureMatrixShader);
+        g_bTextureMatrixShader = 0;
+    } else {
+        ASSERT_M(iError == GL_NO_ERROR, GLToString(iError));
+    }
 }
 
 void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
@@ -696,8 +561,7 @@ RageDisplay_Legacy::ResolutionChanged()
 // bNewDeviceOut is set true if a new device was created and textures
 // need to be reloaded.
 std::string
-RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNewDeviceOut)
-{
+RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNewDeviceOut) {
 	// LOG->Warn( "RageDisplay_Legacy::TryVideoMode( %d, %d, %d, %d, %d, %d )",
 	// p.windowed, p.width, p.height, p.bpp, p.rate, p.vsync );
 
@@ -727,7 +591,7 @@ RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNewDeviceOut)
 		/* Recreate all vertex buffers. */
 		InvalidateObjects();
 
-		InitShaders();
+		setupGLShaders();
 	}
 
 // I'm not sure this is correct -Colby
@@ -1731,91 +1595,52 @@ RageDisplay_Legacy::SetTextureFiltering(TextureUnit tu, bool b)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, iMinFilter);
 }
 
-void
-RageDisplay_Legacy::SetEffectMode(EffectMode effect)
-{
+void RageDisplay_Legacy::SetEffectMode(EffectMode effect) {
 	if (!GLEW_ARB_fragment_program || !GLEW_ARB_shading_language_100 ||
 		!GLEW_ARB_shader_objects)
 		return;
 
-	GLhandleARB hShader = 0;
+    ShaderGL *shader;
 	switch (effect) {
+		case EffectMode_Unpremultiply: shader = &shaderUnPreMultiply; break;
+		case EffectMode_ColorBurn: shader = &shaderColorBurn; break;
+		case EffectMode_ColorDodge: shader = &shaderColorDodge; break;
+		case EffectMode_VividLight: shader = &shaderVividLight; break;
+		case EffectMode_HardMix: shader = &shaderHHardMix; break;
+		case EffectMode_Overlay: shader = &shaderHOverlay; break;
+		case EffectMode_Screen: shader = &shaderHScreen; break;
+		case EffectMode_YUYV422: shader = &shaderHYUYV422; break;
 		case EffectMode_Normal:
-			hShader = 0;
-			break;
-		case EffectMode_Unpremultiply:
-			hShader = g_bUnpremultiplyShader;
-			break;
-		case EffectMode_ColorBurn:
-			hShader = g_bColorBurnShader;
-			break;
-		case EffectMode_ColorDodge:
-			hShader = g_bColorDodgeShader;
-			break;
-		case EffectMode_VividLight:
-			hShader = g_bVividLightShader;
-			break;
-		case EffectMode_HardMix:
-			hShader = g_hHardMixShader;
-			break;
-		case EffectMode_Overlay:
-			hShader = g_hOverlayShader;
-			break;
-		case EffectMode_Screen:
-			hShader = g_hScreenShader;
-			break;
-		case EffectMode_YUYV422:
-			hShader = g_hYUYV422Shader;
-			break;
-		default:
-			break;
+		default: return;
 	}
 
 	DebugFlushGLErrors();
-	glUseProgramObjectARB(hShader);
-	if (hShader == 0)
-		return;
-	const auto iTexture1 = glGetUniformLocationARB(hShader, "Texture1");
-	const auto iTexture2 = glGetUniformLocationARB(hShader, "Texture2");
-	glUniform1iARB(iTexture1, 0);
-	glUniform1iARB(iTexture2, 1);
+	shader->setUniform1i("Texture1", 0);
+	shader->setUniform1i("Texture2", 1);
 
 	if (effect == EffectMode_YUYV422) {
-		const auto iTextureWidthUniform =
-		  glGetUniformLocationARB(hShader, "TextureWidth");
+		const auto iTextureWidthUniform = shader->getUniformLocation("TextureWidth");
 		GLint iWidth;
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &iWidth);
-		glUniform1iARB(iTextureWidthUniform, iWidth);
+		glUniform1i(iTextureWidthUniform, iWidth);
 	}
 
 	DebugAssertNoGLError();
 }
 
-bool
-RageDisplay_Legacy::IsEffectModeSupported(EffectMode effect)
-{
-	switch (effect) {
-		case EffectMode_Normal:
-			return true;
-		case EffectMode_Unpremultiply:
-			return g_bUnpremultiplyShader != 0;
-		case EffectMode_ColorBurn:
-			return g_bColorBurnShader != 0;
-		case EffectMode_ColorDodge:
-			return g_bColorDodgeShader != 0;
-		case EffectMode_VividLight:
-			return g_bVividLightShader != 0;
-		case EffectMode_HardMix:
-			return g_hHardMixShader != 0;
-		case EffectMode_Overlay:
-			return g_hOverlayShader != 0;
-		case EffectMode_Screen:
-			return g_hScreenShader != 0;
-		case EffectMode_YUYV422:
-			return g_hYUYV422Shader != 0;
-		default:
-			return false;
-	}
+bool RageDisplay_Legacy::IsEffectModeSupported(EffectMode effect) {
+    switch (effect) {
+        case EffectMode_Normal: return true;
+        case EffectMode_Unpremultiply: return shaderUnPreMultiply.isActive();
+        case EffectMode_ColorBurn: return shaderColorBurn.isActive();
+        case EffectMode_ColorDodge: return shaderColorDodge.isActive();
+        case EffectMode_VividLight: return shaderVividLight.isActive();
+        case EffectMode_HardMix: return shaderHHardMix.isActive();
+        case EffectMode_Overlay: return shaderHOverlay.isActive();
+        case EffectMode_Screen: return shaderHScreen.isActive();
+        case EffectMode_YUYV422: return shaderHYUYV422.isActive();
+        default: return false;
+    }
 }
 
 void
@@ -2880,14 +2705,8 @@ RageDisplay_Legacy::SetCelShaded(int stage)
 		return; // not supported
 
 	switch (stage) {
-		case 1:
-			glUseProgramObjectARB(g_gShellShader);
-			break;
-		case 2:
-			glUseProgramObjectARB(g_gCelShader);
-			break;
-		default:
-			glUseProgramObjectARB(0);
-			break;
+		case 1: shaderGShell.bind(); break;
+		case 2: shaderGCel.bind(); break;
+		default: ShaderGL::unbind(); break;
 	}
 }
