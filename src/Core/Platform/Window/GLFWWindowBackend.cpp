@@ -18,6 +18,15 @@ namespace Core::Platform::Window {
      * TODO: Callback for minimize, restore, maximize
      */
     void GLFWWindowBackend::create() {
+		// This set of window hints is only required on macOS as that platform no
+        // longer prefers OpenGL and would generate a OpenGL 2.0 graphics context.
+#ifdef __APPLE__
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#endif
+
         // Create Window
         this->windowHandle = glfwCreateWindow(
                 static_cast<int>(size.width),static_cast<int>(size.height),
