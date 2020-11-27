@@ -21,10 +21,6 @@
 #include <set>
 #include <map>
 
-#ifdef _WIN32
-#include <GL/wglew.h>
-#endif
-
 #if defined(_MSC_VER)
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glu32.lib")
@@ -735,12 +731,12 @@ RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNewDeviceOut)
 #ifdef _WIN32
 	/* Set vsync the Windows way, if we can.  (What other extensions are there
 	 * to do this, for other archs?) */
-	if (wglewIsSupported("WGL_EXT_swap_control"))
-		wglSwapIntervalEXT(p.vsync);
-	else
-		return std::string(
-		  "The WGL_EXT_swap_control extension is not supported on "
-		  "your computer.");
+//	if (wglewIsSupported("WGL_EXT_swap_control"))
+//		wglSwapIntervalEXT(p.vsync);
+//	else
+//		return std::string(
+//		  "The WGL_EXT_swap_control extension is not supported on "
+//		  "your computer.");
 #endif
 
 	ResolutionChanged();
