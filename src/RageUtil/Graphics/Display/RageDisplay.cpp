@@ -951,12 +951,11 @@ RageDisplay::SaveScreenshot(const std::string& sPath, GraphicsFileFormat format)
 	 * to output screenshots in a strange (non-1) sample aspect ratio. */
 	if (format != SAVE_LOSSLESS && format != SAVE_LOSSLESS_SENSIBLE) {
 		// Maintain the DAR.
-		ASSERT((*GetActualVideoModeParams()).fDisplayAspectRatio > 0);
+		ASSERT( PREFSMAN->m_fDisplayAspectRatio > 0);
 		const auto iHeight = 480;
 		// This used to be lrintf. However, lrintf causes odd resolutions like
 		// 639x480 (4:3) and 853x480 (16:9). ceilf gives correct values. -aj
-		const auto iWidth = static_cast<int>(
-		  ceilf(iHeight * (*GetActualVideoModeParams()).fDisplayAspectRatio));
+		const auto iWidth = static_cast<int>(ceilf(iHeight * PREFSMAN->m_fDisplayAspectRatio));
 		timer.Touch();
 		RageSurfaceUtils::Zoom(surface, iWidth, iHeight);
 		//		LOG->Trace( "%ix%i -> %ix%i (%.3f) in %f seconds", surface->w,

@@ -12,6 +12,7 @@
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "RageUtil/Misc/RageTypes.h"
 #include "RageUtil/Utils/RageUtil.h"
+#include "Core/Platform/Platform.hpp"
 
 #include "arch/LowLevelWindow/LowLevelWindow.h"
 
@@ -449,7 +450,6 @@ void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
 		throw std::runtime_error(sError);
 
 	// Log driver details
-	g_pWind->LogDebugInformation();
     Locator::getLogger()->trace("OGL Vendor: {}", glGetString(GL_VENDOR));
     Locator::getLogger()->trace("OGL Renderer: {}", glGetString(GL_RENDERER));
     Locator::getLogger()->trace("OGL Version: {}", glGetString(GL_VERSION));
@@ -473,7 +473,7 @@ void
 RageDisplay_Legacy::GetDisplaySpecs(DisplaySpecs& out) const
 {
 	out.clear();
-	g_pWind->GetDisplaySpecs(out);
+//	g_pWind->GetDisplaySpecs(out);
 }
 
 static void
@@ -658,8 +658,9 @@ RageDisplay_Legacy::UseOffscreenRenderTarget()
 		param.bWithDepthBuffer = true;
 		param.bWithAlpha = true;
 		param.bFloat = false;
-		param.iWidth = (*GetActualVideoModeParams()).width;
-		param.iHeight = (*GetActualVideoModeParams()).height;
+		auto dims = Core::Platform::getWindowDimensions();
+		param.iWidth = dims.width;
+		param.iHeight = dims.height;
 		const RageTextureID id(
 		  ssprintf("FullscreenTexture%dx%d", param.iWidth, param.iHeight));
 		// See if we have this texture loaded already
@@ -761,8 +762,9 @@ RageDisplay_Legacy::BeginFrame()
 	/* We do this in here, rather than ResolutionChanged, or we won't update the
 	 * viewport for the concurrent rendering context. */
 
-	const auto fWidth = (*g_pWind->GetActualVideoModeParams()).windowWidth;
-	const auto fHeight = (*g_pWind->GetActualVideoModeParams()).windowHeight;
+	auto dims = Core::Platform::getWindowDimensions();
+	const auto fWidth = dims.width;
+	const auto fHeight = dims.height;
 	glViewport(0, 0, fWidth, fHeight);
 	glClearColor(0, 0, 0, 0);
 	SetZWrite(true);
@@ -789,12 +791,13 @@ RageDisplay_Legacy::EndFrame()
 		fullscreenSprite.SetHorizAlign(align_left);
 		fullscreenSprite.SetVertAlign(align_top);
 		CameraPushMatrix();
+		auto dims = Core::Platform::getWindowDimensions();
 		LoadMenuPerspective(
 		  0,
-		  static_cast<float>(GetActualVideoModeParams()->width),
-		  static_cast<float>(GetActualVideoModeParams()->height),
-		  static_cast<float>(GetActualVideoModeParams()->width) / 2.f,
-		  static_cast<float>(GetActualVideoModeParams()->height) / 2.f);
+		  static_cast<float>(dims.width),
+		  static_cast<float>(dims.height),
+		  static_cast<float>(dims.width) / 2.f,
+		  static_cast<float>(dims.height) / 2.f);
 		fullscreenSprite.Draw();
 		CameraPopMatrix();
 	}
@@ -819,8 +822,9 @@ RageDisplay_Legacy::EndFrame()
 RageSurface*
 RageDisplay_Legacy::CreateScreenshot()
 {
-	const auto width = (*g_pWind->GetActualVideoModeParams()).width;
-	const auto height = (*g_pWind->GetActualVideoModeParams()).height;
+	auto dims = Core::Platform::getWindowDimensions();
+	const auto width = dims.width;
+	const auto height = dims.height;
 
 	RageSurface* image = nullptr;
 	if (offscreenRenderTarget) {
@@ -849,10 +853,11 @@ RageDisplay_Legacy::CreateScreenshot()
 		glReadBuffer(GL_FRONT);
 		DebugAssertNoGLError();
 
+		auto dims = Core::Platform::getWindowDimensions();
 		glReadPixels(0,
 					 0,
-					 (*g_pWind->GetActualVideoModeParams()).width,
-					 (*g_pWind->GetActualVideoModeParams()).height,
+					 dims.width,
+					 dims.height,
 					 GL_RGBA,
 					 GL_UNSIGNED_BYTE,
 					 image->pixels);
@@ -1557,11 +1562,9 @@ RageDisplay_Legacy::DrawLineStripInternal(const RageSpriteVertex v[],
 		auto pMat = GetProjectionTop();
 		const auto fW = 2 / pMat->m[0][0];
 		const auto fH = -2 / pMat->m[1][1];
-		const auto fWidthVal =
-		  static_cast<float>((*g_pWind->GetActualVideoModeParams()).width) / fW;
-		const auto fHeightVal =
-		  static_cast<float>((*g_pWind->GetActualVideoModeParams()).height) /
-		  fH;
+		auto dims = Core::Platform::getWindowDimensions();
+		const auto fWidthVal = static_cast<float>(dims.width) / fW;
+		const auto fHeightVal = static_cast<float>(dims.height) / fH;
 		fLineWidth *= (fWidthVal + fHeightVal) / 2;
 	}
 
@@ -1717,7 +1720,8 @@ RageDisplay_Legacy::SetTextureFiltering(TextureUnit tu, bool b)
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_WIDTH, &iWidth2);
 		if (iWidth1 > 1 && iWidth2 != 0) {
 			/* Mipmaps are enabled. */
-			if ((*g_pWind->GetActualVideoModeParams()).bTrilinearFiltering)
+//			if ((*g_pWind->GetActualVideoModeParams()).bTrilinearFiltering)
+			if (true)
 				iMinFilter = GL_LINEAR_MIPMAP_LINEAR;
 			else
 				iMinFilter = GL_LINEAR_MIPMAP_NEAREST;
@@ -2216,8 +2220,7 @@ RageDisplay_Legacy::CreateTexture(RagePixelFormat pixfmt,
 
 	glBindTexture(GL_TEXTURE_2D, iTexHandle);
 
-	if ((*g_pWind->GetActualVideoModeParams()).bAnisotropicFiltering &&
-		GLEW_EXT_texture_filter_anisotropic) {
+	if (GLEW_EXT_texture_filter_anisotropic) {
 		GLfloat fLargestSupportedAnisotropy;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
 					&fLargestSupportedAnisotropy);
@@ -2612,7 +2615,7 @@ RenderTarget_FramebufferObject::FinishRenderingTo()
 bool
 RageDisplay_Legacy::SupportsRenderToTexture() const
 {
-	return GLEW_EXT_framebuffer_object || g_pWind->SupportsRenderToTexture();
+	return GLEW_EXT_framebuffer_object;
 }
 
 bool
@@ -2622,8 +2625,7 @@ RageDisplay_Legacy::SupportsFullscreenBorderlessWindow() const
 	// implementation to support creating a fullscreen borderless window, and
 	// we're going to need RenderToTexture support in order to render in
 	// alternative resolutions
-	return g_pWind->SupportsFullscreenBorderlessWindow() &&
-		   SupportsRenderToTexture();
+	return true;
 }
 
 /*
@@ -2639,10 +2641,10 @@ RageDisplay_Legacy::CreateRenderTarget(const RenderTargetParam& param,
 									   int& iTextureHeightOut)
 {
 	RenderTarget* pTarget;
-	if (GLEW_EXT_framebuffer_object)
-		pTarget = new RenderTarget_FramebufferObject;
-	else
-		pTarget = g_pWind->CreateRenderTarget();
+//	if (GLEW_EXT_framebuffer_object)
+//		pTarget = new RenderTarget_FramebufferObject;
+//	else
+//		pTarget = g_pWind->CreateRenderTarget();
 
 	intptr_t iTexture = 0;
 	if (pTarget) {
@@ -2677,9 +2679,9 @@ RageDisplay_Legacy::SetRenderTarget(intptr_t iTexture, bool bPreserveTexture)
 		DISPLAY->CameraPopMatrix();
 
 		/* Reset the viewport. */
-		const auto fWidth = (*g_pWind->GetActualVideoModeParams()).windowWidth;
-		const auto fHeight =
-		  (*g_pWind->GetActualVideoModeParams()).windowHeight;
+		auto dims = Core::Platform::getWindowDimensions();
+		const auto fWidth = dims.width;
+		const auto fHeight = dims.height;
 		glViewport(0, 0, fWidth, fHeight);
 
 		if (g_pCurrentRenderTarget != nullptr)
