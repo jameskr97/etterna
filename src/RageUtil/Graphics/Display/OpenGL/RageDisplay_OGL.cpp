@@ -600,7 +600,7 @@ RageDisplay_Legacy::RageDisplay_Legacy() {
     Locator::getLogger()->trace("RageDisplay_Legacy::RageDisplay_Legacy()");
     Locator::getLogger()->trace("Current renderer: OpenGL");
 
-    backend = std::make_unique<GLFWWindowBackend>("nano_glfw_window", Dimensions{WINDOW_WIDTH, WINDOW_HEIGHT});
+    backend = std::make_unique<GLFWWindowBackend>("Etterna", Dimensions{WINDOW_WIDTH, WINDOW_HEIGHT});
 
 	FixLittleEndian();
 	RageDisplay_Legacy_Helpers::Init();
