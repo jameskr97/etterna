@@ -161,8 +161,8 @@ class VideoModeParams
 
 	bool windowed{ false };
 	std::string sDisplayId;
-	int width{ 0 };
-	int height{ 0 };
+	int width{ 1280 };
+	int height{ 720 };
 	int bpp{ 0 };
 	int rate{ 0 };
 	bool vsync{ false };
@@ -207,8 +207,8 @@ class ActualVideoModeParams : public VideoModeParams
 	// If bWindowIsFullscreenBorderless is true,
 	// then these properties will differ from width/height (which describe the
 	// render size)
-	int windowWidth{ 0 };
-	int windowHeight{ 0 };
+	int windowWidth{ 1280 };
+	int windowHeight{ 720 };
 	bool renderOffscreen{ false };
 };
 

@@ -462,7 +462,7 @@ CheckVideoDefaultSettings()
 	// detected - mina
 	static Preference<bool> TKGP("ResetVideoSettingsWithNewGPU", true);
 
-	VideoCardDefaults defaults{"", "d3d,opengl", 800, 600, 32, 32, 32, 1024, false};
+	VideoCardDefaults defaults{"", "opengl", 800, 600, 32, 32, 32, 1024, false};
     Locator::getLogger()->trace("Card matches '{}'.",!defaults.sDriverRegex.empty() ? defaults.sDriverRegex.c_str() : "(unknown card)");
 
 
@@ -579,7 +579,7 @@ CreateDisplay()
 #endif
 			} else if (CompareNoCase(sRenderer, "d3d") == 0) {
 #if defined(SUPPORT_D3D)
-				pRet = new RageDisplay_D3D;
+//				pRet = new RageDisplay_D3D;
 #endif
 			} else if (CompareNoCase(sRenderer, "null") == 0) {
 				return new RageDisplay_Null;

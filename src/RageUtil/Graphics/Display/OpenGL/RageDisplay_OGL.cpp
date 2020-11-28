@@ -13,6 +13,7 @@
 #include "RageUtil/Misc/RageTypes.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "Core/Platform/Platform.hpp"
+#include "Core/Platform/Window/GLFWWindowBackend.hpp"
 
 #include "arch/LowLevelWindow/LowLevelWindow.h"
 
@@ -64,6 +65,10 @@ static std::map<intptr_t, RenderTarget*> g_mapRenderTargets;
 static RenderTarget* g_pCurrentRenderTarget = nullptr;
 
 static LowLevelWindow* g_pWind;
+using namespace Core::Platform::Window;
+static std::unique_ptr<GLFWWindowBackend> backend;
+
+#pragma region data block
 
 static bool g_bInvertY = false;
 
@@ -236,9 +241,11 @@ TurnOffHardwareVBO()
 		glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 	}
 }
+#pragma endregion
 
 RageDisplay_Legacy::RageDisplay_Legacy()
 {
+    backend = std::make_unique<GLFWWindowBackend>("Etterna", Dimensions{1280, 720});
 	if (PREFSMAN->m_verbose_log > 1) {
 		Locator::getLogger()->trace("RageDisplay_Legacy::RageDisplay_Legacy()");
 		Locator::getLogger()->trace("Current renderer: OpenGL");
@@ -438,12 +445,15 @@ void InitShaders() {
 }
 
 void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
-	g_pWind = LowLevelWindow::Create();
+    backend->create();
 
-	auto bIgnore = false;
-	auto sError = SetVideoMode(p, bIgnore);
-	if (!sError.empty())
-		throw std::runtime_error(sError);
+    gladLoadGL();
+//	g_pWind = LowLevelWindow::Create();
+//
+//	auto bIgnore = false;
+//	auto sError = SetVideoMode(p, bIgnore);
+//	if (!sError.empty())
+//		throw std::runtime_error(sError);
 
 	// Log driver details
     Locator::getLogger()->trace("OGL Vendor: {}", glGetString(GL_VENDOR));
@@ -761,7 +771,8 @@ RageDisplay_Legacy::BeginFrame()
 	auto dims = Core::Platform::getWindowDimensions();
 	const auto fWidth = dims.width;
 	const auto fHeight = dims.height;
-	glViewport(0, 0, fWidth, fHeight);
+//	glViewport(0, 0, fWidth, fHeight);
+	glViewport(0, 0, 1280, 720);
 	glClearColor(0, 0, 0, 0);
 	SetZWrite(true);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -800,10 +811,11 @@ RageDisplay_Legacy::EndFrame()
 
 	FrameLimitBeforeVsync();
 	const auto beforePresent = std::chrono::steady_clock::now();
-	g_pWind->SwapBuffers();
+//	g_pWind->SwapBuffers();
 	glFlush();
+	backend->update();
 
-	g_pWind->Update();
+//	g_pWind->Update();
 
 	const auto afterPresent = std::chrono::steady_clock::now();
 	const auto endTime = afterPresent - beforePresent;
@@ -904,7 +916,8 @@ RageDisplay_Legacy::GetTexture(intptr_t iTexture)
 const ActualVideoModeParams*
 RageDisplay_Legacy::GetActualVideoModeParams() const
 {
-	return g_pWind->GetActualVideoModeParams();
+    return new ActualVideoModeParams();
+//	return g_pWind->GetActualVideoModeParams();
 }
 
 static void
@@ -2678,7 +2691,7 @@ RageDisplay_Legacy::SetRenderTarget(intptr_t iTexture, bool bPreserveTexture)
 		auto dims = Core::Platform::getWindowDimensions();
 		const auto fWidth = dims.width;
 		const auto fHeight = dims.height;
-		glViewport(0, 0, fWidth, fHeight);
+		glViewport(0, 0, 1280, 720);
 
 		if (g_pCurrentRenderTarget != nullptr)
 			g_pCurrentRenderTarget->FinishRenderingTo();
@@ -2697,7 +2710,9 @@ RageDisplay_Legacy::SetRenderTarget(intptr_t iTexture, bool bPreserveTexture)
 	g_pCurrentRenderTarget = pTarget;
 
 	/* Set the viewport to the size of the render target. */
-	glViewport(0, 0, pTarget->GetParam().iWidth, pTarget->GetParam().iHeight);
+//	glViewport(0, 0, pTarget->GetParam().iWidth, pTarget->GetParam().iHeight);
+    glViewport(0, 0, 1280, 720);
+
 
 	/* If this render target implementation flips Y, compensate.   Inverting
 	 * will switch the winding order. */
