@@ -45,7 +45,7 @@ static bool g_bColorIndexTableWorks = true;
 /* Range and granularity of points and lines: */
 static float g_line_range[2];
 static float g_point_range[2];
-static int g_iMaxTextureUnits = 0;
+static int MAX_TEXTURE_UNITS = 1;
 
 // Global Shader
 static unsigned int g_bTextureMatrixShader = 0;
@@ -65,7 +65,6 @@ static bool g_bInvertY = false;
 // Translation Unit function declarations
 static void CheckPalettedTextures();
 static void CheckReversePackedPixels();
-void SetupExtensions();
 static void FixLittleEndian();
 static void TurnOffHardwareVBO();
 static void InvalidateObjects();
@@ -432,33 +431,6 @@ static void CheckReversePackedPixels() {
 	}
 }
 
-void SetupExtensions() {
-	gladLoadGL();
-
-	g_iMaxTextureUnits = 1;
-	if (GLAD_GL_ARB_multitexture)
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB,
-					  static_cast<GLint*>(&g_iMaxTextureUnits));
-
-	CheckPalettedTextures();
-	CheckReversePackedPixels();
-
-	{
-		auto iMaxTableSize = 0;
-		glGetIntegerv(GL_MAX_PIXEL_MAP_TABLE, &iMaxTableSize);
-		if (iMaxTableSize < 256) {
-			/* The minimum GL_MAX_PIXEL_MAP_TABLE is 32; if it's not at least
-			 * 256, we can't fit a palette in it, so we can't send paletted data
-			 * as input for a non-paletted texture. */
-			Locator::getLogger()->trace("GL_MAX_PIXEL_MAP_TABLE is only {}",
-					  static_cast<int>(iMaxTableSize));
-			g_bColorIndexTableWorks = false;
-		} else {
-			g_bColorIndexTableWorks = true;
-		}
-	}
-}
-
 static void FixLittleEndian() {
 	static auto bInitialized = false;
 	if (bInitialized)
@@ -558,7 +530,7 @@ static bool SetTextureUnit(TextureUnit tu) {
 	if (!GLAD_GL_ARB_multitexture && tu != TextureUnit_1)
 		return false;
 
-	if (static_cast<int>(tu) > g_iMaxTextureUnits)
+	if (static_cast<int>(tu) > MAX_TEXTURE_UNITS)
 		return false;
 	glActiveTextureARB(enum_add2(GL_TEXTURE0_ARB, tu));
 	return true;
@@ -613,19 +585,35 @@ RageDisplay_Legacy::~RageDisplay_Legacy() {
 }
 
 void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
+    // Create Window and run OpenGL loader
     backend->create();
     gladLoadGL();
 
 	// Log driver details
-    Locator::getLogger()->info("OGL Vendor: {}", glGetString(GL_VENDOR));
-    Locator::getLogger()->info("OGL Renderer: {}", glGetString(GL_RENDERER));
-    Locator::getLogger()->info("OGL Version: {}.{}", GLVersion.major, GLVersion.minor);
-    Locator::getLogger()->info("OGL Max texture size: {}", GetMaxTextureSize());
-    Locator::getLogger()->info("OGL Texture units: {}", g_iMaxTextureUnits);
-    Locator::getLogger()->info("OGL Extensions: {}", glGetString(GL_EXTENSIONS));
+    Locator::getLogger()->info("OpenGL Vendor: {}", glGetString(GL_VENDOR));
+    Locator::getLogger()->info("OpenGL Renderer: {}", glGetString(GL_RENDERER));
+    Locator::getLogger()->info("OpenGL Version: {}.{}", GLVersion.major, GLVersion.minor);
+    Locator::getLogger()->info("OpenGL Max texture size: {}", GetMaxTextureSize());
+    Locator::getLogger()->info("OpenGL Texture units: {}", MAX_TEXTURE_UNITS);
+    Locator::getLogger()->info("OpenGL Extensions: {}", glGetString(GL_EXTENSIONS));
 
-	/* Log this, so if people complain that the radar looks bad on their
-	 * system we can compare them: */
+    // Check needed extensions
+	if (GLAD_GL_ARB_multitexture) glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &MAX_TEXTURE_UNITS);
+    CheckPalettedTextures();
+	CheckReversePackedPixels();
+
+	// Initialize Shaders
+	setupGLShaders();
+
+    /* The minimum GL_MAX_PIXEL_MAP_TABLE is 32; if it's not at least 256, we can't fit a
+     * palette in it, so we can't send paletted data as input for a non-paletted texture. */
+    int MAX_SIZE_PIXEL_MAP_TABLE = 0;
+    glGetIntegerv(GL_MAX_PIXEL_MAP_TABLE, &MAX_SIZE_PIXEL_MAP_TABLE);
+    g_bColorIndexTableWorks = MAX_SIZE_PIXEL_MAP_TABLE >= 256;
+    if (!g_bColorIndexTableWorks)
+        Locator::getLogger()->trace("GL_MAX_PIXEL_MAP_TABLE is only {}", MAX_SIZE_PIXEL_MAP_TABLE);
+
+	/* Log this, so if people complain that the radar looks bad on their system we can compare them: */
 	glGetFloatv(GL_LINE_WIDTH_RANGE, g_line_range);
 	glGetFloatv(GL_POINT_SIZE_RANGE, g_point_range);
 }
@@ -676,6 +664,7 @@ void RageDisplay_Legacy::setupGLShaders() {
 	}
 }
 
+// REMOVE?: THIS FUNCTION DOES NOT GET RUN WITH GLFW
 std::string RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNewDeviceOut) {
     // Return true if mode change was successful.
     // bNewDeviceOut is set true if a new device was created and textures
@@ -691,7 +680,6 @@ std::string RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNe
 
 	/* Now that we've initialized, we can search for extensions.  Do this before
 	 * InvalidateObjects, since AllocateBuffers needs it. */
-	SetupExtensions();
 
 	if (bNewDeviceOut) {
 		/* We have a new OpenGL context, so we have to tell our textures that
@@ -756,7 +744,6 @@ bool RageDisplay_Legacy::UseOffscreenRenderTarget() {
 	}
 	return true;
 }
-
 
 #pragma endregion
 
@@ -1126,12 +1113,8 @@ void RageDisplay_Legacy::GetDisplaySpecs(DisplaySpecs& out) const {
 //	g_pWind->GetDisplaySpecs(out);
 }
 
-int RageDisplay_Legacy::GetNumTextureUnits()
-{
-	if (GLAD_GL_ARB_multitexture)
-		return 1;
-
-	return g_iMaxTextureUnits;
+int RageDisplay_Legacy::GetNumTextureUnits() {
+	return MAX_TEXTURE_UNITS;
 }
 
 int RageDisplay_Legacy::GetMaxTextureSize() const {
