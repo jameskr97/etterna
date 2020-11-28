@@ -13,8 +13,9 @@
 #include "RageUtil/Misc/RageTypes.h"
 #include "RageUtil/Utils/RageUtil.h"
 #include "arch/LowLevelWindow/LowLevelWindow.h"
-#include <glad/glad.h>
+#include "Core/Platform/Window/GLFWWindowBackend.hpp"
 
+#include <glad/glad.h>
 
 #include <algorithm>
 #include <chrono>
@@ -33,6 +34,9 @@ using std::max;
 using std::min;
 using namespace RageDisplay_Legacy_Helpers;
 
+#define WINDOW_WIDTH 960
+#define WINDOW_HEIGHT 540
+
 
 static bool g_bReversePackedPixelsWorks = true;
 static bool g_bColorIndexTableWorks = true;
@@ -49,6 +53,8 @@ static unsigned int g_bTextureMatrixShader = 0;
 static unsigned int g_iAttribTextureMatrixScale;
 
 // Render Related
+using namespace Core::Platform::Window;
+static std::unique_ptr<IWindowBackend> backend;
 static LowLevelWindow* g_pWind;
 static std::map<intptr_t, RenderTarget*> g_mapRenderTargets;
 static RenderTarget* g_pCurrentRenderTarget = nullptr;
@@ -593,41 +599,39 @@ void SetPixelMapForSurface(int glImageFormat, int glTexFormat, const RageSurface
 #pragma region RageDisplay_Legacy Functions
 
 #pragma region Constructors/Initializations
-RageDisplay_Legacy::RageDisplay_Legacy()
-{
-	if (PREFSMAN->m_verbose_log > 1) {
-		Locator::getLogger()->trace("RageDisplay_Legacy::RageDisplay_Legacy()");
-		Locator::getLogger()->trace("Current renderer: OpenGL");
-	}
+RageDisplay_Legacy::RageDisplay_Legacy() {
+    Locator::getLogger()->trace("RageDisplay_Legacy::RageDisplay_Legacy()");
+    Locator::getLogger()->trace("Current renderer: OpenGL");
+
+    backend = std::make_unique<GLFWWindowBackend>("nano_glfw_window", Dimensions{WINDOW_WIDTH, WINDOW_HEIGHT});
 
 	FixLittleEndian();
 	RageDisplay_Legacy_Helpers::Init();
 
-	g_pWind = nullptr;
+//	g_pWind = nullptr;
 	g_bTextureMatrixShader = 0;
 }
 
 RageDisplay_Legacy::~RageDisplay_Legacy() {
-	delete g_pWind;
+//	delete g_pWind;
 }
 
 void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
-	g_pWind = LowLevelWindow::Create();
-
-	auto bIgnore = false;
-	auto sError = SetVideoMode(p, bIgnore);
-	if (!sError.empty())
-		throw std::runtime_error(sError);
+//	g_pWind = LowLevelWindow::Create();
+//	auto bIgnore = false;
+//	auto sError = SetVideoMode(p, bIgnore);
+//	if (!sError.empty())
+//		throw std::runtime_error(sError);
+    backend->create();
+    gladLoadGL();
 
 	// Log driver details
-	g_pWind->LogDebugInformation();
-    Locator::getLogger()->trace("OGL Vendor: {}", glGetString(GL_VENDOR));
-    Locator::getLogger()->trace("OGL Renderer: {}", glGetString(GL_RENDERER));
-    Locator::getLogger()->trace("OGL Version: {}.{}", GLVersion.major, GLVersion.minor);
-    Locator::getLogger()->trace("OGL Max texture size: {}", GetMaxTextureSize());
-    Locator::getLogger()->trace("OGL Texture units: {}", g_iMaxTextureUnits);
-    Locator::getLogger()->trace("GLU Version: {}.{}", GLAD_GL_VERSION_1_0);
-    Locator::getLogger()->trace("OGL Extensions: {}", glGetString(GL_EXTENSIONS));
+    Locator::getLogger()->info("OGL Vendor: {}", glGetString(GL_VENDOR));
+    Locator::getLogger()->info("OGL Renderer: {}", glGetString(GL_RENDERER));
+    Locator::getLogger()->info("OGL Version: {}.{}", GLVersion.major, GLVersion.minor);
+    Locator::getLogger()->info("OGL Max texture size: {}", GetMaxTextureSize());
+    Locator::getLogger()->info("OGL Texture units: {}", g_iMaxTextureUnits);
+    Locator::getLogger()->info("OGL Extensions: {}", glGetString(GL_EXTENSIONS));
 
 	/* Log this, so if people complain that the radar looks bad on their
 	 * system we can compare them: */
@@ -690,7 +694,7 @@ std::string RageDisplay_Legacy::TryVideoMode(const VideoModeParams& p, bool& bNe
 	// p.windowed, p.width, p.height, p.bpp, p.rate, p.vsync );
 
 	std::string err;
-	err = g_pWind->TryVideoMode(p, bNewDeviceOut);
+//	err = g_pWind->TryVideoMode(p, bNewDeviceOut);
 	if (!err.empty())
 		return err; // failed to set video mode
 
@@ -768,8 +772,8 @@ bool RageDisplay_Legacy::UseOffscreenRenderTarget() {
 #pragma region Creation/Deletion Functions
 
 RageSurface* RageDisplay_Legacy::CreateScreenshot() {
-	const auto width = (*g_pWind->GetActualVideoModeParams()).width;
-	const auto height = (*g_pWind->GetActualVideoModeParams()).height;
+	const auto width = WINDOW_WIDTH;
+	const auto height = WINDOW_HEIGHT;
 
 	RageSurface* image = nullptr;
 	if (offscreenRenderTarget) {
@@ -800,8 +804,8 @@ RageSurface* RageDisplay_Legacy::CreateScreenshot() {
 
 		glReadPixels(0,
 					 0,
-					 (*g_pWind->GetActualVideoModeParams()).width,
-					 (*g_pWind->GetActualVideoModeParams()).height,
+					 WINDOW_WIDTH,
+					 WINDOW_HEIGHT,
 					 GL_RGBA,
 					 GL_UNSIGNED_BYTE,
 					 image->pixels);
@@ -873,8 +877,8 @@ intptr_t RageDisplay_Legacy::CreateTexture(RagePixelFormat pixfmt, RageSurface* 
 
 	glBindTexture(GL_TEXTURE_2D, iTexHandle);
 
-	if ((*g_pWind->GetActualVideoModeParams()).bAnisotropicFiltering &&
-		GLAD_GL_EXT_texture_filter_anisotropic) {
+//	if ((*g_pWind->GetActualVideoModeParams()).bAnisotropicFiltering &&
+	if (GLAD_GL_EXT_texture_filter_anisotropic) {
 		GLfloat fLargestSupportedAnisotropy;
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,
 					&fLargestSupportedAnisotropy);
@@ -988,10 +992,10 @@ intptr_t RageDisplay_Legacy::CreateRenderTarget(const RenderTargetParam& param, 
      */
 
     RenderTarget* pTarget;
-	if (GLAD_GL_EXT_framebuffer_object)
-		pTarget = new RenderTarget_FramebufferObject;
-	else
-		pTarget = g_pWind->CreateRenderTarget();
+//	if (GLAD_GL_EXT_framebuffer_object)
+//		pTarget = new RenderTarget_FramebufferObject;
+//	else
+//		pTarget = g_pWind->CreateRenderTarget();
 
 	intptr_t iTexture = 0;
 	if (pTarget) {
@@ -1078,9 +1082,13 @@ RagePixelFormat RageDisplay_Legacy::GetImgPixelFormat(RageSurface*& img, bool& b
 	return pixfmt;
 }
 
-const ActualVideoModeParams* RageDisplay_Legacy::GetActualVideoModeParams() const
-{
-	return g_pWind->GetActualVideoModeParams();
+const ActualVideoModeParams* RageDisplay_Legacy::GetActualVideoModeParams() const  {
+	return new ActualVideoModeParams{
+        VideoModeParams(true, "nano_display_id",
+                        WINDOW_WIDTH, WINDOW_HEIGHT, 32, 60, true,
+                        false, true, true, true,
+                        false, "nano_title", "", false,
+                        WINDOW_WIDTH / WINDOW_HEIGHT)};
 }
 
 std::string RageDisplay_Legacy::GetTextureDiagnostics(unsigned iTexture) const {
@@ -1124,7 +1132,7 @@ intptr_t RageDisplay_Legacy::GetRenderTarget() {
 
 void RageDisplay_Legacy::GetDisplaySpecs(DisplaySpecs& out) const {
 	out.clear();
-	g_pWind->GetDisplaySpecs(out);
+//	g_pWind->GetDisplaySpecs(out);
 }
 
 int RageDisplay_Legacy::GetNumTextureUnits()
@@ -1235,7 +1243,8 @@ void RageDisplay_Legacy::SetTextureFiltering(TextureUnit tu, bool b)
 		glGetTexLevelParameteriv(GL_TEXTURE_2D, 1, GL_TEXTURE_WIDTH, &iWidth2);
 		if (iWidth1 > 1 && iWidth2 != 0) {
 			/* Mipmaps are enabled. */
-			if ((*g_pWind->GetActualVideoModeParams()).bTrilinearFiltering)
+//			if ((*g_pWind->GetActualVideoModeParams()).bTrilinearFiltering)
+			if (true)
 				iMinFilter = GL_LINEAR_MIPMAP_LINEAR;
 			else
 				iMinFilter = GL_LINEAR_MIPMAP_NEAREST;
@@ -1526,8 +1535,8 @@ void RageDisplay_Legacy::SetRenderTarget(intptr_t iTexture, bool bPreserveTextur
 		DISPLAY->CameraPopMatrix();
 
 		/* Reset the viewport. */
-		const auto fWidth  = (*g_pWind->GetActualVideoModeParams()).windowWidth;
-		const auto fHeight = (*g_pWind->GetActualVideoModeParams()).windowHeight;
+		const auto fWidth  = WINDOW_WIDTH;
+		const auto fHeight = WINDOW_HEIGHT;
 		glViewport(0, 0, fWidth, fHeight);
 
 		if (g_pCurrentRenderTarget != nullptr)
@@ -1635,8 +1644,8 @@ bool RageDisplay_Legacy::BeginFrame() {
 	/* We do this in here, rather than ResolutionChanged, or we won't update the
 	 * viewport for the concurrent rendering context. */
 
-	const auto fWidth = (*g_pWind->GetActualVideoModeParams()).windowWidth;
-	const auto fHeight = (*g_pWind->GetActualVideoModeParams()).windowHeight;
+	const auto fWidth  = WINDOW_WIDTH;
+	const auto fHeight = WINDOW_HEIGHT;
 	glViewport(0, 0, fWidth, fHeight);
 	glClearColor(0, 0, 0, 0);
 	SetZWrite(true);
@@ -1673,10 +1682,10 @@ void RageDisplay_Legacy::EndFrame() {
 
 	FrameLimitBeforeVsync();
 	const auto beforePresent = std::chrono::steady_clock::now();
-	g_pWind->SwapBuffers();
-	glFlush();
-
-	g_pWind->Update();
+//	g_pWind->SwapBuffers();
+//	glFlush();
+    backend->update();
+//	g_pWind->Update();
 
 	const auto afterPresent = std::chrono::steady_clock::now();
 	const auto endTime = afterPresent - beforePresent;
@@ -1842,11 +1851,8 @@ void RageDisplay_Legacy::DrawLineStripInternal(const RageSpriteVertex v[], int i
 		auto pMat = GetProjectionTop();
 		const auto fW = 2 / pMat->m[0][0];
 		const auto fH = -2 / pMat->m[1][1];
-		const auto fWidthVal =
-		  static_cast<float>((*g_pWind->GetActualVideoModeParams()).width) / fW;
-		const auto fHeightVal =
-		  static_cast<float>((*g_pWind->GetActualVideoModeParams()).height) /
-		  fH;
+		const auto fWidthVal = WINDOW_WIDTH / fW;
+		const auto fHeightVal = WINDOW_HEIGHT / fH;
 		fLineWidth *= (fWidthVal + fHeightVal) / 2;
 	}
 
@@ -1927,7 +1933,8 @@ void RageDisplay_Legacy::UpdateTexture(intptr_t iTexHandle, RageSurface* pImg, i
 #pragma region RageDisplay_Legacy Support Checking
 
 bool RageDisplay_Legacy::SupportsRenderToTexture() const {
-	return GLAD_GL_EXT_framebuffer_object || g_pWind->SupportsRenderToTexture();
+//	return GLAD_GL_EXT_framebuffer_object || g_pWind->SupportsRenderToTexture();
+	return GLAD_GL_EXT_framebuffer_object;
 }
 
 bool RageDisplay_Legacy::SupportsFullscreenBorderlessWindow() const {
@@ -1935,7 +1942,8 @@ bool RageDisplay_Legacy::SupportsFullscreenBorderlessWindow() const {
 	// implementation to support creating a fullscreen borderless window, and
 	// we're going to need RenderToTexture support in order to render in
 	// alternative resolutions
-	return g_pWind->SupportsFullscreenBorderlessWindow() && SupportsRenderToTexture();
+//	return g_pWind->SupportsFullscreenBorderlessWindow() && SupportsRenderToTexture();
+	return SupportsRenderToTexture();
 }
 
 /*
