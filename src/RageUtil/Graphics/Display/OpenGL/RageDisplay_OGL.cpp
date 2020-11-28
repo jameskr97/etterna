@@ -12,7 +12,6 @@
 #include "RageUtil/Graphics/RageTextureManager.h"
 #include "RageUtil/Misc/RageTypes.h"
 #include "RageUtil/Utils/RageUtil.h"
-#include "arch/LowLevelWindow/LowLevelWindow.h"
 #include "Core/Platform/Window/GLFWWindowBackend.hpp"
 
 #include <glad/glad.h>
@@ -53,9 +52,7 @@ static unsigned int g_bTextureMatrixShader = 0;
 static unsigned int g_iAttribTextureMatrixScale;
 
 // Render Related
-using namespace Core::Platform::Window;
-static std::unique_ptr<IWindowBackend> backend;
-static LowLevelWindow* g_pWind;
+//static LowLevelWindow* g_pWind;
 static std::map<intptr_t, RenderTarget*> g_mapRenderTargets;
 static RenderTarget* g_pCurrentRenderTarget = nullptr;
 
@@ -608,20 +605,14 @@ RageDisplay_Legacy::RageDisplay_Legacy() {
 	FixLittleEndian();
 	RageDisplay_Legacy_Helpers::Init();
 
-//	g_pWind = nullptr;
 	g_bTextureMatrixShader = 0;
 }
 
 RageDisplay_Legacy::~RageDisplay_Legacy() {
-//	delete g_pWind;
+
 }
 
 void RageDisplay_Legacy::Init(const VideoModeParams& p)  {
-//	g_pWind = LowLevelWindow::Create();
-//	auto bIgnore = false;
-//	auto sError = SetVideoMode(p, bIgnore);
-//	if (!sError.empty())
-//		throw std::runtime_error(sError);
     backend->create();
     gladLoadGL();
 
