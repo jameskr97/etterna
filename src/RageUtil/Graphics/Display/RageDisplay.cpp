@@ -186,7 +186,6 @@ bool RageDisplay::BeginFrame() {
 void RageDisplay::EndFrame() { ProcessStatsOnFlip(); }
 
 void RageDisplay::SetDefaultRenderStates() {
-	SetLighting(false);
 	SetCullMode(CULL_NONE);
 	SetZWrite(false);
 	SetZTestMode(ZTEST_OFF);

@@ -228,15 +228,6 @@ ActorFrame::BeginDraw()
 		  m_fFOV, SCREEN_WIDTH, SCREEN_HEIGHT, m_fVanishX, m_fVanishY);
 	}
 
-	if (m_bOverrideLighting) {
-		DISPLAY->SetLighting(m_bLighting);
-		if (m_bLighting)
-			DISPLAY->SetLightDirectional(0,
-										 m_ambientColor,
-										 m_diffuseColor,
-										 m_specularColor,
-										 m_lightDirection);
-	}
 }
 
 void
@@ -296,13 +287,8 @@ ActorFrame::DrawPrimitives()
 }
 
 void
-ActorFrame::EndDraw()
-{
-	if (m_bOverrideLighting) {
-		// TODO: pop state instead of turning lighting off
-		DISPLAY->SetLightOff(0);
-		DISPLAY->SetLighting(false);
-	}
+ActorFrame::EndDraw() {
+
 
 	if (m_fFOV != -1) {
 		DISPLAY->CameraPopMatrix();

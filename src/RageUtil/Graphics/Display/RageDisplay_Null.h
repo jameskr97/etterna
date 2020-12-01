@@ -65,16 +65,6 @@ class RageDisplay_Null : public RageDisplay
 					 ) override
 	{
 	}
-	void SetLighting(bool) override {}
-	void SetLightOff(int /* index */) override {}
-	void SetLightDirectional(
-	  int /* index */,
-	  const RageColor& /* unreferenced: ambient */,
-	  const RageColor& /* unreferenced: diffuse */,
-	  const RageColor& /* unreferenced: specular */,
-	  const RageVector3& /* unreferenced: dir */) override
-	{
-	}
 
 	void SetSphereEnvironmentMapping(TextureUnit /* tu */,
 									 bool /* b */) override

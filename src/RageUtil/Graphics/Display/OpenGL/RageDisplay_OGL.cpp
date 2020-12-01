@@ -1369,35 +1369,6 @@ void RageDisplay_Legacy::SetMaterial(const RageColor& emissive, const RageColor&
 	}
 }
 
-void RageDisplay_Legacy::SetLighting(bool b)
-{
-	if (b)
-		glEnable(GL_LIGHTING);
-	else
-		glDisable(GL_LIGHTING);
-}
-
-void RageDisplay_Legacy::SetLightOff(int index)
-{
-	glDisable(GL_LIGHT0 + index);
-}
-
-void RageDisplay_Legacy::SetLightDirectional(int index, const RageColor& ambient, const RageColor& diffuse, const RageColor& specular, const RageVector3& dir) {
-	// Light coordinates are transformed by the modelview matrix, but
-	// we are being passed in world-space coords.
-	glPushMatrix();
-	glLoadIdentity();
-
-	glEnable(GL_LIGHT0 + index);
-	glLightfv(GL_LIGHT0 + index, GL_AMBIENT, ambient);
-	glLightfv(GL_LIGHT0 + index, GL_DIFFUSE, diffuse);
-	glLightfv(GL_LIGHT0 + index, GL_SPECULAR, specular);
-	float position[4] = { dir.x, dir.y, dir.z, 0 };
-	glLightfv(GL_LIGHT0 + index, GL_POSITION, position);
-
-	glPopMatrix();
-}
-
 void RageDisplay_Legacy::SetCullMode(CullMode mode)
 {
 	if (mode != CULL_NONE)

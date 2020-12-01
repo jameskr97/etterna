@@ -258,9 +258,6 @@ class RageDisplay {
 	virtual void SetCullMode(CullMode mode) = 0;
 	virtual void SetAlphaTest(bool b) = 0;
 	virtual void SetMaterial(const RageColor& emissive, const RageColor& ambient, const RageColor& diffuse, const RageColor& specular, float shininess) = 0;
-	virtual void SetLighting(bool b) = 0;
-	virtual void SetLightOff(int index) = 0;
-	virtual void SetLightDirectional(int index, const RageColor& ambient, const RageColor& diffuse, const RageColor& specular, const RageVector3& dir) = 0;
 	virtual void SetSphereEnvironmentMapping(TextureUnit tu, bool b) = 0;
 	virtual void SetCelShaded(int stage) = 0;
 

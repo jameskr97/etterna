@@ -79,9 +79,6 @@ class RageDisplay_Legacy : public RageDisplay
 	void SetCullMode(CullMode mode) override;
 	void SetAlphaTest(bool b) override;
 	void SetMaterial(const RageColor& emissive, const RageColor& ambient, const RageColor& diffuse, const RageColor& specular, float shininess) override;
-	void SetLighting(bool b) override;
-	void SetLightOff(int index) override;
-	void SetLightDirectional(int index, const RageColor& ambient, const RageColor& diffuse, const RageColor& specular, const RageVector3& dir) override;
 
 	void SetSphereEnvironmentMapping(TextureUnit tu, bool b) override;
 	void SetCelShaded(int stage) override;
