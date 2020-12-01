@@ -64,7 +64,6 @@
 #include <windows.h>
 int(WINAPIV* __vsnprintf)(char*, size_t, const char*, va_list) = _vsnprintf;
 
-#include "RageUtil/Graphics/Display/DirectX/RageDisplay_D3D.h"
 #include "archutils/Win32/VideoDriverInfo.h"
 static Preference<int> g_iLastSeenMemory("LastSeenMemory", 0);
 #endif
@@ -565,9 +564,9 @@ RageDisplay* CreateDisplay() {
 			if (CompareNoCase(sRenderer, "opengl") == 0) {
 				pRet = new RageDisplay_Legacy;
 			} else if (CompareNoCase(sRenderer, "d3d") == 0) {
-#if defined(SUPPORT_D3D)
-				pRet = new RageDisplay_D3D;
-#endif
+//            #if defined(SUPPORT_D3D)
+//                pRet = new RageDisplay_D3D;
+//            #endif
 			} else if (CompareNoCase(sRenderer, "null") == 0) {
 				return new RageDisplay_Null;
 			} else {

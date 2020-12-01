@@ -95,11 +95,6 @@ list(APPEND SMDATA_RAGE_GRAPHICS_HPP
   "Graphics/Display/Texture/RageTextureRenderTarget.h"
 )
 
-if(WIN32)
-  list(APPEND SMDATA_RAGE_GRAPHICS_SRC "Graphics/Display/DirectX/RageDisplay_D3D.cpp")
-  list(APPEND SMDATA_RAGE_GRAPHICS_HPP "Graphics/Display/DirectX/RageDisplay_D3D.h")
-endif()
-
 source_group("Rage\\\\Graphics" FILES ${SMDATA_RAGE_GRAPHICS_SRC} ${SMDATA_RAGE_GRAPHICS_HPP})
 
 list(APPEND SMDATA_RAGE_FILE_SRC
