@@ -4,6 +4,8 @@ configure_file(Misc/AppInfo.in.cpp ${PROJECT_BINARY_DIR}/generated/AppInfo.cpp)
 target_sources(Etterna PUBLIC ${PROJECT_BINARY_DIR}/generated/AppInfo.cpp)
 
 list(APPEND CORE_HPP
+	 	KeyCodes.hpp
+	 	MouseCodes.hpp
         Crash/CrashpadHandler.hpp
         Misc/PlogLogger.hpp
         Services/Locator.hpp)
