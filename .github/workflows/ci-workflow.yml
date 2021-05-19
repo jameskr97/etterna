@@ -84,8 +84,24 @@ jobs:
           name: Etterna Symbols - ${{github.sha}}
           path: '${{github.workspace}}/EtternaSymbolsUploadDir'
 
+      - name: Sign Etterna Binary
+        env:
+          MACOS_CODESIGN_CERT: ${{ secrets.MACOS_CODESIGN_CERT }}
+          MACOS_CODESIGN_CERT_PW: ${{ secrets.MACOS_CODESIGN_CERT_PW }}
+        run: |
+          echo $MACOS_CODESIGN_CERT | base64 -d > certificate.p12
+          security create-keychain -p password build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p password build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CODESIGN_CERT_PW -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k password build.keychain
+          codesign --force -s "Etterna Development Group" Etterna.app -v
+
       - name: Generate binary
         run: cd build && cpack
+
+      - name: Sign Etterna DMG
+        run: cd build && codesign --force -s "Etterna Development Group" `basename *.dmg` -v
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
