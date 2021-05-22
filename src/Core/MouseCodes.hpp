@@ -1,8 +1,8 @@
 #ifndef CORE_MOUSECODES_HPP
 #define CORE_MOUSECODES_HPP
 
-namespace Core {
-    class enum : MouseCode {
+namespace Core::Input {
+    enum class Mouse {
         Button0                = 0,
         Button1                = 1,
         Button2                = 2,
@@ -18,4 +18,4 @@ namespace Core {
     };
 }
 
-#endif CORE_KEYCODES_HPP
+#endif // CORE_MOUSECODES_HPP

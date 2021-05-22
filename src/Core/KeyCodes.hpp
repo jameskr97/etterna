@@ -1,8 +1,8 @@
 #ifndef CORE_KEYCODES_HPP
 #define CORE_KEYCODES_HPP
 
-namespace Core {
-    enum Keys {
+namespace Core::Input {
+    enum class Keys {
         UNKNOWN             = -1,
         Space               = 32,
         Apostrophe          = 39, /* ' */
@@ -136,4 +136,4 @@ namespace Core {
     };
 }
 
-#endif CORE_KEYCODES_HPP
+#endif // CORE_KEYCODES_HPP
