@@ -13,7 +13,7 @@
 #include <IOKit/IOMessage.h>
 #include <Carbon/Carbon.h>
 
-REGISTER_INPUT_HANDLER_CLASS2(HID, MacOSX_HID);
+//REGISTER_INPUT_HANDLER_CLASS2(HID, MacOSX_HID);
 
 void
 InputHandler_MacOSX_HID::QueueCallback(void* target,
