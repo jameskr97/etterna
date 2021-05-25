@@ -402,8 +402,8 @@ struct DeviceInput {
 	bool bDown{ false };
 
 	std::chrono::steady_clock::time_point ts{std::chrono::microseconds{ 0 }};
-	Core::Input::Keys key;
-	Core::Input::Mouse mouse;
+	Core::Input::Keys key{Core::Input::Keys::Unknown};
+	Core::Input::Mouse mouse{Core::Input::Mouse::Unknown};
 
 	DeviceInput() = default;
 	DeviceInput(InputDevice d, DeviceButton b, float l = 0) : device(d), button(b), level(l), bDown(l > 0.5F), ts(std::chrono::microseconds{ 0 }){}
@@ -423,6 +423,7 @@ struct DeviceInput {
 	[[nodiscard]] auto IsJoystick() const -> bool { return ::IsJoystick(device); }
 	[[nodiscard]] auto IsMouse() const -> bool { return ::IsMouse(device); }
 	[[nodiscard]] auto ToString() const -> std::string;
+	std::string to_string() const;
 };
 
 /* Return true if we represent the same button on the same device. Don't compare level or ts. */

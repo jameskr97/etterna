@@ -7,6 +7,7 @@
 #include "RageUtil/Utils/RageUtil.h"
 
 #include <map>
+#include <any>
 
 static const char* InputDeviceStateNames[] = {
 	"Connected",
@@ -18,144 +19,138 @@ XToString(InputDeviceState);
 XToLocalizedString(InputDeviceState);
 LuaXType(InputDevice);
 
-static std::map<DeviceButton, std::string> g_mapNamesToString;
-static std::map<std::string, DeviceButton> g_mapStringToNames;
-static void
-InitNames()
-{
+//static std::map<std::any, std::string, decltype(cmp)> g_mapNamesToString;
+
+static std::map<std::string, std::any> g_mapNamesToString;
+//static std::map<std::string, DeviceButton> g_mapStringToNames;
+static void InitNames() {
 	if (!g_mapNamesToString.empty())
 		return;
 
-	g_mapNamesToString[KEY_PERIOD] = "period";
-	g_mapNamesToString[KEY_COMMA] = "comma";
-	g_mapNamesToString[KEY_COLON] = "colon";
-	g_mapNamesToString[KEY_SPACE] = "space";
-	g_mapNamesToString[KEY_DEL] = "delete";
-	g_mapNamesToString[KEY_BACKSLASH] = "backslash";
+	g_mapNamesToString["period"] = Core::Input::Keys::Period;
+	g_mapNamesToString["comma"] = Core::Input::Keys::Comma;
+	g_mapNamesToString["colon"] = Core::Input::Keys::Semicolon;
+	g_mapNamesToString["space"] = Core::Input::Keys::Space;
+	g_mapNamesToString["delete"] = Core::Input::Keys::Delete;
+	g_mapNamesToString["backslash"] = Core::Input::Keys::Backslash;
 
-	g_mapNamesToString[KEY_BACK] = "backspace";
-	g_mapNamesToString[KEY_TAB] = "tab";
-	g_mapNamesToString[KEY_ENTER] = "enter";
-	g_mapNamesToString[KEY_PAUSE] = "pause";
-	g_mapNamesToString[KEY_ESC] = "escape";
+	g_mapNamesToString["backspace"] = Core::Input::Keys::Backspace;
+	g_mapNamesToString["tab"] = Core::Input::Keys::Tab;
+	g_mapNamesToString["enter"] = Core::Input::Keys::Enter;
+	g_mapNamesToString["pause"] = Core::Input::Keys::Pause;
+	g_mapNamesToString["escape"] = Core::Input::Keys::Escape;
 
-	g_mapNamesToString[KEY_F1] = "F1";
-	g_mapNamesToString[KEY_F2] = "F2";
-	g_mapNamesToString[KEY_F3] = "F3";
-	g_mapNamesToString[KEY_F4] = "F4";
-	g_mapNamesToString[KEY_F5] = "F5";
-	g_mapNamesToString[KEY_F6] = "F6";
-	g_mapNamesToString[KEY_F7] = "F7";
-	g_mapNamesToString[KEY_F8] = "F8";
-	g_mapNamesToString[KEY_F9] = "F9";
-	g_mapNamesToString[KEY_F10] = "F10";
-	g_mapNamesToString[KEY_F11] = "F11";
-	g_mapNamesToString[KEY_F12] = "F12";
-	g_mapNamesToString[KEY_F13] = "F13";
-	g_mapNamesToString[KEY_F14] = "F14";
-	g_mapNamesToString[KEY_F15] = "F15";
-	g_mapNamesToString[KEY_F16] = "F16";
+	g_mapNamesToString["F1"] = Core::Input::Keys::F1;
+	g_mapNamesToString["F2"] = Core::Input::Keys::F2;
+	g_mapNamesToString["F3"] = Core::Input::Keys::F3;
+	g_mapNamesToString["F4"] = Core::Input::Keys::F4;
+	g_mapNamesToString["F5"] = Core::Input::Keys::F5;
+	g_mapNamesToString["F6"] = Core::Input::Keys::F6;
+	g_mapNamesToString["F7"] = Core::Input::Keys::F7;
+	g_mapNamesToString["F8"] = Core::Input::Keys::F8;
+	g_mapNamesToString["F9"] = Core::Input::Keys::F9;
+	g_mapNamesToString["F10"] = Core::Input::Keys::F10;
+	g_mapNamesToString["F11"] = Core::Input::Keys::F11;
+	g_mapNamesToString["F12"] = Core::Input::Keys::F12;
+	g_mapNamesToString["F13"] = Core::Input::Keys::F13;
+	g_mapNamesToString["F14"] = Core::Input::Keys::F14;
+	g_mapNamesToString["F15"] = Core::Input::Keys::F15;
+	g_mapNamesToString["F16"] = Core::Input::Keys::F16;
 
-	g_mapNamesToString[KEY_LCTRL] = "left ctrl";
-	g_mapNamesToString[KEY_RCTRL] = "right ctrl";
-	g_mapNamesToString[KEY_LSHIFT] = "left shift";
-	g_mapNamesToString[KEY_RSHIFT] = "right shift";
-	g_mapNamesToString[KEY_LALT] = "left alt";
-	g_mapNamesToString[KEY_RALT] = "right alt";
-	g_mapNamesToString[KEY_LMETA] = "left meta";
-	g_mapNamesToString[KEY_RMETA] = "right meta";
+	g_mapNamesToString["left ctrl"] = Core::Input::Keys::LeftControl;
+	g_mapNamesToString["right ctrl"] = Core::Input::Keys::RightControl;
+	g_mapNamesToString["left shift"] = Core::Input::Keys::LeftShift;
+	g_mapNamesToString["right shift"] = Core::Input::Keys::RightShift;
+	g_mapNamesToString["left alt"] = Core::Input::Keys::LeftAlt;
+	g_mapNamesToString["right alt"] = Core::Input::Keys::RightAlt;
 	// Note: On Windows, the Super key is the Windows key. -aj
-	g_mapNamesToString[KEY_LSUPER] = "left super";
-	g_mapNamesToString[KEY_RSUPER] = "right super";
-	g_mapNamesToString[KEY_MENU] = "menu";
+	g_mapNamesToString["left super"] = Core::Input::Keys::LeftSuper;
+	g_mapNamesToString["right super"] = Core::Input::Keys::RightSuper;
+	g_mapNamesToString["menu"] = Core::Input::Keys::Menu;
 
-	g_mapNamesToString[KEY_FN] = "function";
+	g_mapNamesToString["num lock"] = Core::Input::Keys::NumLock;
+	g_mapNamesToString["scroll lock"] = Core::Input::Keys::ScrollLock;
+	g_mapNamesToString["caps lock"] = Core::Input::Keys::CapsLock;
+	g_mapNamesToString["prtsc"] = Core::Input::Keys::PrintScreen;
 
-	g_mapNamesToString[KEY_NUMLOCK] = "num lock";
-	g_mapNamesToString[KEY_SCRLLOCK] = "scroll lock";
-	g_mapNamesToString[KEY_CAPSLOCK] = "caps lock";
-	g_mapNamesToString[KEY_PRTSC] = "prtsc";
+	g_mapNamesToString["up"] = Core::Input::Keys::Up;
+	g_mapNamesToString["down"] = Core::Input::Keys::Down;
+	g_mapNamesToString["left"] = Core::Input::Keys::Left;
+	g_mapNamesToString["right"] = Core::Input::Keys::Right;
 
-	g_mapNamesToString[KEY_UP] = "up";
-	g_mapNamesToString[KEY_DOWN] = "down";
-	g_mapNamesToString[KEY_LEFT] = "left";
-	g_mapNamesToString[KEY_RIGHT] = "right";
+	g_mapNamesToString["insert"] = Core::Input::Keys::Insert;
+	g_mapNamesToString["home"] = Core::Input::Keys::Home;
+	g_mapNamesToString["end"] = Core::Input::Keys::End;
+	g_mapNamesToString["pgup"] = Core::Input::Keys::PageUp;
+	g_mapNamesToString["pgdn"] = Core::Input::Keys::PageDown;
 
-	g_mapNamesToString[KEY_INSERT] = "insert";
-	g_mapNamesToString[KEY_HOME] = "home";
-	g_mapNamesToString[KEY_END] = "end";
-	g_mapNamesToString[KEY_PGUP] = "pgup";
-	g_mapNamesToString[KEY_PGDN] = "pgdn";
+	g_mapNamesToString["KP 0"] = Core::Input::Keys::KP0;
+	g_mapNamesToString["KP 1"] = Core::Input::Keys::KP1;
+	g_mapNamesToString["KP 2"] = Core::Input::Keys::KP2;
+	g_mapNamesToString["KP 3"] = Core::Input::Keys::KP3;
+	g_mapNamesToString["KP 4"] = Core::Input::Keys::KP4;
+	g_mapNamesToString["KP 5"] = Core::Input::Keys::KP5;
+	g_mapNamesToString["KP 6"] = Core::Input::Keys::KP6;
+	g_mapNamesToString["KP 7"] = Core::Input::Keys::KP7;
+	g_mapNamesToString["KP 8"] = Core::Input::Keys::KP8;
+	g_mapNamesToString["KP 9"] = Core::Input::Keys::KP9;
+	g_mapNamesToString["KP /"] = Core::Input::Keys::KPDivide;
+	g_mapNamesToString["KP *"] = Core::Input::Keys::KPMultiply;
+	g_mapNamesToString["KP -"] = Core::Input::Keys::KPSubtract;
+	g_mapNamesToString["KP +"] = Core::Input::Keys::KPAdd;
+	g_mapNamesToString["KP ."] = Core::Input::Keys::KPDecimal;
+	g_mapNamesToString["KP ="] = Core::Input::Keys::KPEqual;
+	g_mapNamesToString["KP enter"] = Core::Input::Keys::KPEnter;
 
-	g_mapNamesToString[KEY_KP_C0] = "KP 0";
-	g_mapNamesToString[KEY_KP_C1] = "KP 1";
-	g_mapNamesToString[KEY_KP_C2] = "KP 2";
-	g_mapNamesToString[KEY_KP_C3] = "KP 3";
-	g_mapNamesToString[KEY_KP_C4] = "KP 4";
-	g_mapNamesToString[KEY_KP_C5] = "KP 5";
-	g_mapNamesToString[KEY_KP_C6] = "KP 6";
-	g_mapNamesToString[KEY_KP_C7] = "KP 7";
-	g_mapNamesToString[KEY_KP_C8] = "KP 8";
-	g_mapNamesToString[KEY_KP_C9] = "KP 9";
-	g_mapNamesToString[KEY_KP_SLASH] = "KP /";
-	g_mapNamesToString[KEY_KP_ASTERISK] = "KP *";
-	g_mapNamesToString[KEY_KP_HYPHEN] = "KP -";
-	g_mapNamesToString[KEY_KP_PLUS] = "KP +";
-	g_mapNamesToString[KEY_KP_PERIOD] = "KP .";
-	g_mapNamesToString[KEY_KP_EQUAL] = "KP =";
-	g_mapNamesToString[KEY_KP_ENTER] = "KP enter";
-
-	g_mapNamesToString[JOY_LEFT] = "Left1";
-	g_mapNamesToString[JOY_RIGHT] = "Right1";
-	g_mapNamesToString[JOY_UP] = "Up1";
-	g_mapNamesToString[JOY_DOWN] = "Down1";
+	g_mapNamesToString["Left1"] = JOY_LEFT;
+	g_mapNamesToString["Right1"] = JOY_RIGHT;
+	g_mapNamesToString["Up1"] = JOY_UP;
+	g_mapNamesToString["Down1"] = JOY_DOWN;
 
 	// Secondary sticks:
-	g_mapNamesToString[JOY_LEFT_2] = "Left2";
-	g_mapNamesToString[JOY_RIGHT_2] = "Right2";
-	g_mapNamesToString[JOY_UP_2] = "Up2";
-	g_mapNamesToString[JOY_DOWN_2] = "Down2";
+	g_mapNamesToString["Left2"] = JOY_LEFT_2;
+	g_mapNamesToString["Right2"] = JOY_RIGHT_2;
+	g_mapNamesToString["Up2"] = JOY_UP_2;
+	g_mapNamesToString["Down2"] = JOY_DOWN_2;
 
-	g_mapNamesToString[JOY_Z_UP] = "Z-Up";
-	g_mapNamesToString[JOY_Z_DOWN] = "Z-Down";
-	g_mapNamesToString[JOY_ROT_UP] = "R-Up";
-	g_mapNamesToString[JOY_ROT_DOWN] = "R-Down";
-	g_mapNamesToString[JOY_ROT_LEFT] = "R-Left";
-	g_mapNamesToString[JOY_ROT_RIGHT] = "R-Right";
-	g_mapNamesToString[JOY_ROT_Z_UP] = "ZR-Up";
-	g_mapNamesToString[JOY_ROT_Z_DOWN] = "ZR-Down";
-	g_mapNamesToString[JOY_HAT_LEFT] = "H-Left";
-	g_mapNamesToString[JOY_HAT_RIGHT] = "H-Right";
-	g_mapNamesToString[JOY_HAT_UP] = "H-Up";
-	g_mapNamesToString[JOY_HAT_DOWN] = "H-Down";
-	g_mapNamesToString[JOY_AUX_1] = "Aux1";
-	g_mapNamesToString[JOY_AUX_2] = "Aux2";
-	g_mapNamesToString[JOY_AUX_3] = "Aux3";
-	g_mapNamesToString[JOY_AUX_4] = "Aux4";
+	g_mapNamesToString["Z-Up"] = JOY_Z_UP;
+	g_mapNamesToString["Z-Down"] = JOY_Z_DOWN;
+	g_mapNamesToString["R-Up"] = JOY_ROT_UP;
+	g_mapNamesToString["R-Down"] = JOY_ROT_DOWN;
+	g_mapNamesToString["R-Left"] = JOY_ROT_LEFT;
+	g_mapNamesToString["R-Right"] = JOY_ROT_RIGHT;
+	g_mapNamesToString["ZR-Up"] = JOY_ROT_Z_UP;
+	g_mapNamesToString["ZR-Down"] = JOY_ROT_Z_DOWN;
+	g_mapNamesToString["H-Left"] = JOY_HAT_LEFT;
+	g_mapNamesToString["H-Right"] = JOY_HAT_RIGHT;
+	g_mapNamesToString["H-Up"] = JOY_HAT_UP;
+	g_mapNamesToString["H-Down"] = JOY_HAT_DOWN;
+	g_mapNamesToString["Aux1"] = JOY_AUX_1;
+	g_mapNamesToString["Aux2"] = JOY_AUX_2;
+	g_mapNamesToString["Aux3"] = JOY_AUX_3;
+	g_mapNamesToString["Aux4"] = JOY_AUX_4;
 
-	g_mapNamesToString[MOUSE_LEFT] = "left mouse button";
-	g_mapNamesToString[MOUSE_RIGHT] = "right mouse button";
-	g_mapNamesToString[MOUSE_MIDDLE] = "middle mouse button";
-	g_mapNamesToString[MOUSE_WHEELUP] = "mousewheel up";
-	g_mapNamesToString[MOUSE_WHEELDOWN] = "mousewheel down";
+	g_mapNamesToString["left mouse button"] = Core::Input::Mouse::ButtonLeft;
+	g_mapNamesToString["right mouse button"] = Core::Input::Mouse::ButtonRight;
+	g_mapNamesToString["middle mouse button"] = Core::Input::Mouse::ButtonMiddle;
+	g_mapNamesToString["mousewheel up"] = MOUSE_WHEELUP;
+	g_mapNamesToString["mousewheel down"] = MOUSE_WHEELDOWN;
 
-	for (auto& m : g_mapNamesToString)
-		g_mapStringToNames[m.second] = m.first;
+//	for (auto& m : g_mapNamesToString)
+//		g_mapStringToNames[m.second] = m.first;
 }
 
 /* Return a reversible representation of a DeviceButton. This is not affected
  * by InputDrivers, localization or the keyboard language. */
-std::string
-DeviceButtonToString(DeviceButton key)
-{
+std::string DeviceButtonToString(DeviceButton key) {
 	InitNames();
 
+	return "FIXME";
 	// Check the name map first to allow making names for keys that are inside
 	// the ascii range. -Kyz
-	const std::map<DeviceButton, std::string>::const_iterator it =
-	  g_mapNamesToString.find(key);
-	if (it != g_mapNamesToString.end())
-		return it->second;
+//	auto it = g_mapNamesToString.find(key);
+//	if (it != g_mapNamesToString.end())
+//		return it->second;
 
 	// All printable ASCII except for uppercase alpha characters line up.
 	if (key >= 33 && key < 127 && !(key >= 'A' && key <= 'Z'))
@@ -173,9 +168,7 @@ DeviceButtonToString(DeviceButton key)
 	return "unknown";
 }
 
-DeviceButton
-StringToDeviceButton(const std::string& s)
-{
+DeviceButton StringToDeviceButton(const std::string& s) {
 	InitNames();
 
 	if (s.size() == 1)
@@ -194,10 +187,9 @@ StringToDeviceButton(const std::string& s)
 	if (sscanf(s.c_str(), "Mouse %i", &i) == 1)
 		return enum_add2(MOUSE_LEFT, i);
 
-	const std::map<std::string, DeviceButton>::const_iterator it =
-	  g_mapStringToNames.find(s);
-	if (it != g_mapStringToNames.end())
-		return it->second;
+//	auto it = g_mapStringToNames.find(s);
+//	if (it != g_mapStringToNames.end())
+//		return it->second;
 
 	return DeviceButton_Invalid;
 }
@@ -215,20 +207,15 @@ StringToX(InputDevice);
 
 /* Return a reversible representation of a DeviceInput. This is not affected by
  * InputDrivers, localization or the keyboard language. */
-std::string
-DeviceInput::ToString() const
-{
+std::string DeviceInput::ToString() const {
 	if (device == InputDevice_Invalid)
 		return std::string();
 
-	std::string s =
-	  InputDeviceToString(device) + "_" + DeviceButtonToString(button);
+	std::string s = InputDeviceToString(device) + "_" + DeviceButtonToString(button);
 	return s;
 }
 
-bool
-DeviceInput::FromString(const std::string& s)
-{
+bool DeviceInput::FromString(const std::string& s) {
 	char szDevice[32] = "";
 	char szButton[32] = "";
 
@@ -240,4 +227,21 @@ DeviceInput::FromString(const std::string& s)
 	device = StringToInputDevice(szDevice);
 	button = StringToDeviceButton(szButton);
 	return true;
+}
+
+std::string DeviceInput::to_string() const {
+    for (const auto& [mkey, value] : g_mapNamesToString){
+
+        if(value.type() == typeid(Core::Input::Mouse)
+            && this->mouse == *std::any_cast<Core::Input::Mouse>(&value)) {
+            return "DeviceButton_" + mkey;
+        }
+
+        if(value.type() == typeid(Core::Input::Keys)
+            && this->key == *std::any_cast<Core::Input::Keys>(&value)) {
+            return "DeviceButton_" + mkey;
+        }
+
+    }
+    return ""; // unknown
 }
