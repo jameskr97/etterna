@@ -3,7 +3,7 @@
 
 namespace Core::Input {
     enum class Keys {
-        UNKNOWN             = -1,
+        Unknown             = -1,
         Space               = 32,
         Apostrophe          = 39, /* ' */
         Comma               = 44, /* , */

@@ -3,6 +3,7 @@
 
 namespace Core::Input {
     enum class Mouse {
+        Unknown                = -1,
         Button0                = 0,
         Button1                = 1,
         Button2                = 2,
