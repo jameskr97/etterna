@@ -3,6 +3,8 @@
 #define RAGE_INPUT_DEVICE_H
 
 #include "Etterna/Models/Misc/EnumHelper.h"
+#include "Core/MouseCodes.hpp"
+#include "Core/KeyCodes.hpp"
 #include <chrono>
 #include <utility>
 
@@ -381,13 +383,10 @@ enum DeviceButton
 	DeviceButton_Invalid
 };
 
-auto
-DeviceButtonToString(DeviceButton i) -> std::string;
-auto
-StringToDeviceButton(const std::string& s) -> DeviceButton;
+auto DeviceButtonToString(DeviceButton i) -> std::string;
+auto StringToDeviceButton(const std::string& s) -> DeviceButton;
 
-struct DeviceInput
-{
+struct DeviceInput {
   public:
 	InputDevice device{ InputDevice_Invalid };
 	DeviceButton button{ DeviceButton_Invalid };
@@ -396,105 +395,52 @@ struct DeviceInput
 	 * percentage (0..1). This should be 0 for analog axes within the dead zone.
 	 */
 	float level{ 0 };
-
-	// Mouse coordinates
-	// unsigned x;
-	// unsigned y;
-	int z{ 0 }; // mousewheel
+	int z{ 0 }; // Mouse coordinates - mousewheel
 
 	/* Whether this button is pressed. This is level with a threshold and
 	 * debouncing applied. */
 	bool bDown{ false };
 
-	std::chrono::steady_clock::time_point ts;
+	std::chrono::steady_clock::time_point ts{std::chrono::microseconds{ 0 }};
+	Core::Input::Keys key;
+	Core::Input::Mouse mouse;
 
-	DeviceInput()
-	  : ts(std::chrono::microseconds{ 0 })
-	{
-	}
-	DeviceInput(InputDevice d, DeviceButton b, float l = 0)
-	  : device(d)
-	  , button(b)
-	  , level(l)
-	  , bDown(l > 0.5F)
-	  , ts(std::chrono::microseconds{ 0 })
-	{
-	}
-	DeviceInput(InputDevice d,
-				DeviceButton b,
-				float l,
-				const std::chrono::steady_clock::time_point& t)
-	  : device(d)
-	  , button(b)
-	  , level(l)
-	  , bDown(level > 0.5F)
-	  , ts(t)
-	{
-	}
-	DeviceInput(InputDevice d,
-				DeviceButton b,
-				const std::chrono::steady_clock::time_point& t,
-				int zVal = 0)
-	  : device(d)
-	  , button(b)
-	  , z(zVal)
-	  , ts(t)
-	{
-	}
+	DeviceInput() = default;
+	DeviceInput(InputDevice d, DeviceButton b, float l = 0) : device(d), button(b), level(l), bDown(l > 0.5F), ts(std::chrono::microseconds{ 0 }){}
 
-	[[nodiscard]] auto ToString() const -> std::string;
+	DeviceInput(InputDevice d, Core::Input::Keys b, float l = 0) : device(d), key(b), level(l), bDown(l > 0.5F), ts(std::chrono::microseconds{ 0 }){}
+	DeviceInput(InputDevice d, Core::Input::Mouse b, float l = 0) : device(d), mouse(b), level(l), bDown(l > 0.5F), ts(std::chrono::microseconds{ 0 }){}
+
+	DeviceInput(InputDevice d, DeviceButton b, float l, const std::chrono::steady_clock::time_point& t) : device(d), button(b), level(l), bDown(level > 0.5F), ts(t) {}
+	DeviceInput(InputDevice d, DeviceButton b, const std::chrono::steady_clock::time_point& t, int zVal = 0) : device(d) , button(b) , z(zVal) , ts(t){}
+
+	DeviceInput(InputDevice d, Core::Input::Keys b, float l, const std::chrono::steady_clock::time_point& t) : device(d), key(b), level(l), bDown(level > 0.5F), ts(t) {}
+	DeviceInput(InputDevice d, Core::Input::Mouse b, float l, const std::chrono::steady_clock::time_point& t) : device(d), mouse(b), level(l), bDown(level > 0.5F), ts(t) {}
+
 	auto FromString(const std::string& s) -> bool;
-
-	[[nodiscard]] auto IsValid() const -> bool
-	{
-		return device != InputDevice_Invalid;
-	};
 	void MakeInvalid() { device = InputDevice_Invalid; };
-
-	[[nodiscard]] auto IsJoystick() const -> bool
-	{
-		return ::IsJoystick(device);
-	}
+	[[nodiscard]] auto IsValid() const -> bool { return device != InputDevice_Invalid; };
+	[[nodiscard]] auto IsJoystick() const -> bool { return ::IsJoystick(device); }
 	[[nodiscard]] auto IsMouse() const -> bool { return ::IsMouse(device); }
+	[[nodiscard]] auto ToString() const -> std::string;
 };
 
-inline auto
-operator==(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
-	/* Return true if we represent the same button on the same device.
-	 * Don't compare level or ts. */
-	return lhs.device == rhs.device && lhs.button == rhs.button;
+/* Return true if we represent the same button on the same device. Don't compare level or ts. */
+inline auto operator==(DeviceInput const& lhs, DeviceInput const& rhs) -> bool {
+    return lhs.device == rhs.device && (lhs.button == rhs.button || lhs.key == rhs.key || lhs.mouse == rhs.mouse);                                                                                                                                                                                         ;
 }
-inline auto
-operator!=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
-	return !operator==(lhs, rhs);
-}
+inline auto operator!=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return !operator==(lhs, rhs); }
 
-inline auto
-operator<(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
+inline auto operator<(DeviceInput const& lhs, DeviceInput const& rhs) -> bool {
 	/* Only the devices and buttons matter here. */
 	if (lhs.device != rhs.device) {
 		return lhs.device < rhs.device;
 	}
 	return lhs.button < rhs.button;
 }
-inline auto
-operator>(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
-	return operator<(rhs, lhs);
-}
-inline auto
-operator<=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
-	return !operator<(rhs, lhs);
-}
-inline auto
-operator>=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool
-{
-	return !operator<(lhs, rhs);
-}
+inline auto operator >(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return operator<(rhs, lhs); }
+inline auto operator<=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return !operator<(rhs, lhs); }
+inline auto operator>=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return !operator<(lhs, rhs); }
 
 typedef std::vector<DeviceInput> DeviceInputList;
 
