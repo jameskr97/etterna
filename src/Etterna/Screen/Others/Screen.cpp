@@ -253,11 +253,11 @@ Screen::Input(const InputEventPlus& input)
 	}
 	if (input.type == IET_FIRST_PRESS) {
 		// Always broadcast mouse input so themers can grab it. -aj
-		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, MOUSE_LEFT))
+		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, Core::Input::Mouse::ButtonLeft))
 			MESSAGEMAN->Broadcast(Message_LeftClick);
-		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, MOUSE_RIGHT))
+		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, Core::Input::Mouse::ButtonRight))
 			MESSAGEMAN->Broadcast(Message_RightClick);
-		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, MOUSE_MIDDLE))
+		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, Core::Input::Mouse::ButtonMiddle))
 			MESSAGEMAN->Broadcast(Message_MiddleClick);
 		// Can't do MouseWheelUp and MouseWheelDown at the same time. -aj
 		if (input.DeviceI == DeviceInput(DEVICE_MOUSE, MOUSE_WHEELUP))
@@ -397,7 +397,7 @@ Screen::PassInputToLua(const InputEventPlus& input)
 		lua_createtable(L, 0, 8);
 		Enum::Push(L, input.DeviceI.device);
 		lua_setfield(L, -2, "device");
-		Enum::Push(L, input.DeviceI.button);
+        lua_pushstring(L, input.DeviceI.to_string().c_str());
 		lua_setfield(L, -2, "button");
 		lua_pushnumber(L, input.DeviceI.level);
 		lua_setfield(L, -2, "level");
