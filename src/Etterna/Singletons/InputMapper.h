@@ -16,28 +16,17 @@ const int NUM_SHOWN_GAME_TO_DEVICE_SLOTS = 3;
 const int NUM_USER_GAME_TO_DEVICE_SLOTS = 2;
 extern const std::string DEVICE_INPUT_SEPARATOR;
 
-struct AutoMappingEntry
-{
+struct AutoMappingEntry {
 	AutoMappingEntry(int i, DeviceButton db, GameButton gb, bool b)
-	  : m_iSlotIndex(i)
-	  , m_deviceButton(db)
-	  , m_gb(gb)
-	  , m_bSecondController(b)
-	{
-	}
+	 : m_iSlotIndex(i), m_deviceButton(db), m_gb(gb), m_bSecondController(b) {}
 	AutoMappingEntry() = default;
 
-	[[nodiscard]] auto IsEmpty() const -> bool
-	{
-		return m_deviceButton == DeviceButton_Invalid &&
-			   m_gb == GameButton_Invalid;
-	}
+	[[nodiscard]] auto IsEmpty() const -> bool { return m_deviceButton == DeviceButton_Invalid && m_gb == GameButton_Invalid; }
 
 	int m_iSlotIndex{ -1 };
 	DeviceButton m_deviceButton{ DeviceButton_Invalid };
-	GameButton m_gb{
-		GameButton_Invalid
-	}; // GameButton_Invalid means unmap this button
+	GameButton m_gb {GameButton_Invalid}; // GameButton_Invalid means unmap this button
+
 	/* If this is true, this is an auxilliary mapping assigned to the second
 	 * player. If two of the same device are found, and the device has secondary
 	 * entries, the later entries take precedence. This way, if a Pump pad is
@@ -47,99 +36,16 @@ struct AutoMappingEntry
 	bool m_bSecondController{ false };
 };
 
-struct AutoMappings
-{
-	AutoMappings(std::string s1,
-				 std::string s2,
-				 std::string s3,
-				 AutoMappingEntry im0 = AutoMappingEntry(),
-				 AutoMappingEntry im1 = AutoMappingEntry(),
-				 AutoMappingEntry im2 = AutoMappingEntry(),
-				 AutoMappingEntry im3 = AutoMappingEntry(),
-				 AutoMappingEntry im4 = AutoMappingEntry(),
-				 AutoMappingEntry im5 = AutoMappingEntry(),
-				 AutoMappingEntry im6 = AutoMappingEntry(),
-				 AutoMappingEntry im7 = AutoMappingEntry(),
-				 AutoMappingEntry im8 = AutoMappingEntry(),
-				 AutoMappingEntry im9 = AutoMappingEntry(),
-				 AutoMappingEntry im10 = AutoMappingEntry(),
-				 AutoMappingEntry im11 = AutoMappingEntry(),
-				 AutoMappingEntry im12 = AutoMappingEntry(),
-				 AutoMappingEntry im13 = AutoMappingEntry(),
-				 AutoMappingEntry im14 = AutoMappingEntry(),
-				 AutoMappingEntry im15 = AutoMappingEntry(),
-				 AutoMappingEntry im16 = AutoMappingEntry(),
-				 AutoMappingEntry im17 = AutoMappingEntry(),
-				 AutoMappingEntry im18 = AutoMappingEntry(),
-				 AutoMappingEntry im19 = AutoMappingEntry(),
-				 AutoMappingEntry im20 = AutoMappingEntry(),
-				 AutoMappingEntry im21 = AutoMappingEntry(),
-				 AutoMappingEntry im22 = AutoMappingEntry(),
-				 AutoMappingEntry im23 = AutoMappingEntry(),
-				 AutoMappingEntry im24 = AutoMappingEntry(),
-				 AutoMappingEntry im25 = AutoMappingEntry(),
-				 AutoMappingEntry im26 = AutoMappingEntry(),
-				 AutoMappingEntry im27 = AutoMappingEntry(),
-				 AutoMappingEntry im28 = AutoMappingEntry(),
-				 AutoMappingEntry im29 = AutoMappingEntry(),
-				 AutoMappingEntry im30 = AutoMappingEntry(),
-				 AutoMappingEntry im31 = AutoMappingEntry(),
-				 AutoMappingEntry im32 = AutoMappingEntry(),
-				 AutoMappingEntry im33 = AutoMappingEntry(),
-				 AutoMappingEntry im34 = AutoMappingEntry(),
-				 AutoMappingEntry im35 = AutoMappingEntry(),
-				 AutoMappingEntry im36 = AutoMappingEntry(),
-				 AutoMappingEntry im37 = AutoMappingEntry(),
-				 AutoMappingEntry im38 = AutoMappingEntry(),
-				 AutoMappingEntry im39 = AutoMappingEntry())
-	  : m_sGame(std::move(std::move(s1)))
-	  , m_sDriverRegex(std::move(std::move(s2)))
-	  , m_sControllerName(std::move(std::move(s3)))
+struct AutoMappings {
+	AutoMappings(std::string s1, std::string s2, std::string s3, std::initializer_list<AutoMappingEntry> list = {})
+	  : m_sGame(std::move(std::move(s1))), m_sDriverRegex(std::move(std::move(s2))), m_sControllerName(std::move(std::move(s3)))
 	{
-#define PUSH(im)                                                               \
-	if (!(im).IsEmpty())                                                       \
-		m_vMaps.push_back(im);
-		PUSH(im0);
-		PUSH(im1);
-		PUSH(im2);
-		PUSH(im3);
-		PUSH(im4);
-		PUSH(im5);
-		PUSH(im6);
-		PUSH(im7);
-		PUSH(im8);
-		PUSH(im9);
-		PUSH(im10);
-		PUSH(im11);
-		PUSH(im12);
-		PUSH(im13);
-		PUSH(im14);
-		PUSH(im15);
-		PUSH(im16);
-		PUSH(im17);
-		PUSH(im18);
-		PUSH(im19);
-		PUSH(im20);
-		PUSH(im21);
-		PUSH(im22);
-		PUSH(im23);
-		PUSH(im24);
-		PUSH(im25);
-		PUSH(im26);
-		PUSH(im27);
-		PUSH(im28);
-		PUSH(im29);
-		PUSH(im30);
-		PUSH(im31);
-		PUSH(im32);
-		PUSH(im33);
-		PUSH(im34);
-		PUSH(im35);
-		PUSH(im36);
-		PUSH(im37);
-		PUSH(im38);
-		PUSH(im39);
-#undef PUSH
+
+        for (const auto &item : list){
+            if(!item.IsEmpty())
+	            m_vMaps.emplace_back(item);
+        }
+
 	}
 
 	// Strings used by automatic joystick mappings.
@@ -165,17 +71,11 @@ class InputScheme
 	GameButtonInfo m_GameButtonInfo[NUM_GameButton];
 	const AutoMappings* m_pAutoMappings;
 
-	[[nodiscard]] auto ButtonNameToIndex(const std::string& sButtonName) const
-	  -> GameButton;
-	[[nodiscard]] auto GameButtonToMenuButton(GameButton gb) const
-	  -> GameButton;
-	void MenuButtonToGameInputs(GameButton MenuI,
-								PlayerNumber pn,
-								std::vector<GameInput>& GameIout) const;
-	void MenuButtonToGameButtons(GameButton MenuI,
-								 std::vector<GameButton>& aGameButtons) const;
-	[[nodiscard]] auto GetGameButtonInfo(GameButton gb) const
-	  -> const GameButtonInfo*;
+	[[nodiscard]] auto ButtonNameToIndex(const std::string& sButtonName) const -> GameButton;
+	[[nodiscard]] auto GameButtonToMenuButton(GameButton gb) const -> GameButton;
+	void MenuButtonToGameInputs(GameButton MenuI, PlayerNumber pn, std::vector<GameInput>& GameIout) const;
+	void MenuButtonToGameButtons(GameButton MenuI, std::vector<GameButton>& aGameButtons) const;
+	[[nodiscard]] auto GetGameButtonInfo(GameButton gb) const -> const GameButtonInfo*;
 	[[nodiscard]] auto GetGameButtonName(GameButton gb) const -> const char*;
 };
 /** @brief A special foreach loop to handle the various GameButtons. */
@@ -223,16 +123,12 @@ class InputMapper
 	void ReadMappingsFromDisk();
 	void SaveMappingsToDisk();
 	void ResetMappingsToDefault();
-	void CheckButtonAndAddToReason(GameButton menu,
-								   std::vector<std::string>& full_reason,
-								   std::string const& sub_reason);
+	void CheckButtonAndAddToReason(GameButton menu, std::vector<std::string>& full_reason, std::string const& sub_reason);
 	void SanityCheckMappings(std::vector<std::string>& reason);
 
 	void ClearAllMappings();
 
-	void SetInputMap(const DeviceInput& DeviceI,
-					 const GameInput& GameI,
-					 int iSlotIndex);
+	void SetInputMap(const DeviceInput& DeviceI, const GameInput& GameI, int iSlotIndex);
 	void ClearFromInputMap(const DeviceInput& DeviceI);
 	auto ClearFromInputMap(const GameInput& GameI, int iSlotIndex) -> bool;
 
@@ -242,37 +138,19 @@ class InputMapper
 
 	[[nodiscard]] auto IsMapped(const DeviceInput& DeviceI) const -> bool;
 
-	auto DeviceToGame(const DeviceInput& DeviceI, GameInput& GameI) const
-	  -> bool; // return true if there is a mapping from device to pad
-	auto GameToDevice(const GameInput& GameI,
-					  int iSlotNum,
-					  DeviceInput& DeviceI) const
-	  -> bool; // return true if there is a mapping from pad to device
+	auto DeviceToGame(const DeviceInput& DeviceI, GameInput& GameI) const -> bool; // return true if there is a mapping from device to pad
+	auto GameToDevice(const GameInput& GameI, int iSlotNum, DeviceInput& DeviceI) const -> bool; // return true if there is a mapping from pad to device
 
-	[[nodiscard]] auto GameButtonToMenuButton(GameButton gb) const
-	  -> GameButton;
-	void MenuToGame(GameButton MenuI,
-					PlayerNumber pn,
-					std::vector<GameInput>& GameIout) const;
-	[[nodiscard]] auto ControllerToPlayerNumber(GameController controller) const
-	  -> PlayerNumber;
+	[[nodiscard]] auto GameButtonToMenuButton(GameButton gb) const -> GameButton;
+	void MenuToGame(GameButton MenuI, PlayerNumber pn, std::vector<GameInput>& GameIout) const;
+	[[nodiscard]] auto ControllerToPlayerNumber(GameController controller) const -> PlayerNumber;
 
-	[[nodiscard]] auto GetSecsHeld(const GameInput& GameI,
-								   MultiPlayer mp = MultiPlayer_Invalid) const
-	  -> float;
-	[[nodiscard]] auto GetSecsHeld(GameButton MenuI, PlayerNumber pn) const
-	  -> float;
+	[[nodiscard]] auto GetSecsHeld(const GameInput& GameI, MultiPlayer mp = MultiPlayer_Invalid) const -> float;
+	[[nodiscard]] auto GetSecsHeld(GameButton MenuI, PlayerNumber pn) const -> float;
 
-	auto IsBeingPressed(const GameInput& GameI,
-						MultiPlayer mp = MultiPlayer_Invalid,
-						const DeviceInputList* pButtonState = nullptr) const
-	  -> bool;
-	[[nodiscard]] auto IsBeingPressed(GameButton MenuI, PlayerNumber pn) const
-	  -> bool;
-	auto IsBeingPressed(const std::vector<GameInput>& GameI,
-						MultiPlayer mp = MultiPlayer_Invalid,
-						const DeviceInputList* pButtonState = nullptr) const
-	  -> bool;
+	auto IsBeingPressed(const GameInput& GameI, MultiPlayer mp = MultiPlayer_Invalid, const DeviceInputList* pButtonState = nullptr) const -> bool;
+	[[nodiscard]] auto IsBeingPressed(GameButton MenuI, PlayerNumber pn) const -> bool;
+	auto IsBeingPressed(const std::vector<GameInput>& GameI, MultiPlayer mp = MultiPlayer_Invalid, const DeviceInputList* pButtonState = nullptr) const -> bool;
 
 	void ResetKeyRepeat(const GameInput& GameI);
 	void ResetKeyRepeat(GameButton MenuI, PlayerNumber pn);
@@ -281,16 +159,13 @@ class InputMapper
 	void RepeatStopKey(GameButton MenuI, PlayerNumber pn);
 
 	[[nodiscard]] auto GetLevel(const GameInput& GameI) const -> float;
-	[[nodiscard]] auto GetLevel(GameButton MenuI, PlayerNumber pn) const
-	  -> float;
+	[[nodiscard]] auto GetLevel(GameButton MenuI, PlayerNumber pn) const -> float;
 
 	static auto MultiPlayerToInputDevice(MultiPlayer mp) -> InputDevice;
 	static auto InputDeviceToMultiPlayer(InputDevice id) -> MultiPlayer;
 
 	void Unmap(InputDevice device);
-	void ApplyMapping(const std::vector<AutoMappingEntry>& vMmaps,
-					  GameController gc,
-					  InputDevice id);
+	void ApplyMapping(const std::vector<AutoMappingEntry>& vMmaps, GameController gc, InputDevice id);
 
   protected:
 	InputMappings m_mappings;
@@ -303,7 +178,6 @@ class InputMapper
 	auto operator=(const InputMapper& rhs) -> InputMapper&;
 };
 
-extern InputMapper*
-  INPUTMAPPER; // global and accessible from anywhere in our program
+extern InputMapper* INPUTMAPPER; // global and accessible from anywhere in our program
 
 #endif
