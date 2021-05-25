@@ -1,6 +1,12 @@
 #include "GLFWWindowBackend.hpp"
 
+#include "Etterna/Singletons/InputFilter.h"
+#include "Core/Services/Locator.hpp"
+#include "Core/MouseCodes.hpp"
+#include "Core/KeyCodes.hpp"
+
 #include <GLFW/glfw3.h>
+#include <chrono>
 
 namespace Core::Platform::Window {
 
@@ -56,6 +62,28 @@ namespace Core::Platform::Window {
             } else if(focus == GLFW_FALSE && backend->onFocusLost != nullptr){
                 std::invoke(backend->onFocusLost);
             }
+        });
+
+        // Mouse click callback
+        glfwSetMouseButtonCallback(this->windowHandle, [](GLFWwindow* window, int button, int action, int mods){
+            auto now = std::chrono::steady_clock::now();
+            bool validMouseButtons = button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_MIDDLE ||
+                                     button == GLFW_MOUSE_BUTTON_RIGHT;
+            if(!validMouseButtons)
+                return;
+
+            INPUTFILTER->ButtonPressed(DeviceInput(DEVICE_MOUSE, Core::Input::Mouse(button), action == GLFW_PRESS, now));
+        });
+
+        // Mouse position callback
+        glfwSetCursorPosCallback(this->windowHandle, [](GLFWwindow* window, double xpos, double ypos){
+            INPUTFILTER->UpdateCursorLocation(static_cast<float>(xpos), static_cast<float>(ypos));
+        });
+
+        // Key press callback
+        glfwSetKeyCallback(this->windowHandle, [](GLFWwindow* window, int key, int scancode, int action, int mods){
+            auto now = std::chrono::steady_clock::now();
+            INPUTFILTER->ButtonPressed(DeviceInput(DEVICE_KEYBOARD, Core::Input::Keys(key), action == GLFW_PRESS, now));
         });
 
         // Set as render context
