@@ -402,7 +402,7 @@ struct DeviceInput {
 	bool bDown{ false };
 
 	std::chrono::steady_clock::time_point ts{std::chrono::microseconds{ 0 }};
-	Core::Input::Keys key{Core::Input::Keys::Unknown};
+	Core::Input::Keys key{Core::Input::Keys::Last};
 	Core::Input::Mouse mouse{Core::Input::Mouse::Unknown};
 
 	DeviceInput() = default;
@@ -437,7 +437,11 @@ inline auto operator<(DeviceInput const& lhs, DeviceInput const& rhs) -> bool {
 	if (lhs.device != rhs.device) {
 		return lhs.device < rhs.device;
 	}
-	return lhs.button < rhs.button;
+//    return lhs.key < rhs.key;
+
+//    if(lhs.button != DeviceButton_Invalid && rhs.button != DeviceButton_Invalid)
+    return lhs.button < rhs.button;
+
 }
 inline auto operator >(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return operator<(rhs, lhs); }
 inline auto operator<=(DeviceInput const& lhs, DeviceInput const& rhs) -> bool { return !operator<(rhs, lhs); }

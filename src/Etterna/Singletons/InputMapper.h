@@ -19,13 +19,19 @@ extern const std::string DEVICE_INPUT_SEPARATOR;
 struct AutoMappingEntry {
 	AutoMappingEntry(int i, DeviceButton db, GameButton gb, bool b)
 	 : m_iSlotIndex(i), m_deviceButton(db), m_gb(gb), m_bSecondController(b) {}
+
+    AutoMappingEntry(int i, Core::Input::Keys key, GameButton gb, bool b)
+	 : m_iSlotIndex(i), key(key), m_gb(gb), m_bSecondController(b) {}
 	AutoMappingEntry() = default;
 
-	[[nodiscard]] auto IsEmpty() const -> bool { return m_deviceButton == DeviceButton_Invalid && m_gb == GameButton_Invalid; }
+	[[nodiscard]] auto IsEmpty() const -> bool {
+	    return m_deviceButton == DeviceButton_Invalid && key == Core::Input::Keys::Unknown && m_gb == GameButton_Invalid;
+	}
 
 	int m_iSlotIndex{ -1 };
 	DeviceButton m_deviceButton{ DeviceButton_Invalid };
 	GameButton m_gb {GameButton_Invalid}; // GameButton_Invalid means unmap this button
+	Core::Input::Keys key{Core::Input::Keys::Unknown};
 
 	/* If this is true, this is an auxilliary mapping assigned to the second
 	 * player. If two of the same device are found, and the device has secondary
@@ -91,19 +97,13 @@ class InputMappings
 	std::string m_sDescription;
 
 	// map from a GameInput to multiple DeviceInputs
-	DeviceInput m_GItoDI[NUM_GameController][NUM_GameButton]
-						[NUM_GAME_TO_DEVICE_SLOTS];
+	DeviceInput m_GItoDI[NUM_GameController][NUM_GameButton][NUM_GAME_TO_DEVICE_SLOTS];
 
 	void Clear();
 	void Unmap(InputDevice id);
-	void WriteMappings(const InputScheme* pInputScheme,
-					   const std::string& sFilePath);
-	void ReadMappings(const InputScheme* pInputScheme,
-					  const std::string& sFilePath,
-					  bool bIsAutoMapping);
-	void SetInputMap(const DeviceInput& DeviceI,
-					 const GameInput& GameI,
-					 int iSlotIndex);
+	void WriteMappings(const InputScheme* pInputScheme, const std::string& sFilePath);
+	void ReadMappings(const InputScheme* pInputScheme, const std::string& sFilePath, bool bIsAutoMapping);
+	void SetInputMap(const DeviceInput& DeviceI, const GameInput& GameI, int iSlotIndex);
 
 	void ClearFromInputMap(const DeviceInput& DeviceI);
 	auto ClearFromInputMap(const GameInput& GameI, int iSlotIndex) -> bool;

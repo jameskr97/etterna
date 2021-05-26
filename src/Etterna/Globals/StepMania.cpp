@@ -831,6 +831,7 @@ namespace StepMania {
             return;
 
         for (unsigned i = 0; i < ieArray.size(); i++) {
+            Locator::getLogger()->info("FLAG1 {}", ieArray[i].di.key);
             InputEventPlus input;
             input.DeviceI = ieArray[i].di;
             input.type = ieArray[i].type;
@@ -859,11 +860,11 @@ namespace StepMania {
                 }
             }
 
+            Locator::getLogger()->info("FLAG2");
             if (input.GameI.IsValid()) {
-                input.MenuI =
-                  INPUTMAPPER->GameButtonToMenuButton(input.GameI.button);
-                input.pn =
-                  INPUTMAPPER->ControllerToPlayerNumber(input.GameI.controller);
+                Locator::getLogger()->info("VALID INPUT");
+                input.MenuI = INPUTMAPPER->GameButtonToMenuButton(input.GameI.button);
+                input.pn = INPUTMAPPER->ControllerToPlayerNumber(input.GameI.controller);
             }
 
             INPUTQUEUE->RememberInput(input);

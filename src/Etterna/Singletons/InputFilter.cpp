@@ -202,14 +202,14 @@ InputFilter::ButtonPressed(const DeviceInput& di)
 		Locator::getLogger()->warn("InputFilter::ButtonPressed: zero timestamp is invalid");
 
 	// Filter out input that is beyond the range of the current system.
-	if (di.device >= NUM_InputDevice) {
-		Locator::getLogger()->trace("InputFilter::ButtonPressed: Invalid device {}", di.device);
-		return;
-	}
-	if (di.button >= NUM_DeviceButton) {
-		Locator::getLogger()->trace("InputFilter::ButtonPressed: Invalid button {}", di.button);
-		return;
-	}
+//	if (di.device >= NUM_InputDevice) {
+//		Locator::getLogger()->info("InputFilter::ButtonPressed: Invalid device {}", di.device);
+//		return;
+//	}
+//	if (di.button >= NUM_DeviceButton) {
+//		Locator::getLogger()->info("InputFilter::ButtonPressed: Invalid button {}", di.button);
+//		return;
+//	}
 
 	ButtonState& bs = GetButtonState(di);
 
@@ -333,7 +333,7 @@ InputFilter::Update(float fDeltaTime)
 {
 	auto now = std::chrono::steady_clock::now();
 
-	INPUTMAN->Update();
+//	INPUTMAN->Update();
 
 	/* Make sure that nothing gets inserted while we do this, to prevent things
 	 * like "key pressed, key release, key repeat". */
