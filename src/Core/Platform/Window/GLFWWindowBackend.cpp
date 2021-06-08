@@ -60,6 +60,7 @@ namespace Core::Platform::Window {
 
         // Set as render context
         glfwMakeContextCurrent(this->windowHandle);
+        glfwSwapInterval(0);
     }
 
     /**
